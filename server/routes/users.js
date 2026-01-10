@@ -58,7 +58,7 @@ router.post('/', authenticateToken, requireRole('admin'), async (req, res, next)
         }
 
         const avatarInitials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-        const passwordHash = await bcrypt.hash(password, 10);
+        const passwordHash = await bcrypt.hash(password, 12);
         const id = 'u-' + Date.now();
 
         await query(

@@ -3,9 +3,9 @@
 -- Default users (password is 'password' for all, hashed with bcrypt cost 10)
 -- To generate: require('bcrypt').hashSync('password', 10)
 INSERT INTO users (id, name, username, password_hash, role, avatar_initials) VALUES
-    ('u1', 'Admin User', 'admin', '$2b$10$3euPcmQfZ/e4aM7FrKg9.uV6JhPFG3J7dPh5rA5G7xUNk5e/6Vq2e', 'admin', 'AD'),
-    ('u2', 'Manager User', 'manager', '$2b$10$3euPcmQfZ/e4aM7FrKg9.uV6JhPFG3J7dPh5rA5G7xUNk5e/6Vq2e', 'manager', 'MG'),
-    ('u3', 'Standard User', 'user', '$2b$10$3euPcmQfZ/e4aM7FrKg9.uV6JhPFG3J7dPh5rA5G7xUNk5e/6Vq2e', 'user', 'US')
+    ('u1', 'Admin User', 'admin', '$2a$12$z5H7VrzTpLImYWSH3xufKufCiGB0n9CSlNMOrRBRIxq.6mvuVS7uy', 'admin', 'AD'),
+    ('u2', 'Manager User', 'manager', '$2a$12$z5H7VrzTpLImYWSH3xufKufCiGB0n9CSlNMOrRBRIxq.6mvuVS7uy', 'manager', 'MG'),
+    ('u3', 'Standard User', 'user', '$2a$12$z5H7VrzTpLImYWSH3xufKufCiGB0n9CSlNMOrRBRIxq.6mvuVS7uy', 'user', 'US')
 ON CONFLICT (id) DO NOTHING;
 
 -- Default clients
