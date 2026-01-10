@@ -4,15 +4,18 @@ services:
     image: postgres:16-alpine
     container_name: tempo-postgres
     environment:
-      POSTGRES_USER: tempo
-      POSTGRES_PASSWORD: tempo
-      POSTGRES_DB: tempo
+      POSTGRES_USER: ${POSTGRES_USER:-tempo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tempo}
+      POSTGRES_DB: ${POSTGRES_DB:-tempo}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./server/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./server/db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - ./server/db/postgresql.conf:/etc/postgresql/postgresql.conf
+    ports:
+      - "5432:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U tempo -d tempo" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tempo} -d ${POSTGRES_DB:-tempo}" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -28,11 +31,11 @@ services:
       PORT: 3001
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: tempo
-      DB_USER: tempo
-      DB_PASSWORD: tempo
+      DB_NAME: ${POSTGRES_DB:-tempo}
+      DB_USER: ${POSTGRES_USER:-tempo}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-tempo}
       JWT_SECRET: ${JWT_SECRET:-tempo-secret-key-change-in-production}
-      FRONTEND_URL: http://YOUR_SERVER_IP:3000
+      FRONTEND_URL: http://${SERVER_IP:-localhost}:3000
     ports:
       - "3001:3001"
     depends_on:
@@ -46,7 +49,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: http://YOUR_SERVER_IP:3001/api
+        VITE_API_URL: http://${SERVER_IP:-localhost}:3001/api
     container_name: tempo-frontend
     ports:
       - "3000:80"
