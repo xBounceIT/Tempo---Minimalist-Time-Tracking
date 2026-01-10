@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -20,6 +20,9 @@ interface ReportsProps {
   entries: TimeEntry[];
   projects: Project[];
   clients: Client[];
+  startOfWeek: 'Monday' | 'Sunday';
+  treatSaturdayAsHoliday: boolean;
+  dailyGoal: number;
 }
 
 type GroupingType = 'none' | 'date' | 'client' | 'project' | 'task';
@@ -42,14 +45,46 @@ const GROUP_OPTIONS: Option[] = [
   { id: 'task', name: 'Task' },
 ];
 
-const Reports: React.FC<ReportsProps> = ({ entries, projects, clients }) => {
+// Helper to get local YYYY-MM-DD string
+const toLocalISOString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, startOfWeek, treatSaturdayAsHoliday, dailyGoal }) => {
   // --- Dashboard State ---
   const [activeTab, setActiveTab] = useState<'dashboard' | 'detailed'>('dashboard');
 
+  // Use a state for chart visibility to help ResponsiveContainer compute correctly after tab switch
+  const [chartsVisible, setChartsVisible] = useState(false);
+  useEffect(() => {
+    if (activeTab === 'dashboard') {
+      const timer = setTimeout(() => setChartsVisible(true), 100);
+      return () => clearTimeout(timer);
+    } else {
+      setChartsVisible(false);
+    }
+  }, [activeTab]);
+
   // --- Detailed Report State ---
   const [period, setPeriod] = useState('this_month');
-  const [startDate, setStartDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  
+  // Initial date calculation for state
+  const getInitialDates = () => {
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), 1);
+    const end = new Date();
+    return {
+      start: toLocalISOString(start),
+      end: toLocalISOString(end)
+    };
+  };
+
+  const initialDates = getInitialDates();
+  const [startDate, setStartDate] = useState(initialDates.start);
+  const [endDate, setEndDate] = useState(initialDates.end);
   
   const [filterClient, setFilterClient] = useState('all');
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
@@ -69,23 +104,52 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients }) => {
 
   // --- Dashboard Data Calculation ---
   const weeklyActivityData = useMemo(() => {
-    const last7Days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 is Sunday
+    
+    // Calculate the start of the week
+    let offset = 0;
+    if (startOfWeek === 'Monday') {
+      offset = currentDay === 0 ? 6 : currentDay - 1;
+    } else {
+      offset = currentDay;
+    }
+
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - offset);
+    weekStart.setHours(0, 0, 0, 0);
+
+    const data = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      const dateStr = toLocalISOString(d);
+      
+      const dayOfWeek = d.getDay();
+      const isSunday = dayOfWeek === 0;
+      const isSaturday = dayOfWeek === 6;
+      
+      // Skip Sundays and Saturdays (if treated as holiday)
+      if (isSunday || (treatSaturdayAsHoliday && isSaturday)) {
+        continue;
+      }
+
+      const isHoliday = false; // Remaining days are work days
+
       const hours = entries
         .filter(e => e.date === dateStr)
         .reduce((sum, e) => sum + e.duration, 0);
       
-      last7Days.push({
+      data.push({
         date: d.toLocaleDateString(undefined, { weekday: 'short' }),
         fullDate: dateStr,
-        hours: hours
+        hours: hours,
+        isFuture: d > today,
+        isHoliday
       });
     }
-    return last7Days;
-  }, [entries]);
+    return data;
+  }, [entries, startOfWeek, treatSaturdayAsHoliday]);
 
   const projectData = useMemo(() => {
     return projects.map(p => {
@@ -114,22 +178,56 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients }) => {
   const handlePeriodChange = (val: string) => {
     setPeriod(val);
     const today = new Date();
-    let start = new Date();
-    let end = new Date();
+    today.setHours(0, 0, 0, 0);
+    let start = new Date(today);
+    let end = new Date(today);
 
     switch (val) {
-      case 'today': break;
-      case 'yesterday': start.setDate(today.getDate() - 1); end.setDate(today.getDate() - 1); break;
-      case 'this_week': start.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); break;
-      case 'last_week': 
-        start.setDate(today.getDate() - today.getDay() - 6);
-        end.setDate(today.getDate() - today.getDay());
+      case 'today': 
         break;
-      case 'this_month': start = new Date(today.getFullYear(), today.getMonth(), 1); break;
-      case 'last_month': start = new Date(today.getFullYear(), today.getMonth() - 1, 1); end = new Date(today.getFullYear(), today.getMonth(), 0); break;
+      case 'yesterday': 
+        start.setDate(today.getDate() - 1); 
+        end.setDate(today.getDate() - 1); 
+        break;
+      case 'this_week': {
+        const currentDay = today.getDay();
+        let offset = 0;
+        if (startOfWeek === 'Monday') {
+          offset = currentDay === 0 ? 6 : currentDay - 1;
+        } else {
+          offset = currentDay;
+        }
+        start.setDate(today.getDate() - offset);
+        end.setDate(start.getDate() + 6);
+        break;
+      }
+      case 'last_week': {
+        const currentDay = today.getDay();
+        let offset = 0;
+        if (startOfWeek === 'Monday') {
+          offset = currentDay === 0 ? 6 : currentDay - 1;
+        } else {
+          offset = currentDay;
+        }
+        // Go back 1 week
+        start.setDate(today.getDate() - offset - 7);
+        end.setDate(start.getDate() + 6);
+        break;
+      }
+      case 'this_month': 
+        start = new Date(today.getFullYear(), today.getMonth(), 1); 
+        end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        break;
+      case 'last_month': 
+        start = new Date(today.getFullYear(), today.getMonth() - 1, 1); 
+        end = new Date(today.getFullYear(), today.getMonth(), 0); 
+        break;
+      default:
+        return; // For 'custom' we don't auto-set
     }
-    setStartDate(start.toISOString().split('T')[0]);
-    setEndDate(end.toISOString().split('T')[0]);
+    
+    setStartDate(toLocalISOString(start));
+    setEndDate(toLocalISOString(end));
   };
 
   const generateReport = () => {
@@ -182,46 +280,79 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients }) => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <h3 className="text-lg font-bold text-slate-800 mb-6">Weekly Activity</h3>
-              <div className="h-[300px] w-full min-w-0">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                  <BarChart data={weeklyActivityData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} />
-                    <YAxis axisLine={false} tickLine={false} />
-                    <RechartsTooltip 
-                      cursor={{fill: '#f8fafc'}}
-                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Bar dataKey="hours" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={40} />
-                  </BarChart>
-                </ResponsiveContainer>
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+              <h3 className="text-lg font-bold text-slate-800 mb-6">Weekly Activity ({startOfWeek} Start)</h3>
+              <div className="h-[300px] w-full" style={{ minWidth: '0px' }}>
+                {chartsVisible && (
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <BarChart data={weeklyActivityData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        domain={[0, (dataMax: number) => Math.max(dataMax, dailyGoal)]}
+                      />
+                      <RechartsTooltip 
+                        cursor={{fill: '#f8fafc'}}
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                        formatter={(value: any, name: string, item: any) => {
+                          if (item && item.payload && item.payload.isHoliday) {
+                            return ['N/A', 'Hours'];
+                          }
+                          return [`${value} hrs`, 'Hours'];
+                        }}
+                      />
+                      <Bar 
+                        dataKey="hours" 
+                        fill="#6366f1" 
+                        radius={[4, 4, 0, 0]} 
+                        barSize={40} 
+                      >
+                         {weeklyActivityData.map((entry, index) => {
+                           let color = '#6366f1'; // Default Purple (Below Goal)
+                           
+                           if (entry.isHoliday && entry.hours === 0) {
+                             color = '#e2e8f0'; // Gray for empty holidays
+                           } else if (entry.hours > dailyGoal) {
+                             color = '#ef4444'; // Red (Above Goal)
+                           } else if (Math.abs(entry.hours - dailyGoal) < 0.1 && dailyGoal > 0) {
+                             color = '#22c55e'; // Green (At Goal)
+                           }
+
+                           return <Cell key={`cell-${index}`} fill={color} />;
+                         })}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
               <h3 className="text-lg font-bold text-slate-800 mb-6">Hours by Project</h3>
-              <div className="h-[300px] w-full min-w-0">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                  <PieChart>
-                    <Pie
-                      data={projectData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {projectData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip />
-                    <Legend verticalAlign="bottom" height={36}/>
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="h-[300px] w-full" style={{ minWidth: '0px' }}>
+                {chartsVisible && (
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <PieChart>
+                      <Pie
+                        data={projectData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {projectData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip />
+                      <Legend verticalAlign="bottom" height={36}/>
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
           </div>
@@ -239,28 +370,32 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients }) => {
                     value={period}
                     onChange={handlePeriodChange}
                   />
-                  {period === 'custom' && (
-                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">From</label>
-                        <input 
-                          type="date" 
-                          value={startDate} 
-                          onChange={e => setStartDate(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">To</label>
-                        <input 
-                          type="date" 
-                          value={endDate} 
-                          onChange={e => setEndDate(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm"
-                        />
-                      </div>
+                  <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">From</label>
+                      <input 
+                        type="date" 
+                        value={startDate} 
+                        onChange={e => {
+                          setStartDate(e.target.value);
+                          setPeriod('custom');
+                        }}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm"
+                      />
                     </div>
-                  )}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">To</label>
+                      <input 
+                        type="date" 
+                        value={endDate} 
+                        onChange={e => {
+                          setEndDate(e.target.value);
+                          setPeriod('custom');
+                        }}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 

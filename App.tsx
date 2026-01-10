@@ -395,9 +395,6 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, [generateRecurringEntries]);
 
-  const handleLogin = (user: User) => { setCurrentUser(user); setActiveView('tracker'); };
-  const handleLogout = () => { setCurrentUser(null); };
-
   const handleAddEntry = (newEntry: Omit<TimeEntry, 'id' | 'createdAt' | 'userId'>) => {
     if (!currentUser) return;
     // Use viewingUserId if available (for managers/admins), otherwise default to current user
@@ -465,6 +462,17 @@ const App: React.FC = () => {
     setIsInsightLoading(false);
   };
 
+  // ADDED FIX: Missing handleLogin and handleLogout handlers
+  const handleLogin = (user: User) => {
+    setCurrentUser(user);
+    setViewingUserId(user.id);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setViewingUserId('');
+  };
+
   if (!currentUser) return <Login users={users} onLogin={handleLogin} />;
 
   return (
@@ -484,7 +492,16 @@ const App: React.FC = () => {
           dailyGoal={settings.dailyGoal}
         />
       )}
-      {activeView === 'reports' && <Reports entries={entries.filter(e => e.userId === currentUser.id)} projects={projects} clients={clients} />}
+      {activeView === 'reports' && (
+        <Reports 
+          entries={entries.filter(e => e.userId === currentUser.id)} 
+          projects={projects} 
+          clients={clients} 
+          startOfWeek={settings.startOfWeek}
+          treatSaturdayAsHoliday={settings.treatSaturdayAsHoliday}
+          dailyGoal={settings.dailyGoal}
+        />
+      )}
       
       {activeView === 'clients' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
         <ClientsView clients={clients} onAddClient={addClient} />
