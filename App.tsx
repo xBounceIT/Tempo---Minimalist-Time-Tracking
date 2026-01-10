@@ -36,10 +36,11 @@ const TrackerView: React.FC<{
   onViewUserChange: (id: string) => void;
   availableUsers: User[];
   currentUser: User;
+  dailyGoal: number;
 }> = ({ 
   entries, clients, projects, projectTasks, onAddEntry, onDeleteEntry, insights, isInsightLoading, 
   onRefreshInsights, onUpdateEntry, startOfWeek, treatSaturdayAsHoliday, onMakeRecurring, userRole,
-  viewingUserId, onViewUserChange, availableUsers, currentUser
+  viewingUserId, onViewUserChange, availableUsers, currentUser, dailyGoal
 }) => {
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
@@ -94,6 +95,8 @@ const TrackerView: React.FC<{
           selectedDate={selectedDate}
           onMakeRecurring={onMakeRecurring}
           userRole={userRole}
+          dailyGoal={dailyGoal}
+          currentDayTotal={dailyTotal}
         />
 
         <div className="space-y-4">
@@ -107,7 +110,7 @@ const TrackerView: React.FC<{
             {selectedDate && (
                <div className="text-right">
                 <p className="text-[10px] font-bold text-slate-400 uppercase">Day Total</p>
-                <p className="text-lg font-black text-indigo-600">{dailyTotal.toFixed(2)} h</p>
+                <p className={`text-lg font-black transition-colors ${dailyTotal > dailyGoal ? 'text-red-600' : 'text-indigo-600'}`}>{dailyTotal.toFixed(2)} h</p>
               </div>
             )}
           </div>
@@ -118,7 +121,8 @@ const TrackerView: React.FC<{
                 <tr>
                   {!selectedDate && <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">Date</th>}
                   <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">Client / Project</th>
-                  <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">Task & Notes</th>
+                  <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">Task</th>
+                  <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">Notes</th>
                   <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter text-right">Hours</th>
                   <th className="px-6 py-3 w-10"></th>
                 </tr>
@@ -126,7 +130,7 @@ const TrackerView: React.FC<{
               <tbody className="divide-y divide-slate-100">
                 {filteredEntries.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-20 text-center">
+                    <td colSpan={selectedDate ? 5 : 6} className="px-6 py-20 text-center">
                       <i className="fa-solid fa-calendar-day text-4xl text-slate-100 mb-4 block"></i>
                       <p className="text-slate-400 font-medium text-sm">No time entries for this selection</p>
                     </td>
@@ -148,9 +152,6 @@ const TrackerView: React.FC<{
                         <span className="font-semibold text-slate-800">{entry.task}</span>
                         {entry.isPlaceholder && <i className="fa-solid fa-repeat text-[10px] text-indigo-400" title="Recurring task"></i>}
                       </div>
-                      {entry.notes && (
-                        <div className="text-slate-500 text-xs mt-1 italic leading-relaxed">{entry.notes}</div>
-                      )}
                       {entry.isPlaceholder && (
                         <button 
                           onClick={() => {
@@ -163,6 +164,13 @@ const TrackerView: React.FC<{
                         >
                           Complete Log
                         </button>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm align-top">
+                      {entry.notes ? (
+                        <div className="text-slate-500 text-xs italic leading-relaxed">{entry.notes}</div>
+                      ) : (
+                        <span className="text-slate-300 text-xs">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-900 font-black text-right align-top">
@@ -473,6 +481,7 @@ const App: React.FC = () => {
           onViewUserChange={setViewingUserId}
           availableUsers={availableUsers}
           currentUser={currentUser}
+          dailyGoal={settings.dailyGoal}
         />
       )}
       {activeView === 'reports' && <Reports entries={entries.filter(e => e.userId === currentUser.id)} projects={projects} clients={clients} />}

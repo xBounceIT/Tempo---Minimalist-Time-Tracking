@@ -12,9 +12,21 @@ interface TimeEntryFormProps {
   selectedDate: string;
   onMakeRecurring?: (taskId: string, pattern: 'daily' | 'weekly' | 'monthly', endDate?: string) => void;
   userRole: UserRole;
+  dailyGoal: number;
+  currentDayTotal: number;
 }
 
-const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ clients, projects, projectTasks, onAdd, selectedDate, onMakeRecurring, userRole }) => {
+const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ 
+  clients, 
+  projects, 
+  projectTasks, 
+  onAdd, 
+  selectedDate, 
+  onMakeRecurring, 
+  userRole,
+  dailyGoal,
+  currentDayTotal
+}) => {
   const [isSmartMode, setIsSmartMode] = useState(false);
   const [smartInput, setSmartInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +39,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ clients, projects, projec
   const [selectedTaskId, setSelectedTaskId] = useState('');
   const [notes, setNotes] = useState('');
   const [duration, setDuration] = useState('');
+  const [errors, setErrors] = useState<{ hours?: string }>({});
   
   // New user controls
   const [makeRecurring, setMakeRecurring] = useState(false);
@@ -67,7 +80,15 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ clients, projects, projec
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTaskName || !duration || !selectedProjectId) return;
+    setErrors({});
+
+    const durationVal = parseFloat(duration);
+    if (!duration || isNaN(durationVal) || durationVal <= 0) {
+      setErrors({ hours: 'Hours are required and must be greater than 0' });
+      return;
+    }
+
+    if (!selectedTaskName || !selectedProjectId) return;
 
     const project = projects.find(p => p.id === selectedProjectId);
     const client = clients.find(c => c.id === selectedClientId);
@@ -80,7 +101,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ clients, projects, projec
       projectName: project?.name || 'General',
       task: selectedTaskName,
       notes,
-      duration: parseFloat(duration),
+      duration: durationVal,
     });
 
     // Handle recursion if checked
@@ -93,6 +114,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ clients, projects, projec
     setNotes('');
     setMakeRecurring(false);
     setRecurrenceEndDate('');
+    setErrors({});
   };
 
   const handleSmartSubmit = async (e: React.FormEvent) => {
@@ -137,6 +159,12 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ clients, projects, projec
       }
     }
   };
+
+  const isExceedingGoal = useMemo(() => {
+    const val = parseFloat(duration);
+    if (isNaN(val) || val <= 0) return false;
+    return (currentDayTotal + val) > dailyGoal;
+  }, [duration, currentDayTotal, dailyGoal]);
 
   const canCreateCustomTask = userRole === 'admin' || userRole === 'manager';
 
@@ -236,16 +264,20 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ clients, projects, projec
               )}
             </div>
             <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Hours</label>
+              <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Hours <span className="text-red-500">*</span></label>
               <input
                 type="number"
                 step="0.1"
-                min="0"
+                min="0.1"
                 value={duration}
-                onChange={(e) => setDuration(e.target.value)}
+                onChange={(e) => {
+                  setDuration(e.target.value);
+                  if (errors.hours) setErrors({});
+                }}
                 placeholder="0.0"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold"
+                className={`w-full px-3 py-2 bg-slate-50 border rounded-lg focus:ring-2 outline-none text-sm font-bold transition-colors ${errors.hours ? 'border-red-500 focus:ring-red-200 bg-red-50' : 'border-slate-200 focus:ring-indigo-500'}`}
               />
+              {errors.hours && <p className="text-[10px] text-red-500 mt-1 font-bold animate-in fade-in">{errors.hours}</p>}
             </div>
           </form>
           
@@ -263,6 +295,14 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ clients, projects, projec
             
             <div className="flex items-end justify-between gap-4">
                 <div className="flex-1">
+                  {isExceedingGoal && (
+                    <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 animate-in fade-in slide-in-from-left-4">
+                      <i className="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                      <p className="text-[10px] font-bold text-amber-700 uppercase leading-none">
+                        Warning: This entry will exceed your daily goal of {dailyGoal} hours.
+                      </p>
+                    </div>
+                  )}
                   {selectedTaskId && (
                     <div className={`transition-all duration-300 border rounded-xl overflow-hidden ${makeRecurring ? 'bg-indigo-50 border-indigo-100' : 'bg-transparent border-transparent'}`}>
                        <div className="flex items-center">
