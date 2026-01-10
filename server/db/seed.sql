@@ -1,0 +1,37 @@
+-- Seed data for Tempo Time Tracking
+
+-- Default users (password is 'password' for all, hashed with bcrypt cost 10)
+-- To generate: require('bcrypt').hashSync('password', 10)
+INSERT INTO users (id, name, username, password_hash, role, avatar_initials) VALUES
+    ('u1', 'Admin User', 'admin', '$2b$10$3euPcmQfZ/e4aM7FrKg9.uV6JhPFG3J7dPh5rA5G7xUNk5e/6Vq2e', 'admin', 'AD'),
+    ('u2', 'Manager User', 'manager', '$2b$10$3euPcmQfZ/e4aM7FrKg9.uV6JhPFG3J7dPh5rA5G7xUNk5e/6Vq2e', 'manager', 'MG'),
+    ('u3', 'Standard User', 'user', '$2b$10$3euPcmQfZ/e4aM7FrKg9.uV6JhPFG3J7dPh5rA5G7xUNk5e/6Vq2e', 'user', 'US')
+ON CONFLICT (id) DO NOTHING;
+
+-- Default clients
+INSERT INTO clients (id, name) VALUES
+    ('c1', 'Acme Corp'),
+    ('c2', 'Global Tech')
+ON CONFLICT (id) DO NOTHING;
+
+-- Default projects
+INSERT INTO projects (id, name, client_id, color, description) VALUES
+    ('p1', 'Website Redesign', 'c1', '#3b82f6', 'Complete overhaul of the main marketing site.'),
+    ('p2', 'Mobile App', 'c1', '#10b981', 'Native iOS and Android application development.'),
+    ('p3', 'Internal Research', 'c2', '#8b5cf6', 'Ongoing research into new market trends.')
+ON CONFLICT (id) DO NOTHING;
+
+-- Default tasks
+INSERT INTO tasks (id, name, project_id, description) VALUES
+    ('t1', 'Initial Design', 'p1', 'Lo-fi wireframes and moodboards.'),
+    ('t2', 'Frontend Dev', 'p1', 'React component implementation.'),
+    ('t3', 'API Integration', 'p2', 'Connecting the app to the backend services.'),
+    ('t4', 'General Support', 'p3', 'Misc administrative tasks and support.')
+ON CONFLICT (id) DO NOTHING;
+
+-- Default settings for each user
+INSERT INTO settings (user_id, full_name, email, daily_goal, start_of_week) VALUES
+    ('u1', 'Admin User', 'admin@example.com', 8.00, 'Monday'),
+    ('u2', 'Manager User', 'manager@example.com', 8.00, 'Monday'),
+    ('u3', 'Standard User', 'user@example.com', 8.00, 'Monday')
+ON CONFLICT (user_id) DO NOTHING;
