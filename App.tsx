@@ -494,9 +494,15 @@ const App: React.FC = () => {
       )}
       {activeView === 'reports' && (
         <Reports 
-          entries={entries.filter(e => e.userId === currentUser.id)} 
+          entries={
+            (currentUser.role === 'admin' || currentUser.role === 'manager')
+            ? entries
+            : entries.filter(e => e.userId === currentUser.id)
+          } 
           projects={projects} 
           clients={clients} 
+          users={users}
+          currentUser={currentUser}
           startOfWeek={settings.startOfWeek}
           treatSaturdayAsHoliday={settings.treatSaturdayAsHoliday}
           dailyGoal={settings.dailyGoal}

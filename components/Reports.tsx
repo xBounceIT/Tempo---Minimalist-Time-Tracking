@@ -13,13 +13,15 @@ import {
   Cell, 
   Legend 
 } from 'recharts';
-import { TimeEntry, Project, Client } from '../types';
+import { TimeEntry, Project, Client, User } from '../types';
 import CustomSelect, { Option } from './CustomSelect';
 
 interface ReportsProps {
   entries: TimeEntry[];
   projects: Project[];
   clients: Client[];
+  users: User[];
+  currentUser: User;
   startOfWeek: 'Monday' | 'Sunday';
   treatSaturdayAsHoliday: boolean;
   dailyGoal: number;
@@ -53,7 +55,7 @@ const toLocalISOString = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, startOfWeek, treatSaturdayAsHoliday, dailyGoal }) => {
+const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, currentUser, startOfWeek, treatSaturdayAsHoliday, dailyGoal }) => {
   // --- Dashboard State ---
   const [activeTab, setActiveTab] = useState<'dashboard' | 'detailed'>('dashboard');
 
@@ -86,12 +88,16 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, startOfWe
   const [startDate, setStartDate] = useState(initialDates.start);
   const [endDate, setEndDate] = useState(initialDates.end);
   
+  const [filterUser, setFilterUser] = useState('all');
   const [filterClient, setFilterClient] = useState('all');
-  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
+  const [filterProject, setFilterProject] = useState('all');
   const [filterTask, setFilterTask] = useState('all');
   const [noteSearch, setNoteSearch] = useState('');
 
+  const canFilterUsers = currentUser.role === 'admin' || currentUser.role === 'manager';
+
   const [visibleFields, setVisibleFields] = useState({
+    user: canFilterUsers,
     client: true,
     project: true,
     task: true,
@@ -163,17 +169,60 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, startOfWe
   const totalHours = entries.reduce((sum, e) => sum + e.duration, 0);
 
   // --- Helpers ---
-  const uniqueTasks = useMemo(() => Array.from(new Set(entries.map(e => e.task))), [entries]);
+  const userOptions = useMemo(() => [
+    { id: 'all', name: '--- All Users ---' },
+    ...users.map(u => ({ id: u.id, name: u.name }))
+  ], [users]);
 
   const clientOptions = useMemo(() => [
     { id: 'all', name: '--- All Clients ---' },
     ...clients.map(c => ({ id: c.id, name: c.name }))
   ], [clients]);
 
+  // Synchronized Filter Logic
+  const filteredProjects = useMemo(() => {
+    if (filterClient === 'all') return projects;
+    return projects.filter(p => p.clientId === filterClient);
+  }, [projects, filterClient]);
+
+  const projectOptions = useMemo(() => [
+    { id: 'all', name: '--- All Projects ---' },
+    ...filteredProjects.map(p => ({ id: p.id, name: p.name }))
+  ], [filteredProjects]);
+
+  const filteredTasks = useMemo(() => {
+    let relevantEntries = entries;
+    if (filterUser !== 'all') {
+         relevantEntries = relevantEntries.filter(e => e.userId === filterUser);
+    }
+    if (filterClient !== 'all') {
+      relevantEntries = relevantEntries.filter(e => e.clientId === filterClient);
+    }
+    if (filterProject !== 'all') {
+      relevantEntries = relevantEntries.filter(e => e.projectId === filterProject);
+    }
+    return Array.from(new Set(relevantEntries.map(e => e.task))).sort();
+  }, [entries, filterUser, filterClient, filterProject]);
+
   const taskOptions = useMemo(() => [
     { id: 'all', name: '--- All Tasks ---' },
-    ...uniqueTasks.map(t => ({ id: t, name: t }))
-  ], [uniqueTasks]);
+    ...filteredTasks.map(t => ({ id: t, name: t }))
+  ], [filteredTasks]);
+
+  const handleClientChange = (val: string) => {
+    setFilterClient(val);
+    setFilterProject('all');
+    setFilterTask('all');
+  };
+
+  const handleProjectChange = (val: string) => {
+    setFilterProject(val);
+    setFilterTask('all');
+    if (val !== 'all') {
+        const proj = projects.find(p => p.id === val);
+        if (proj) setFilterClient(proj.clientId);
+    }
+  };
 
   const handlePeriodChange = (val: string) => {
     setPeriod(val);
@@ -233,13 +282,18 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, startOfWe
   const generateReport = () => {
     const filtered = entries.filter(e => {
       const dateMatch = e.date >= startDate && e.date <= endDate;
+      const userMatch = filterUser === 'all' || e.userId === filterUser;
       const clientMatch = filterClient === 'all' || e.clientId === filterClient;
-      const projectMatch = selectedProjectIds.length === 0 || selectedProjectIds.includes(e.projectId);
+      const projectMatch = filterProject === 'all' || e.projectId === filterProject;
       const taskMatch = filterTask === 'all' || e.task === filterTask;
       const noteMatch = !noteSearch || (e.notes?.toLowerCase().includes(noteSearch.toLowerCase()));
-      return dateMatch && clientMatch && projectMatch && taskMatch && noteMatch;
+      return dateMatch && userMatch && clientMatch && projectMatch && taskMatch && noteMatch;
     });
     setGeneratedEntries(filtered.sort((a,b) => b.date.localeCompare(a.date)));
+  };
+
+  const getUserName = (userId: string) => {
+    return users.find(u => u.id === userId)?.name || 'Unknown User';
   };
 
   return (
@@ -408,31 +462,29 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, startOfWe
                 <h4 className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-4">2. Detailed Filters</h4>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-4">
+                    {canFilterUsers && (
+                      <CustomSelect 
+                        label="User"
+                        options={userOptions}
+                        value={filterUser}
+                        onChange={setFilterUser}
+                        searchable={true}
+                      />
+                    )}
                     <CustomSelect 
                       label="Client"
                       options={clientOptions}
                       value={filterClient}
-                      onChange={setFilterClient}
+                      onChange={handleClientChange}
+                      searchable={true}
                     />
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Projects</label>
-                      <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 max-h-32 overflow-y-auto space-y-2">
-                        {projects.map(p => (
-                          <label key={p.id} className="flex items-center gap-2 cursor-pointer group">
-                            <input 
-                              type="checkbox" 
-                              checked={selectedProjectIds.includes(p.id)}
-                              onChange={e => {
-                                if (e.target.checked) setSelectedProjectIds([...selectedProjectIds, p.id]);
-                                else setSelectedProjectIds(selectedProjectIds.filter(id => id !== p.id));
-                              }}
-                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <span className="text-xs text-slate-600 group-hover:text-slate-900">{p.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
+                    <CustomSelect
+                       label="Project"
+                       options={projectOptions}
+                       value={filterProject}
+                       onChange={handleProjectChange}
+                       searchable={true}
+                    />
                   </div>
                   <div className="space-y-4">
                     <CustomSelect 
@@ -440,6 +492,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, startOfWe
                       options={taskOptions}
                       value={filterTask}
                       onChange={setFilterTask}
+                      searchable={true}
                     />
                     <div>
                       <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Notes Containing</label>
@@ -523,6 +576,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, startOfWe
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
                       <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Date</th>
+                      {visibleFields.user && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">User</th>}
                       {visibleFields.client && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Client</th>}
                       {visibleFields.project && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Project</th>}
                       {visibleFields.task && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Task</th>}
@@ -533,11 +587,12 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, startOfWe
                   <tbody className="divide-y divide-slate-100">
                     {generatedEntries.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">No entries match your filters.</td>
+                        <td colSpan={7} className="px-6 py-12 text-center text-slate-400 italic">No entries match your filters.</td>
                       </tr>
                     ) : generatedEntries.map(e => (
                       <tr key={e.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-6 py-4 text-xs font-bold text-slate-600 whitespace-nowrap">{new Date(e.date).toLocaleDateString()}</td>
+                        {visibleFields.user && <td className="px-6 py-4 text-xs font-bold text-indigo-600">{getUserName(e.userId)}</td>}
                         {visibleFields.client && <td className="px-6 py-4 text-xs font-medium text-slate-800">{e.clientName}</td>}
                         {visibleFields.project && <td className="px-6 py-4 text-xs font-medium text-slate-800">{e.projectName}</td>}
                         {visibleFields.task && <td className="px-6 py-4 text-xs font-bold text-slate-800">{e.task}</td>}
