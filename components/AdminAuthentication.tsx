@@ -278,46 +278,46 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
       </form>
 
       {/* Tester */}
-      <section className="bg-slate-900 rounded-2xl border border-slate-800 shadow-lg overflow-hidden mt-12">
-        <div className="px-6 py-4 bg-slate-800/50 border-b border-slate-700 flex items-center gap-3">
-           <i className="fa-solid fa-vial text-emerald-400"></i>
-           <h3 className="font-bold text-white">Connection Tester</h3>
+      <section className={`bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-12 transition-opacity ${!formData.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+           <i className="fa-solid fa-vial text-indigo-500"></i>
+           <h3 className="font-bold text-slate-800">Connection Tester</h3>
         </div>
         <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
            <div className="space-y-4">
               <p className="text-xs text-slate-400 mb-4">Enter credentials to test authentication and group retrieval against the current configuration.</p>
               <form onSubmit={handleTest} className="space-y-4">
                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Test Username</label>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Test Username</label>
                     <input 
                       type="text" 
                       value={testUser}
                       onChange={e => setTestUser(e.target.value)}
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-white text-sm"
+                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-700"
                     />
                  </div>
                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Test Password</label>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Test Password</label>
                     <input 
                       type="password" 
                       value={testPass}
                       onChange={e => setTestPass(e.target.value)}
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-white text-sm"
+                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-700"
                     />
                  </div>
                  <button 
                   type="submit"
-                  disabled={isTestLoading}
-                  className="w-full bg-emerald-600 text-white py-2 rounded-lg font-bold hover:bg-emerald-500 transition-colors disabled:opacity-50"
+                  disabled={isTestLoading || !formData.enabled}
+                  className="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-md shadow-indigo-100"
                  >
                     {isTestLoading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Test Authentication'}
                  </button>
               </form>
            </div>
            
-           <div className="bg-black/30 rounded-xl p-4 font-mono text-xs overflow-y-auto h-64 border border-slate-800">
+           <div className="bg-slate-900 rounded-xl p-4 font-mono text-xs overflow-y-auto h-64 border border-slate-800 shadow-inner">
               {isTestLoading ? (
-                 <div className="text-slate-500 animate-pulse">Connecting to LDAP server...</div>
+                 <div className="text-slate-400 animate-pulse">Connecting to LDAP server...</div>
               ) : testResult ? (
                  <div className="space-y-2">
                     <div className={`font-bold ${testResult.success ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -325,10 +325,10 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                     </div>
                     {testResult.details && (
                        <>
-                         <div className="text-slate-300 mt-2">-- Provisioning Details --</div>
-                         <div className="text-slate-400">DN: <span className="text-sky-300">{testResult.details.dn}</span></div>
+                         <div className="text-slate-500 mt-2 border-b border-slate-800 pb-1 mb-2">-- Provisioning Details --</div>
+                         <div className="text-slate-400">DN: <span className="text-indigo-300">{testResult.details.dn}</span></div>
                          <div className="text-slate-400">Role: <span className="text-purple-300 uppercase font-bold">{testResult.details.mappedRole}</span></div>
-                         <div className="text-slate-400 mt-1">Groups Found:</div>
+                         <div className="text-slate-400 mt-2">Groups Found:</div>
                          <ul className="list-disc pl-4 text-slate-500">
                            {testResult.details.groups.map((g: string, i: number) => (
                              <li key={i}>{g}</li>
@@ -341,7 +341,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                  <div className="text-slate-600 italic">
                     Waiting for test execution...
                     <br/><br/>
-                    Note: Since this is a browser-only environment, actual LDAP calls are simulated.
+                    <span className="opacity-50">Log output will appear here after testing.</span>
                  </div>
               )}
            </div>
