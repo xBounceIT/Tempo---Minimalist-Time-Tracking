@@ -33,7 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
   const isAdmin = currentUser.role === 'admin';
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
+    <div className="h-screen flex flex-col md:flex-row bg-slate-50 overflow-hidden">
       <nav
         className={`bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 shrink-0 transition-all duration-300 ease-in-out relative z-30
           ${isCollapsed ? 'md:w-20' : 'md:w-64'} 
@@ -157,7 +157,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
 
         <div className={`p-6 border-t border-slate-800 transition-opacity duration-300 ${isCollapsed ? 'md:opacity-0 overflow-hidden' : 'opacity-100'}`}>
           <div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
-            Tempo v{process.env.APP_VERSION}
+            Tempo v{import.meta.env.VITE_APP_VERSION}
           </div>
         </div>
       </nav>
