@@ -1,18 +1,19 @@
 
 import React, { useState } from 'react';
-import { ProjectTask, Project, UserRole } from '../types';
+import { ProjectTask, Project, Client, UserRole } from '../types';
 import CustomSelect from './CustomSelect';
 
 interface TasksViewProps {
   tasks: ProjectTask[];
   projects: Project[];
+  clients: Client[];
   role: UserRole;
   onAddTask: (name: string, projectId: string, recurringConfig?: any, description?: string) => void;
   onUpdateTask: (id: string, updates: Partial<ProjectTask>) => void;
   onDeleteTask: (id: string) => void;
 }
 
-const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, role, onAddTask, onUpdateTask, onDeleteTask }) => {
+const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, onAddTask, onUpdateTask, onDeleteTask }) => {
   const [name, setName] = useState('');
   const [projectId, setProjectId] = useState('');
   const [description, setDescription] = useState('');
@@ -279,19 +280,33 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, role, onAddTask,
                 </tr>
               ) : tasks.map(task => {
                 const project = projects.find(p => p.id === task.projectId);
+                const client = clients.find(c => c.id === project?.clientId);
+
+                const isProjectDisabled = project?.isDisabled || false;
+                const isClientDisabled = client?.isDisabled || false;
+                const isInheritedDisabled = isProjectDisabled || isClientDisabled;
+                const isEffectivelyDisabled = task.isDisabled || isInheritedDisabled;
 
                 return (
-                  <tr key={task.id} className={`group hover:bg-slate-50 transition-colors ${task.isDisabled ? 'opacity-60 grayscale bg-slate-50/50' : ''}`}>
+                  <tr key={task.id} className={`group hover:bg-slate-50 transition-colors ${isEffectivelyDisabled ? 'opacity-60 grayscale bg-slate-50/50' : ''}`}>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: project?.color || '#ccc' }}></div>
-                        <span className="text-[10px] font-black text-indigo-600 uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                          {project?.name || 'Unknown'}
-                        </span>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: project?.color || '#ccc' }}></div>
+                          <span className={`text-[10px] font-black uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 ${isProjectDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-indigo-600'}`}>
+                            {project?.name || 'Unknown'}
+                            {isProjectDisabled && <span className="ml-1 text-[8px]">(DISABLED)</span>}
+                          </span>
+                        </div>
+                        {client && (
+                          <span className={`text-[9px] font-bold ${isClientDisabled ? 'text-amber-500' : 'text-slate-400'}`}>
+                            Client: {client.name} {isClientDisabled && '(DISABLED)'}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`text-sm font-bold ${task.isDisabled ? 'text-slate-500 line-through decoration-slate-300' : 'text-slate-800'}`}>{task.name}</span>
+                      <span className={`text-sm font-bold ${isEffectivelyDisabled ? 'text-slate-500 line-through decoration-slate-300' : 'text-slate-800'}`}>{task.name}</span>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-xs text-slate-500 max-w-md italic">{task.description || 'No description provided.'}</p>
@@ -299,6 +314,8 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, role, onAddTask,
                     <td className="px-6 py-4">
                       {task.isDisabled ? (
                         <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
+                      ) : isInheritedDisabled ? (
+                        <span className="text-[10px] font-black text-amber-400 uppercase">Inherited Disable</span>
                       ) : (
                         <span className="text-[10px] font-black text-emerald-500 uppercase">Active</span>
                       )}

@@ -117,11 +117,6 @@ router.put('/:id', authenticateToken, requireRole('admin', 'manager'), async (re
 
         const updated = result.rows[0];
 
-        // If project is disabled, cascade to tasks
-        if (isDisabled === true) {
-            await query('UPDATE tasks SET is_disabled = true WHERE project_id = $1', [id]);
-        }
-
         res.json({
             id: updated.id,
             name: updated.name,

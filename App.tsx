@@ -414,16 +414,26 @@ const App: React.FC = () => {
   }, [clients, viewingUserAssignments]);
 
   const filteredProjects = useMemo(() => {
-    const activeProjects = projects.filter(p => !p.isDisabled);
+    const activeProjects = projects.filter(p => {
+      if (p.isDisabled) return false;
+      const client = clients.find(c => c.id === p.clientId);
+      return !client?.isDisabled;
+    });
     if (!viewingUserAssignments) return activeProjects;
     return activeProjects.filter(p => viewingUserAssignments.projectIds.includes(p.id));
-  }, [projects, viewingUserAssignments]);
+  }, [projects, clients, viewingUserAssignments]);
 
   const filteredTasks = useMemo(() => {
-    const activeTasks = projectTasks.filter(t => !t.isDisabled);
+    const activeTasks = projectTasks.filter(t => {
+      if (t.isDisabled) return false;
+      const project = projects.find(p => p.id === t.projectId);
+      if (!project || project.isDisabled) return false;
+      const client = clients.find(c => c.id === project.clientId);
+      return !client?.isDisabled;
+    });
     if (!viewingUserAssignments) return activeTasks;
     return activeTasks.filter(t => viewingUserAssignments.taskIds.includes(t.id));
-  }, [projectTasks, viewingUserAssignments]);
+  }, [projectTasks, projects, clients, viewingUserAssignments]);
 
 
   useEffect(() => {
@@ -531,15 +541,6 @@ const App: React.FC = () => {
     try {
       const updated = await api.clients.update(id, updates);
       setClients(clients.map(c => c.id === id ? updated : c));
-      // If client was disabled, refresh projects and tasks as they might have been cascaded
-      if (updates.isDisabled === true) {
-        const [projectsData, tasksData] = await Promise.all([
-          api.projects.list(),
-          api.tasks.list()
-        ]);
-        setProjects(projectsData);
-        setProjectTasks(tasksData);
-      }
     } catch (err) {
       console.error('Failed to update client:', err);
       alert('Failed to update client');
@@ -738,6 +739,7 @@ const App: React.FC = () => {
         <TasksView
           tasks={projectTasks}
           projects={projects}
+          clients={clients}
           role={currentUser.role}
           onAddTask={addProjectTask}
           onUpdateTask={handleUpdateTask}

@@ -279,17 +279,21 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                 </tr>
               ) : projects.map(project => {
                 const client = clients.find(c => c.id === project.clientId);
+                const isClientDisabled = client?.isDisabled || false;
+                const isEffectivelyDisabled = project.isDisabled || isClientDisabled;
+
                 return (
-                  <tr key={project.id} className={`group hover:bg-slate-50 transition-colors ${project.isDisabled ? 'opacity-60 grayscale bg-slate-50/50' : ''}`}>
+                  <tr key={project.id} className={`group hover:bg-slate-50 transition-colors ${isEffectivelyDisabled ? 'opacity-60 grayscale bg-slate-50/50' : ''}`}>
                     <td className="px-6 py-4">
-                      <span className="text-[10px] font-black text-indigo-600 uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                      <span className={`text-[10px] font-black uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 ${isClientDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-indigo-600'}`}>
                         {client?.name || 'Unknown'}
+                        {isClientDisabled && <span className="ml-1 text-[8px]">(DISABLED)</span>}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: project.color }}></div>
-                        <span className={`text-sm font-bold ${project.isDisabled ? 'text-slate-500 line-through decoration-slate-300' : 'text-slate-800'}`}>{project.name}</span>
+                        <span className={`text-sm font-bold ${isEffectivelyDisabled ? 'text-slate-500 line-through decoration-slate-300' : 'text-slate-800'}`}>{project.name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -298,6 +302,8 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                     <td className="px-6 py-4">
                       {project.isDisabled ? (
                         <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
+                      ) : isClientDisabled ? (
+                        <span className="text-[10px] font-black text-amber-400 uppercase">Inherited Disable</span>
                       ) : (
                         <span className="text-[10px] font-black text-emerald-500 uppercase">Active</span>
                       )}

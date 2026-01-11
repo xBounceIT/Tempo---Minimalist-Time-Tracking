@@ -72,19 +72,6 @@ router.put('/:id', authenticateToken, requireRole('admin', 'manager'), async (re
 
         const updatedClient = result.rows[0];
 
-        // If client is disabled, cascade to projects and tasks
-        if (isDisabled === true) {
-            // Disable all projects for this client
-            await query('UPDATE projects SET is_disabled = true WHERE client_id = $1', [id]);
-
-            // Disable all tasks that belong to any project of this client
-            await query(`
-                UPDATE tasks 
-                SET is_disabled = true 
-                WHERE project_id IN (SELECT id FROM projects WHERE client_id = $1)
-            `, [id]);
-        }
-
         res.json({
             id: updatedClient.id,
             name: updatedClient.name,
