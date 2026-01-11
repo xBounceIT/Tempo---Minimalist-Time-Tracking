@@ -10,6 +10,8 @@ interface ClientsViewProps {
 
 const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdateClient, onDeleteClient }) => {
   const [newClientName, setNewClientName] = useState('');
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,11 +21,63 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
     }
   };
 
+  const confirmDelete = (client: Client) => {
+    setClientToDelete(client);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteConfirmOpen(false);
+    setClientToDelete(null);
+  };
+
+  const handleDelete = () => {
+    if (clientToDelete) {
+      onDeleteClient(clientToDelete.id);
+      setIsDeleteConfirmOpen(false);
+      setClientToDelete(null);
+    }
+  };
+
   const activeClients = clients.filter(c => !c.isDisabled);
   const disabledClients = clients.filter(c => c.isDisabled);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Delete Confirmation Modal */}
+      {isDeleteConfirmOpen && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-200">
+            <div className="p-6 text-center space-y-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                <i className="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-800">Delete Client?</h3>
+                <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+                  Are you sure you want to delete <span className="font-bold text-slate-800">{clientToDelete?.name}</span>?
+                  This action cannot be undone and will delete all associated projects and tasks.
+                </p>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={cancelDelete}
+                  className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
           <i className="fa-solid fa-building text-indigo-500"></i> Add New Client
@@ -61,11 +115,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                     <i className="fa-solid fa-ban text-xs"></i>
                   </button>
                   <button
-                    onClick={() => {
-                      if (window.confirm(`Are you sure you want to delete client "${c.name}"? This will delete all associated projects and tasks.`)) {
-                        onDeleteClient(c.id);
-                      }
-                    }}
+                    onClick={() => confirmDelete(c)}
                     title="Delete Client"
                     className="text-slate-400 hover:text-red-500 transition-colors"
                   >
@@ -104,11 +154,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       <i className="fa-solid fa-rotate-left text-xs"></i>
                     </button>
                     <button
-                      onClick={() => {
-                        if (window.confirm(`Are you sure you want to delete client "${c.name}"?`)) {
-                          onDeleteClient(c.id);
-                        }
-                      }}
+                      onClick={() => confirmDelete(c)}
                       title="Delete Client"
                       className="text-slate-400 hover:text-red-500 transition-colors"
                     >
