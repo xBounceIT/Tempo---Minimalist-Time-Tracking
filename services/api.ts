@@ -115,6 +115,12 @@ export const projectsApi = {
             method: 'POST',
             body: JSON.stringify({ name, clientId, description, color }),
         }),
+
+    update: (id: string, updates: Partial<Project>): Promise<Project> =>
+        fetchApi(`/projects/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        }),
 };
 
 // Tasks API

@@ -89,4 +89,44 @@ router.delete('/:id', authenticateToken, requireRole('admin'), async (req, res, 
     }
 });
 
+// PUT /api/projects/:id - Update project (admin/manager only)
+router.put('/:id', authenticateToken, requireRole('admin', 'manager'), async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { name, clientId, description, color } = req.body;
+
+        if (!name || !clientId) {
+            return res.status(400).json({ error: 'Project name and client ID are required' });
+        }
+
+        const projectColor = color || '#3b82f6';
+
+        const result = await query(
+            `UPDATE projects 
+             SET name = $1, client_id = $2, color = $3, description = $4
+             WHERE id = $5
+             RETURNING id, name, client_id, color, description`,
+            [name, clientId, projectColor, description || null, id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        const updated = result.rows[0];
+        res.json({
+            id: updated.id,
+            name: updated.name,
+            clientId: updated.client_id,
+            color: updated.color,
+            description: updated.description
+        });
+    } catch (err) {
+        if (err.code === '23503') { // Foreign key violation
+            return res.status(400).json({ error: 'Client not found' });
+        }
+        next(err);
+    }
+});
+
 export default router;

@@ -8,23 +8,45 @@ interface ProjectsViewProps {
   clients: Client[];
   role: UserRole;
   onAddProject: (name: string, clientId: string, description?: string) => void;
+  onUpdateProject: (id: string, updates: Partial<Project>) => void;
 }
 
-const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, onAddProject }) => {
+const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, onAddProject, onUpdateProject }) => {
   const [name, setName] = useState('');
   const [clientId, setClientId] = useState('');
   const [description, setDescription] = useState('');
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   const isManagement = role === 'admin' || role === 'manager';
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name && clientId) {
-      onAddProject(name, clientId, description);
+      if (editingProject) {
+        onUpdateProject(editingProject.id, { name, clientId, description });
+        setEditingProject(null);
+      } else {
+        onAddProject(name, clientId, description);
+      }
       setName('');
       setClientId('');
       setDescription('');
     }
+  };
+
+  const startEditing = (project: Project) => {
+    setEditingProject(project);
+    setName(project.name);
+    setClientId(project.clientId);
+    setDescription(project.description || '');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEditing = () => {
+    setEditingProject(null);
+    setName('');
+    setClientId('');
+    setDescription('');
   };
 
   const clientOptions = clients.map(c => ({ id: c.id, name: c.name }));
@@ -34,9 +56,10 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
       {isManagement && (
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <i className="fa-solid fa-briefcase text-emerald-500"></i> Create New Project
+            <i className={`fa-solid ${editingProject ? 'fa-pen-to-square text-indigo-500' : 'fa-briefcase text-emerald-500'}`}></i>
+            {editingProject ? 'Edit Project' : 'Create New Project'}
           </h3>
-          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <CustomSelect
                 label="Client"
@@ -48,27 +71,32 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
             </div>
             <div className="space-y-2">
               <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Project Name</label>
-              <input 
-                type="text" 
-                value={name} 
+              <input
+                type="text"
+                value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="e.g. Website Redesign" 
+                placeholder="e.g. Website Redesign"
                 className="w-full text-sm px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50"
               />
             </div>
             <div className="space-y-2">
               <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Description</label>
               <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  value={description} 
+                <input
+                  type="text"
+                  value={description}
                   onChange={e => setDescription(e.target.value)}
-                  placeholder="What is this project about?" 
+                  placeholder="What is this project about?"
                   className="flex-1 text-sm px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50"
                 />
-                <button className="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold shadow-md shadow-emerald-100 transition-all active:scale-95">
-                  Create
+                <button type="submit" className={`text-white px-6 py-2 rounded-xl font-bold shadow-md transition-all active:scale-95 ${editingProject ? 'bg-indigo-600 shadow-indigo-100' : 'bg-emerald-600 shadow-emerald-100'}`}>
+                  {editingProject ? 'Update' : 'Create'}
                 </button>
+                {editingProject && (
+                  <button type="button" onClick={cancelEditing} className="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl font-bold hover:bg-slate-200 transition-colors">
+                    Cancel
+                  </button>
+                )}
               </div>
             </div>
           </form>
@@ -90,7 +118,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
             </span>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-200">
@@ -98,17 +126,18 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                 <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Client</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Project Name</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Description</th>
+                {isManagement && <th className="px-6 py-4 w-10"></th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {projects.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center text-slate-400 italic">No projects found.</td>
+                  <td colSpan={isManagement ? 4 : 3} className="px-6 py-12 text-center text-slate-400 italic">No projects found.</td>
                 </tr>
               ) : projects.map(project => {
                 const client = clients.find(c => c.id === project.clientId);
                 return (
-                  <tr key={project.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={project.id} className={`group hover:bg-slate-50 transition-colors ${editingProject?.id === project.id ? 'bg-indigo-50/50' : ''}`}>
                     <td className="px-6 py-4">
                       <span className="text-[10px] font-black text-indigo-600 uppercase bg-indigo-50 px-2 py-0.5 rounded">
                         {client?.name || 'Unknown'}
@@ -123,6 +152,16 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                     <td className="px-6 py-4">
                       <p className="text-xs text-slate-500 max-w-md italic">{project.description || 'No description provided.'}</p>
                     </td>
+                    {isManagement && (
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => startEditing(project)}
+                          className="text-slate-300 hover:text-indigo-600 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <i className="fa-solid fa-pen-to-square"></i>
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}

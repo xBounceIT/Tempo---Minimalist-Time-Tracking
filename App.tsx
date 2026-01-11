@@ -543,6 +543,16 @@ const App: React.FC = () => {
     }
   };
 
+  const handleUpdateProject = async (id: string, updates: Partial<Project>) => {
+    try {
+      const updated = await api.projects.update(id, updates);
+      setProjects(projects.map(p => p.id === id ? updated : p));
+    } catch (err) {
+      console.error('Failed to update project:', err);
+      alert('Failed to update project');
+    }
+  };
+
   const addUser = async (name: string, username: string, password: string, role: UserRole) => {
     try {
       const user = await api.users.create(name, username, password, role);
@@ -656,6 +666,7 @@ const App: React.FC = () => {
           clients={clients}
           role={currentUser.role}
           onAddProject={addProject}
+          onUpdateProject={handleUpdateProject}
         />
       )}
 
