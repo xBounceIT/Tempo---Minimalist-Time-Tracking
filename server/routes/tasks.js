@@ -7,11 +7,26 @@ const router = express.Router();
 // GET /api/tasks - List all tasks
 router.get('/', authenticateToken, async (req, res, next) => {
     try {
-        const result = await query(
-            `SELECT id, name, project_id, description, is_recurring, 
-              recurrence_pattern, recurrence_start, recurrence_end 
-       FROM tasks ORDER BY name`
-        );
+        let queryText = `
+            SELECT id, name, project_id, description, is_recurring, 
+                   recurrence_pattern, recurrence_start, recurrence_end 
+            FROM tasks ORDER BY name
+        `;
+        let queryParams = [];
+
+        if (req.user.role === 'user') {
+            queryText = `
+                SELECT t.id, t.name, t.project_id, t.description, t.is_recurring, 
+                       t.recurrence_pattern, t.recurrence_start, t.recurrence_end 
+                FROM tasks t
+                INNER JOIN user_tasks ut ON t.id = ut.task_id
+                WHERE ut.user_id = $1
+                ORDER BY t.name
+            `;
+            queryParams = [req.user.id];
+        }
+
+        const result = await query(queryText, queryParams);
 
         const tasks = result.rows.map(t => ({
             id: t.id,

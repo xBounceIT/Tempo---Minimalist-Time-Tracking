@@ -84,6 +84,15 @@ export const usersApi = {
 
     delete: (id: string): Promise<void> =>
         fetchApi(`/users/${id}`, { method: 'DELETE' }),
+
+    getAssignments: (id: string): Promise<{ clientIds: string[], projectIds: string[], taskIds: string[] }> =>
+        fetchApi(`/users/${id}/assignments`),
+
+    updateAssignments: (id: string, clientIds: string[], projectIds: string[], taskIds: string[]): Promise<void> =>
+        fetchApi(`/users/${id}/assignments`, {
+            method: 'POST',
+            body: JSON.stringify({ clientIds, projectIds, taskIds }),
+        }),
 };
 
 // Clients API

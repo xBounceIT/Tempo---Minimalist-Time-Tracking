@@ -7,7 +7,21 @@ const router = express.Router();
 // GET /api/clients - List all clients
 router.get('/', authenticateToken, async (req, res, next) => {
     try {
-        const result = await query('SELECT id, name FROM clients ORDER BY name');
+        let queryText = 'SELECT id, name FROM clients ORDER BY name';
+        let queryParams = [];
+
+        if (req.user.role === 'user') {
+            queryText = `
+                SELECT c.id, c.name 
+                FROM clients c
+                INNER JOIN user_clients uc ON c.id = uc.client_id
+                WHERE uc.user_id = $1
+                ORDER BY c.name
+            `;
+            queryParams = [req.user.id];
+        }
+
+        const result = await query(queryText, queryParams);
         res.json(result.rows);
     } catch (err) {
         next(err);

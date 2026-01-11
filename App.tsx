@@ -638,7 +638,15 @@ const App: React.FC = () => {
       )}
 
       {currentUser.role === 'admin' && activeView === 'users' && (
-        <UserManagement users={users} onAddUser={addUser} onDeleteUser={deleteUser} currentUserId={currentUser.id} />
+        <UserManagement
+          users={users}
+          clients={clients}
+          projects={projects}
+          tasks={projectTasks}
+          onAddUser={addUser}
+          onDeleteUser={deleteUser}
+          currentUserId={currentUser.id}
+        />
       )}
 
       {currentUser.role === 'admin' && activeView === 'admin-auth' && (

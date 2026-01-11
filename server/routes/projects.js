@@ -7,10 +7,24 @@ const router = express.Router();
 // GET /api/projects - List all projects
 router.get('/', authenticateToken, async (req, res, next) => {
     try {
-        const result = await query(
-            `SELECT id, name, client_id, color, description 
-       FROM projects ORDER BY name`
-        );
+        let queryText = `
+            SELECT id, name, client_id, color, description 
+            FROM projects ORDER BY name
+        `;
+        let queryParams = [];
+
+        if (req.user.role === 'user') {
+            queryText = `
+                SELECT p.id, p.name, p.client_id, p.color, p.description 
+                FROM projects p
+                INNER JOIN user_projects up ON p.id = up.project_id
+                WHERE up.user_id = $1
+                ORDER BY p.name
+            `;
+            queryParams = [req.user.id];
+        }
+
+        const result = await query(queryText, queryParams);
 
         const projects = result.rows.map(p => ({
             id: p.id,
