@@ -31,6 +31,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
     clientIds: [], projectIds: [], taskIds: []
   });
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,10 +86,61 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
     });
   };
 
+  const confirmDelete = (user: User) => {
+    setUserToDelete(user);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteConfirmOpen(false);
+    setUserToDelete(null);
+  };
+
+  const handleDelete = () => {
+    if (userToDelete) {
+      onDeleteUser(userToDelete.id);
+      setIsDeleteConfirmOpen(false);
+      setUserToDelete(null);
+    }
+  };
+
   const managingUser = users.find(u => u.id === managingUserId);
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
+      {/* Delete Confirmation Modal */}
+      {isDeleteConfirmOpen && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-200">
+            <div className="p-6 text-center space-y-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                <i className="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-800">Delete User?</h3>
+                <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+                  Are you sure you want to delete <span className="font-bold text-slate-800">{userToDelete?.name}</span>?
+                  This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={cancelDelete}
+                  className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {currentUserRole === 'admin' && (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
@@ -197,7 +250,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                     </button>
                     {currentUserRole === 'admin' && (
                       <button
-                        onClick={() => onDeleteUser(user.id)}
+                        onClick={() => confirmDelete(user)}
                         disabled={user.id === currentUserId}
                         className="text-slate-400 hover:text-red-500 disabled:opacity-0 transition-colors p-2"
                       >
