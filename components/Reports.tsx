@@ -564,9 +564,58 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                   <h3 className="text-xl font-black italic tracking-tighter">TEMPO <span className="text-indigo-400 font-normal not-italic tracking-normal text-sm ml-2">DETAILED REPORT</span></h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Generated: {new Date().toLocaleString()}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Grand Total</p>
-                  <p className="text-2xl font-black text-indigo-400">{generatedEntries.reduce((s, e) => s + e.duration, 0).toFixed(2)} hrs</p>
+                <div className="flex items-center gap-6">
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Grand Total</p>
+                    <p className="text-2xl font-black text-indigo-400">{generatedEntries.reduce((s, e) => s + e.duration, 0).toFixed(2)} hrs</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!generatedEntries) return;
+
+                      // 1. Define Headers
+                      const headers = ['Date'];
+                      if (visibleFields.user) headers.push('User');
+                      if (visibleFields.client) headers.push('Client');
+                      if (visibleFields.project) headers.push('Project');
+                      if (visibleFields.task) headers.push('Task');
+                      if (visibleFields.notes) headers.push('Note');
+                      if (visibleFields.duration) headers.push('Duration (hrs)');
+
+                      // 2. Map Data
+                      const csvRows = [headers.join(',')];
+
+                      generatedEntries.forEach(e => {
+                        const row = [new Date(e.date).toLocaleDateString()];
+                        if (visibleFields.user) row.push(`"${getUserName(e.userId).replace(/"/g, '""')}"`);
+                        if (visibleFields.client) row.push(`"${e.clientName.replace(/"/g, '""')}"`);
+                        if (visibleFields.project) row.push(`"${e.projectName.replace(/"/g, '""')}"`);
+                        if (visibleFields.task) row.push(`"${e.task.replace(/"/g, '""')}"`);
+                        if (visibleFields.notes) {
+                          const safeNote = (e.notes || '').replace(/"/g, '""').replace(/\n/g, ' ');
+                          row.push(`"${safeNote}"`);
+                        }
+                        if (visibleFields.duration) row.push(e.duration.toFixed(2));
+
+                        csvRows.push(row.join(','));
+                      });
+
+                      // 3. Create Blob and Download
+                      const csvString = csvRows.join('\n');
+                      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.setAttribute('download', `tempo_report_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`);
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="bg-indigo-600 hover:bg-slate-700 text-white text-xs font-bold uppercase tracking-widest py-2 px-4 rounded-lg transition-colors border border-indigo-500 hover:border-slate-600 shadow-lg shadow-indigo-900/20"
+                  >
+                    <i className="fa-solid fa-download mr-2"></i>
+                    Export CSV
+                  </button>
                 </div>
               </div>
 
