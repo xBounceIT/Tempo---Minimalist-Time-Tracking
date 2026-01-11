@@ -61,6 +61,8 @@ app.listen(PORT, async () => {
       const schemaSql = fs.readFileSync(schemaPath, 'utf8');
       // Import query from db module dynamically to ensure it's loaded
       const { query } = await import('./db/index.js');
+      // Split by semicolon and run each to be safer and see progress, 
+      // but simple query(schemaSql) also works for multiple statements in pg.
       await query(schemaSql);
 
       // Explicitly verify that the new tables exist
