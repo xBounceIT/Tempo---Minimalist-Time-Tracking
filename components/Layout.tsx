@@ -157,10 +157,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
 
         <div className={`p-6 border-t border-slate-800 transition-opacity duration-300 ${isCollapsed ? 'md:opacity-0 overflow-hidden' : 'opacity-100'}`}>
           <div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
-            Powered by Gemini AI
-            {import.meta.env.VITE_APP_VERSION && (
-              <span className="opacity-50 ml-1">v{import.meta.env.VITE_APP_VERSION}</span>
-            )}
+            Tempo v{process.env.APP_VERSION}
           </div>
         </div>
       </nav>
