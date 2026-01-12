@@ -54,7 +54,6 @@ export interface LoginResponse {
 export interface Settings {
     fullName: string;
     email: string;
-    compactView: boolean;
 }
 
 // Auth API

@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/', authenticateToken, async (req, res, next) => {
     try {
         const result = await query(
-            `SELECT full_name, email, compact_view, daily_goal, start_of_week, treat_saturday_as_holiday, enable_ai_insights
+            `SELECT full_name, email, daily_goal, start_of_week, treat_saturday_as_holiday, enable_ai_insights
        FROM settings WHERE user_id = $1`,
             [req.user.id]
         );
@@ -27,7 +27,6 @@ router.get('/', authenticateToken, async (req, res, next) => {
             return res.json({
                 fullName: s.full_name,
                 email: s.email,
-                compactView: s.compact_view,
                 dailyGoal: parseFloat(s.daily_goal || 8),
                 startOfWeek: s.start_of_week,
                 treatSaturdayAsHoliday: s.treat_saturday_as_holiday,
@@ -39,7 +38,6 @@ router.get('/', authenticateToken, async (req, res, next) => {
         res.json({
             fullName: s.full_name,
             email: s.email,
-            compactView: s.compact_view,
             dailyGoal: parseFloat(s.daily_goal || 8),
             startOfWeek: s.start_of_week,
             treatSaturdayAsHoliday: s.treat_saturday_as_holiday,
@@ -53,29 +51,27 @@ router.get('/', authenticateToken, async (req, res, next) => {
 // PUT /api/settings - Update settings
 router.put('/', authenticateToken, async (req, res, next) => {
     try {
-        const { fullName, email, compactView, dailyGoal, startOfWeek, treatSaturdayAsHoliday, enableAiInsights } = req.body;
+        const { fullName, email, dailyGoal, startOfWeek, treatSaturdayAsHoliday, enableAiInsights } = req.body;
 
         const result = await query(
-            `INSERT INTO settings (user_id, full_name, email, compact_view, daily_goal, start_of_week, treat_saturday_as_holiday, enable_ai_insights)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            `INSERT INTO settings (user_id, full_name, email, daily_goal, start_of_week, treat_saturday_as_holiday, enable_ai_insights)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        ON CONFLICT (user_id) DO UPDATE SET
          full_name = COALESCE($2, settings.full_name),
          email = COALESCE($3, settings.email),
-         compact_view = COALESCE($4, settings.compact_view),
-         daily_goal = COALESCE($5, settings.daily_goal),
-         start_of_week = COALESCE($6, settings.start_of_week),
-         treat_saturday_as_holiday = COALESCE($7, settings.treat_saturday_as_holiday),
-         enable_ai_insights = COALESCE($8, settings.enable_ai_insights),
+         daily_goal = COALESCE($4, settings.daily_goal),
+         start_of_week = COALESCE($5, settings.start_of_week),
+         treat_saturday_as_holiday = COALESCE($6, settings.treat_saturday_as_holiday),
+         enable_ai_insights = COALESCE($7, settings.enable_ai_insights),
          updated_at = CURRENT_TIMESTAMP
        RETURNING *`,
-            [req.user.id, fullName, email, compactView, dailyGoal, startOfWeek, treatSaturdayAsHoliday, enableAiInsights]
+            [req.user.id, fullName, email, dailyGoal, startOfWeek, treatSaturdayAsHoliday, enableAiInsights]
         );
 
         const s = result.rows[0];
         res.json({
             fullName: s.full_name,
             email: s.email,
-            compactView: s.compact_view,
             dailyGoal: parseFloat(s.daily_goal || 8),
             startOfWeek: s.start_of_week,
             treatSaturdayAsHoliday: s.treat_saturday_as_holiday,

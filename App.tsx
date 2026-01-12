@@ -295,8 +295,7 @@ const App: React.FC = () => {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [settings, setSettings] = useState({
     fullName: 'User',
-    email: '',
-    compactView: false
+    email: ''
   });
   const [ldapConfig, setLdapConfig] = useState<LdapConfig>({
     enabled: false,

@@ -6,7 +6,6 @@ import api from '../services/api';
 export interface UserSettings {
   fullName: string;
   email: string;
-  compactView: boolean;
   dailyGoal: number;
   startOfWeek: 'Monday' | 'Sunday';
   treatSaturdayAsHoliday: boolean;
@@ -17,7 +16,6 @@ const Settings: React.FC = () => {
   const [settings, setSettings] = useState<UserSettings>({
     fullName: '',
     email: '',
-    compactView: false,
     dailyGoal: 8,
     startOfWeek: 'Monday',
     treatSaturdayAsHoliday: true,
@@ -115,11 +113,6 @@ const Settings: React.FC = () => {
           <h2 className="text-2xl font-bold text-slate-800">User Settings</h2>
           <p className="text-sm text-slate-500 mt-1">Manage your individual profile and tracking preferences</p>
         </div>
-        {isSaved && (
-          <div className="bg-emerald-500 text-white px-4 py-2 rounded-lg shadow-md animate-in fade-in slide-in-from-right-4 flex items-center gap-2">
-            <i className="fa-solid fa-check"></i> Changes Saved
-          </div>
-        )}
       </div>
 
       {/* Tabs */}
@@ -232,22 +225,6 @@ const Settings: React.FC = () => {
                       type="checkbox"
                       checked={settings.treatSaturdayAsHoliday}
                       onChange={e => setSettings({ ...settings, treatSaturdayAsHoliday: e.target.checked })}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                  </label>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">Compact Table View</p>
-                    <p className="text-xs text-slate-500 italic">Reduce padding in the tracker activity table.</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={settings.compactView}
-                      onChange={e => setSettings({ ...settings, compactView: e.target.checked })}
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
@@ -366,16 +343,20 @@ const Settings: React.FC = () => {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 flex items-center gap-2 disabled:opacity-50"
+              className={`px-8 py-3 text-white font-bold rounded-xl transition-all duration-300 ease-in-out shadow-md flex items-center gap-2 disabled:opacity-50 ${isSaved ? 'bg-emerald-500 shadow-emerald-100 hover:bg-emerald-600' : 'bg-indigo-600 shadow-indigo-100 hover:bg-indigo-700'}`}
             >
               {isSaving ? (
                 <>
                   <i className="fa-solid fa-circle-notch fa-spin"></i>
                   Saving...
                 </>
+              ) : isSaved ? (
+                <>
+                  <i className="fa-solid fa-check"></i> Changes Saved
+                </>
               ) : (
                 <>
-                  <i className="fa-solid fa-check"></i> Save Changes
+                  <i className="fa-solid fa-save"></i> Save Changes
                 </>
               )}
             </button>
