@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { TimeEntry } from '../types';
 
 interface CalendarProps {
@@ -13,6 +13,20 @@ interface CalendarProps {
 
 const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries, startOfWeek, treatSaturdayAsHoliday, dailyGoal }) => {
   const [viewDate, setViewDate] = useState(new Date(selectedDate || new Date()));
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsMonthPickerOpen(false);
+        setIsYearPickerOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
@@ -155,11 +169,73 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 w-full">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 w-full relative" ref={containerRef}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-slate-800 text-sm">
-          {monthNames[month]} <span className="text-slate-400 font-medium">{year}</span>
-        </h3>
+        <div className="relative flex items-center gap-1">
+          <button
+            onClick={() => {
+              setIsMonthPickerOpen(!isMonthPickerOpen);
+              setIsYearPickerOpen(false);
+            }}
+            className="font-bold text-slate-800 text-sm hover:bg-slate-50 px-2 py-1 rounded-md transition-colors flex items-center gap-1"
+          >
+            {monthNames[month]}
+            <i className={`fa-solid fa-chevron-down text-[8px] text-slate-400 transition-transform ${isMonthPickerOpen ? 'rotate-180' : ''}`}></i>
+          </button>
+
+          <button
+            onClick={() => {
+              setIsYearPickerOpen(!isYearPickerOpen);
+              setIsMonthPickerOpen(false);
+            }}
+            className="text-slate-400 font-medium text-sm hover:bg-slate-50 px-2 py-1 rounded-md transition-colors flex items-center gap-1"
+          >
+            {year}
+            <i className={`fa-solid fa-chevron-down text-[8px] text-slate-300 transition-transform ${isYearPickerOpen ? 'rotate-180' : ''}`}></i>
+          </button>
+
+          {/* Month Picker Overlay */}
+          {isMonthPickerOpen && (
+            <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-slate-200 shadow-xl rounded-xl p-2 grid grid-cols-3 gap-1 min-w-[200px] animate-in fade-in zoom-in-95 duration-150 origin-top-left">
+              {monthNames.map((mName, idx) => (
+                <button
+                  key={mName}
+                  onClick={() => {
+                    setViewDate(new Date(year, idx, 1));
+                    setIsMonthPickerOpen(false);
+                  }}
+                  className={`text-[11px] font-bold py-2 rounded-lg transition-colors ${idx === month
+                      ? 'bg-indigo-600 text-white'
+                      : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                >
+                  {mName.slice(0, 3)}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Year Picker Overlay */}
+          {isYearPickerOpen && (
+            <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-slate-200 shadow-xl rounded-xl p-2 grid grid-cols-3 gap-1 min-w-[180px] max-h-[200px] overflow-y-auto animate-in fade-in zoom-in-95 duration-150 origin-top-left">
+              {Array.from({ length: 21 }, (_, i) => year - 10 + i).map((y) => (
+                <button
+                  key={y}
+                  onClick={() => {
+                    setViewDate(new Date(y, month, 1));
+                    setIsYearPickerOpen(false);
+                  }}
+                  className={`text-[11px] font-bold py-2 rounded-lg transition-colors ${y === year
+                      ? 'bg-indigo-600 text-white'
+                      : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                >
+                  {y}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="flex gap-1">
           <button onClick={prevMonth} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors">
             <i className="fa-solid fa-chevron-left text-xs"></i>
