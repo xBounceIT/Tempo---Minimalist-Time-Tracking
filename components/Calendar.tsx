@@ -131,15 +131,15 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
           : isForbidden
             ? 'bg-red-50 text-red-500 border-red-100 cursor-not-allowed'
             : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0)
-              ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
+              ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
               : isToday
                 ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
                 : 'hover:bg-slate-50 border-transparent text-slate-700'
           }`}
       >
-        <span className={`text-sm font-bold ${isForbidden && !isSelected ? 'text-red-600' : ''}`}>{d}</span>
+        <span className={`text-sm font-bold ${isForbidden && !isSelected ? 'text-red-600' : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) && !isSelected ? 'text-emerald-700' : ''}`}>{d}</span>
         {hasActivity && (
-          <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected || (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) ? 'bg-white' : isForbidden ? 'bg-red-300' : 'bg-indigo-400'}`}></span>
+          <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : isForbidden ? 'bg-red-300' : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) ? 'bg-emerald-400' : 'bg-indigo-400'}`}></span>
         )}
         {holidayName && (
           <span className="absolute top-0.5 right-0.5 w-1 h-1 bg-red-400 rounded-full animate-pulse"></span>
@@ -196,7 +196,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
           Festivo / {treatSaturdayAsHoliday ? 'Weekend' : 'Domenica'}
         </span>
         <div className="flex items-center gap-2 ml-auto">
-          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+          <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
           <span className="text-[10px] font-bold text-slate-400 uppercase">Obiettivo Raggiunto</span>
         </div>
       </div>
