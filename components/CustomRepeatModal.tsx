@@ -39,8 +39,8 @@ const CustomRepeatModal: React.FC<CustomRepeatModalProps> = ({ isOpen, onClose, 
 
     return (
         <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-in zoom-in-95 duration-200 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+                <div className="p-6 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
                     <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                         <i className="fa-solid fa-calendar-days text-indigo-500"></i>
                         Custom Repeat
@@ -72,7 +72,7 @@ const CustomRepeatModal: React.FC<CustomRepeatModalProps> = ({ isOpen, onClose, 
                     </div>
                 </div>
 
-                <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3 rounded-b-2xl">
                     <button
                         onClick={onClose}
                         className="flex-1 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 rounded-xl transition-colors"
