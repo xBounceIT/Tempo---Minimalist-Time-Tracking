@@ -156,6 +156,21 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
         }]);
     };
 
+    const deleteRow = (rowIndex: number) => {
+        const newRows = rows.filter((_, index) => index !== rowIndex);
+        // Ensure at least one row remains
+        if (newRows.length === 0) {
+            newRows.push({
+                clientId: clients[0]?.id || '',
+                projectId: projects.find(p => p.clientId === (clients[0]?.id || ''))?.id || '',
+                taskName: '',
+                days: {},
+                weekNote: ''
+            });
+        }
+        setRows(newRows);
+    };
+
     const handleSubmit = async () => {
         setIsLoading(true);
         const entriesToAdd: Omit<TimeEntry, 'id' | 'createdAt' | 'userId' | 'hourlyCost'>[] = [];
@@ -297,7 +312,14 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                 onClose={() => setActiveDropdownRow(null)}
                                                 searchable={true}
                                             />
-                                            <div className="h-7 invisible">Spacer</div>
+                                            <button
+                                                onClick={() => deleteRow(rowIndex)}
+                                                className="h-7 text-xs font-bold text-red-400 hover:text-white hover:bg-red-500 border border-red-300 hover:border-red-500 rounded px-2 py-1 transition-all duration-300 flex items-center gap-1.5 w-fit"
+                                                title="Delete row"
+                                            >
+                                                <i className="fa-solid fa-trash-can text-[10px]"></i>
+                                                <span>Delete</span>
+                                            </button>
                                         </div>
                                     </td>
                                     <td className="px-4 py-4">
@@ -376,7 +398,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                 <td colSpan={3} className="px-4 py-4">
                                     <button
                                         onClick={addRow}
-                                        className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-2 uppercase tracking-widest"
+                                        className="text-xs font-bold text-purple-600 border-2 border-purple-500 bg-transparent hover:bg-purple-600 hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 uppercase tracking-widest transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-purple-500/20"
                                     >
                                         <i className="fa-solid fa-plus"></i> Add Row
                                     </button>
