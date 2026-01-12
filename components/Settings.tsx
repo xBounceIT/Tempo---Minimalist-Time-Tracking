@@ -6,10 +6,7 @@ import api from '../services/api';
 export interface UserSettings {
   fullName: string;
   email: string;
-  startOfWeek: 'Monday' | 'Sunday';
-  enableAiInsights: boolean;
   compactView: boolean;
-  treatSaturdayAsHoliday: boolean;
 }
 
 const WEEK_OPTIONS = [
@@ -21,10 +18,7 @@ const Settings: React.FC = () => {
   const [settings, setSettings] = useState<UserSettings>({
     fullName: '',
     email: '',
-    startOfWeek: 'Monday',
-    enableAiInsights: true,
-    compactView: false,
-    treatSaturdayAsHoliday: true
+    compactView: false
   });
 
   const [isSaved, setIsSaved] = useState(false);
@@ -110,67 +104,6 @@ const Settings: React.FC = () => {
           </div>
         </section>
 
-        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
-            <i className="fa-solid fa-clock text-indigo-500"></i>
-            <h3 className="font-bold text-slate-800">Tracking Preferences</h3>
-          </div>
-          <div className="p-6 space-y-6">
-
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-bold text-slate-800">Start of Week</p>
-                <p className="text-xs text-slate-500 italic">Preferred start day for calendar and reports</p>
-              </div>
-              <CustomSelect
-                className="w-48"
-                options={WEEK_OPTIONS}
-                value={settings.startOfWeek}
-                onChange={val => setSettings({ ...settings, startOfWeek: val as 'Monday' | 'Sunday' })}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-bold text-slate-800">Treat Saturday as Holiday</p>
-                <p className="text-xs text-slate-500 italic">Disable Saturday selection in the calendar</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.treatSaturdayAsHoliday}
-                  onChange={e => setSettings({ ...settings, treatSaturdayAsHoliday: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-              </label>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
-            <i className="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
-            <h3 className="font-bold text-slate-800">AI Capabilities</h3>
-          </div>
-          <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="max-w-md">
-                <p className="text-sm font-bold text-slate-800">Enable AI Coach</p>
-                <p className="text-xs text-slate-500 italic leading-relaxed">Gemini will analyze your logs to provide personalized productivity insights and coaching.</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.enableAiInsights}
-                  onChange={e => setSettings({ ...settings, enableAiInsights: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-              </label>
-            </div>
-          </div>
-        </section>
 
         <div className="flex justify-end gap-4">
           <button

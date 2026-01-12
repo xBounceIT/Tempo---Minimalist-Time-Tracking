@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig } from './types';
+import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings } from './types';
 import { COLORS } from './constants';
 import Layout from './components/Layout';
 import TimeEntryForm from './components/TimeEntryForm';
@@ -41,10 +41,12 @@ const TrackerView: React.FC<{
   currentUser: User;
   dailyGoal: number;
   onAddBulkEntries: (entries: Omit<TimeEntry, 'id' | 'createdAt' | 'userId'>[]) => Promise<void>;
+  enableAiInsights: boolean;
 }> = ({
   entries, clients, projects, projectTasks, onAddEntry, onDeleteEntry, insights, isInsightLoading,
   onRefreshInsights, onUpdateEntry, startOfWeek, treatSaturdayAsHoliday, onMakeRecurring, userRole,
-  viewingUserId, onViewUserChange, availableUsers, currentUser, dailyGoal, onAddBulkEntries
+  viewingUserId, onViewUserChange, availableUsers, currentUser, dailyGoal, onAddBulkEntries,
+  enableAiInsights
 }) => {
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [trackerMode, setTrackerMode] = useState<'daily' | 'weekly'>(() => {
@@ -254,26 +256,28 @@ const TrackerView: React.FC<{
                 dailyGoal={dailyGoal}
               />
 
-              <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 hidden lg:block">
-                <h3 className="text-indigo-900 font-bold mb-3 flex items-center gap-2 text-sm">
-                  <i className="fa-solid fa-lightbulb text-indigo-500"></i>
-                  AI Coach
-                </h3>
-                <div className="text-indigo-700 text-xs leading-relaxed whitespace-pre-line mb-4">
-                  {isInsightLoading ? (
-                    <div className="flex items-center gap-2">
-                      <i className="fa-solid fa-circle-notch fa-spin"></i>
-                      Analyzing patterns...
-                    </div>
-                  ) : insights}
+              {enableAiInsights && (
+                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 hidden lg:block">
+                  <h3 className="text-indigo-900 font-bold mb-3 flex items-center gap-2 text-sm">
+                    <i className="fa-solid fa-lightbulb text-indigo-500"></i>
+                    AI Coach
+                  </h3>
+                  <div className="text-indigo-700 text-xs leading-relaxed whitespace-pre-line mb-4">
+                    {isInsightLoading ? (
+                      <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-circle-notch fa-spin"></i>
+                        Analyzing patterns...
+                      </div>
+                    ) : insights}
+                  </div>
+                  <button
+                    onClick={onRefreshInsights}
+                    className="w-full bg-white text-indigo-600 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-indigo-200 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                  >
+                    Refresh Insights
+                  </button>
                 </div>
-                <button
-                  onClick={onRefreshInsights}
-                  className="w-full bg-white text-indigo-600 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-indigo-200 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                >
-                  Refresh Insights
-                </button>
-              </div>
+              )}
             </div>
           </div>
         )}
@@ -292,10 +296,7 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState({
     fullName: 'User',
     email: '',
-    startOfWeek: 'Monday' as 'Monday' | 'Sunday',
-    enableAiInsights: true,
-    compactView: false,
-    treatSaturdayAsHoliday: true
+    compactView: false
   });
   const [ldapConfig, setLdapConfig] = useState<LdapConfig>({
     enabled: false,
@@ -310,7 +311,10 @@ const App: React.FC = () => {
   });
   const [generalSettings, setGeneralSettings] = useState({
     currency: 'USD',
-    dailyLimit: 8
+    dailyLimit: 8,
+    startOfWeek: 'Monday' as 'Monday' | 'Sunday',
+    treatSaturdayAsHoliday: true,
+    enableAiInsights: true
   });
 
   const [viewingUserId, setViewingUserId] = useState<string>('');
@@ -749,7 +753,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleUpdateGeneralSettings = async (updates: Partial<{ currency: string, dailyLimit: number }>) => {
+  const handleUpdateGeneralSettings = async (updates: Partial<IGeneralSettings>) => {
     try {
       const updated = await api.generalSettings.update(updates);
       setGeneralSettings(updated);
@@ -817,7 +821,8 @@ const App: React.FC = () => {
           clients={filteredClients} projects={filteredProjects} projectTasks={filteredTasks}
           onAddEntry={handleAddEntry} onDeleteEntry={handleDeleteEntry} onUpdateEntry={handleUpdateEntry}
           insights={insights} isInsightLoading={isInsightLoading} onRefreshInsights={generateInsights}
-          startOfWeek={settings.startOfWeek} treatSaturdayAsHoliday={settings.treatSaturdayAsHoliday}
+          startOfWeek={generalSettings.startOfWeek}
+          treatSaturdayAsHoliday={generalSettings.treatSaturdayAsHoliday}
           onMakeRecurring={handleMakeRecurring} userRole={currentUser.role}
           viewingUserId={viewingUserId}
           onViewUserChange={setViewingUserId}
@@ -825,6 +830,7 @@ const App: React.FC = () => {
           currentUser={currentUser}
           dailyGoal={generalSettings.dailyLimit}
           onAddBulkEntries={handleAddBulkEntries}
+          enableAiInsights={generalSettings.enableAiInsights}
         />
       )}
       {activeView === 'reports' && (
@@ -838,8 +844,8 @@ const App: React.FC = () => {
           clients={clients}
           users={users}
           currentUser={currentUser}
-          startOfWeek={settings.startOfWeek}
-          treatSaturdayAsHoliday={settings.treatSaturdayAsHoliday}
+          startOfWeek={generalSettings.startOfWeek}
+          treatSaturdayAsHoliday={generalSettings.treatSaturdayAsHoliday}
           dailyGoal={generalSettings.dailyLimit}
           currency={generalSettings.currency}
         />

@@ -30,8 +30,8 @@ INSERT INTO tasks (id, name, project_id, description) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Default settings for each user
-INSERT INTO settings (user_id, full_name, email, start_of_week) VALUES
-    ('u1', 'Admin User', 'admin@example.com', 'Monday'),
-    ('u2', 'Manager User', 'manager@example.com', 'Monday'),
-    ('u3', 'Standard User', 'user@example.com', 'Monday')
+INSERT INTO settings (user_id, full_name, email) VALUES
+    ('u1', 'Admin User', 'admin@example.com'),
+    ('u2', 'Manager User', 'manager@example.com'),
+    ('u3', 'Standard User', 'user@example.com')
 ON CONFLICT (user_id) DO NOTHING;

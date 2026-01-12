@@ -54,10 +54,7 @@ export interface LoginResponse {
 export interface Settings {
     fullName: string;
     email: string;
-    startOfWeek: 'Monday' | 'Sunday';
-    enableAiInsights: boolean;
     compactView: boolean;
-    treatSaturdayAsHoliday: boolean;
 }
 
 // Auth API

@@ -8,8 +8,7 @@ const router = express.Router();
 router.get('/', authenticateToken, async (req, res, next) => {
     try {
         const result = await query(
-            `SELECT full_name, email, start_of_week, 
-               enable_ai_insights, compact_view, treat_saturday_as_holiday
+            `SELECT full_name, email, compact_view
        FROM settings WHERE user_id = $1`,
             [req.user.id]
         );
@@ -25,10 +24,7 @@ router.get('/', authenticateToken, async (req, res, next) => {
             return res.json({
                 fullName: req.user.name,
                 email: `${req.user.username}@example.com`,
-                startOfWeek: 'Monday',
-                enableAiInsights: true,
-                compactView: false,
-                treatSaturdayAsHoliday: true
+                compactView: false
             });
         }
 
@@ -36,10 +32,7 @@ router.get('/', authenticateToken, async (req, res, next) => {
         res.json({
             fullName: s.full_name,
             email: s.email,
-            startOfWeek: s.start_of_week,
-            enableAiInsights: s.enable_ai_insights,
-            compactView: s.compact_view,
-            treatSaturdayAsHoliday: s.treat_saturday_as_holiday
+            compactView: s.compact_view
         });
     } catch (err) {
         next(err);
@@ -49,31 +42,25 @@ router.get('/', authenticateToken, async (req, res, next) => {
 // PUT /api/settings - Update settings
 router.put('/', authenticateToken, async (req, res, next) => {
     try {
-        const { fullName, email, startOfWeek, enableAiInsights, compactView, treatSaturdayAsHoliday } = req.body;
+        const { fullName, email, compactView } = req.body;
 
         const result = await query(
-            `INSERT INTO settings (user_id, full_name, email, start_of_week, enable_ai_insights, compact_view, treat_saturday_as_holiday)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `INSERT INTO settings (user_id, full_name, email, compact_view)
+       VALUES ($1, $2, $3, $4)
        ON CONFLICT (user_id) DO UPDATE SET
          full_name = COALESCE($2, settings.full_name),
          email = COALESCE($3, settings.email),
-         start_of_week = COALESCE($4, settings.start_of_week),
-         enable_ai_insights = COALESCE($5, settings.enable_ai_insights),
-         compact_view = COALESCE($6, settings.compact_view),
-         treat_saturday_as_holiday = COALESCE($7, settings.treat_saturday_as_holiday),
+         compact_view = COALESCE($4, settings.compact_view),
          updated_at = CURRENT_TIMESTAMP
        RETURNING *`,
-            [req.user.id, fullName, email, startOfWeek, enableAiInsights, compactView, treatSaturdayAsHoliday]
+            [req.user.id, fullName, email, compactView]
         );
 
         const s = result.rows[0];
         res.json({
             fullName: s.full_name,
             email: s.email,
-            startOfWeek: s.start_of_week,
-            enableAiInsights: s.enable_ai_insights,
-            compactView: s.compact_view,
-            treatSaturdayAsHoliday: s.treat_saturday_as_holiday
+            compactView: s.compact_view
         });
     } catch (err) {
         next(err);

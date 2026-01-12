@@ -33,20 +33,32 @@ const CURRENCY_OPTIONS: Option[] = [
 const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate }) => {
     const [currency, setCurrency] = useState(settings.currency);
     const [dailyLimit, setDailyLimit] = useState(settings.dailyLimit);
-    const [activeTab, setActiveTab] = useState<'localization' | 'limits'>('localization');
+    const [startOfWeek, setStartOfWeek] = useState(settings.startOfWeek);
+    const [treatSaturdayAsHoliday, setTreatSaturdayAsHoliday] = useState(settings.treatSaturdayAsHoliday);
+    const [enableAiInsights, setEnableAiInsights] = useState(settings.enableAiInsights);
+    const [activeTab, setActiveTab] = useState<'localization' | 'tracking' | 'ai'>('localization');
     const [isSaving, setIsSaving] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
 
     useEffect(() => {
         setCurrency(settings.currency);
         setDailyLimit(settings.dailyLimit);
+        setStartOfWeek(settings.startOfWeek);
+        setTreatSaturdayAsHoliday(settings.treatSaturdayAsHoliday);
+        setEnableAiInsights(settings.enableAiInsights);
     }, [settings]);
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSaving(true);
         try {
-            await onUpdate({ currency, dailyLimit });
+            await onUpdate({
+                currency,
+                dailyLimit,
+                startOfWeek,
+                treatSaturdayAsHoliday,
+                enableAiInsights
+            });
             setIsSaved(true);
             setTimeout(() => setIsSaved(false), 3000);
         } catch (err) {
@@ -56,7 +68,12 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
         }
     };
 
-    const hasChanges = currency !== settings.currency || dailyLimit !== settings.dailyLimit;
+    const hasChanges =
+        currency !== settings.currency ||
+        dailyLimit !== settings.dailyLimit ||
+        startOfWeek !== settings.startOfWeek ||
+        treatSaturdayAsHoliday !== settings.treatSaturdayAsHoliday ||
+        enableAiInsights !== settings.enableAiInsights;
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -82,11 +99,18 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                     {activeTab === 'localization' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"></div>}
                 </button>
                 <button
-                    onClick={() => setActiveTab('limits')}
-                    className={`pb-4 text-sm font-bold transition-all relative ${activeTab === 'limits' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                    onClick={() => setActiveTab('tracking')}
+                    className={`pb-4 text-sm font-bold transition-all relative ${activeTab === 'tracking' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
                 >
-                    Work Limits
-                    {activeTab === 'limits' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"></div>}
+                    Tracking Preferences
+                    {activeTab === 'tracking' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"></div>}
+                </button>
+                <button
+                    onClick={() => setActiveTab('ai')}
+                    className={`pb-4 text-sm font-bold transition-all relative ${activeTab === 'ai' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                    AI Capabilities
+                    {activeTab === 'ai' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"></div>}
                 </button>
             </div>
 
@@ -114,27 +138,85 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                     </section>
                 )}
 
-                {activeTab === 'limits' && (
-                    <section className="bg-white rounded-2xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-right-4 duration-300">
+                {activeTab === 'tracking' && (
+                    <section className="bg-white rounded-2xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-300">
                         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3 rounded-t-2xl">
                             <i className="fa-solid fa-clock text-indigo-500"></i>
-                            <h3 className="font-bold text-slate-800">Global Work Limits</h3>
+                            <h3 className="font-bold text-slate-800">Global Tracking Preferences</h3>
                         </div>
 
-                        <div className="p-6 space-y-6">
-                            <div className="max-w-xs">
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Daily Hour Limit</label>
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="number"
-                                        step="0.5"
-                                        value={dailyLimit}
-                                        onChange={e => setDailyLimit(parseFloat(e.target.value))}
-                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-bold"
-                                    />
-                                    <span className="text-xs font-bold text-slate-400 uppercase whitespace-nowrap">hrs / day</span>
+                        <div className="p-6 space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Daily Hour Limit</label>
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="number"
+                                            step="0.5"
+                                            value={dailyLimit}
+                                            onChange={e => setDailyLimit(parseFloat(e.target.value))}
+                                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-bold"
+                                        />
+                                        <span className="text-xs font-bold text-slate-400 uppercase whitespace-nowrap">hrs / day</span>
+                                    </div>
+                                    <p className="mt-2 text-[10px] text-slate-500 italic leading-relaxed">Threshold for visual highlights in the tracker.</p>
                                 </div>
-                                <p className="mt-2 text-xs text-slate-500 italic">This limit applies to all users. It defines the target hours to track and the threshold for visual highlights in the calendar.</p>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Start of Week</label>
+                                    <CustomSelect
+                                        options={[
+                                            { id: 'Monday', name: 'Monday' },
+                                            { id: 'Sunday', name: 'Sunday' },
+                                        ]}
+                                        value={startOfWeek}
+                                        onChange={(val) => setStartOfWeek(val as 'Monday' | 'Sunday')}
+                                    />
+                                    <p className="mt-2 text-[10px] text-slate-500 italic leading-relaxed">Default start day for calendar and reports.</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                <div>
+                                    <p className="text-sm font-bold text-slate-800">Treat Saturday as Holiday</p>
+                                    <p className="text-xs text-slate-500 italic">Disables Saturday selection in the calendar for all users.</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={treatSaturdayAsHoliday}
+                                        onChange={e => setTreatSaturdayAsHoliday(e.target.checked)}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+                )}
+
+                {activeTab === 'ai' && (
+                    <section className="bg-white rounded-2xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3 rounded-t-2xl">
+                            <i className="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
+                            <h3 className="font-bold text-slate-800">AI Capabilities</h3>
+                        </div>
+
+                        <div className="p-6">
+                            <div className="flex items-center justify-between p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                                <div className="max-w-md">
+                                    <p className="text-sm font-bold text-slate-800">Enable AI Coach for all users</p>
+                                    <p className="text-xs text-slate-500 italic leading-relaxed">When enabled, Gemini will analyze user logs to provide personalized productivity insights and coaching.</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={enableAiInsights}
+                                        onChange={e => setEnableAiInsights(e.target.checked)}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
                             </div>
                         </div>
                     </section>

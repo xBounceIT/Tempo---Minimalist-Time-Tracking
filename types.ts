@@ -15,6 +15,9 @@ export interface User {
 export interface GeneralSettings {
   currency: string;
   dailyLimit: number;
+  startOfWeek: 'Monday' | 'Sunday';
+  treatSaturdayAsHoliday: boolean;
+  enableAiInsights: boolean;
 }
 
 export interface Client {
