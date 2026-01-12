@@ -373,7 +373,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                               placeholder="Pattern..."
                             />
                           </div>
-                          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Until</span>
+                          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider ml-6">Until</span>
                           <input
                             type="date"
                             value={recurrenceEndDate}
