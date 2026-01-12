@@ -46,6 +46,8 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
 
     const [rows, setRows] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [activeDropdownRow, setActiveDropdownRow] = useState<number | null>(null);
 
     // Initialize rows from existing entries in this week
     useEffect(() => {
@@ -180,7 +182,8 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             await onAddBulkEntries(entriesToAdd as any);
         }
         setIsLoading(false);
-        alert('Changes saved!');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
     };
 
     const dayTotals = useMemo(() => {
@@ -238,9 +241,9 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             </div>
 
             {/* Grid */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[800px]">
+            <div className={`bg-white rounded-2xl shadow-sm border border-slate-200 ${activeDropdownRow !== null ? '' : 'overflow-hidden'}`}>
+                <div className={`${activeDropdownRow !== null ? 'overflow-visible' : 'overflow-x-auto'}`}>
+                    <table className="w-full text-left border-collapse min-w-[800px] isolate">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
                                 <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-48">Client / Project</th>
@@ -256,7 +259,11 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {rows.map((row, rowIndex) => (
-                                <tr key={rowIndex} className="group hover:bg-slate-50/30 transition-colors">
+                                <tr
+                                    key={rowIndex}
+                                    className="group hover:bg-slate-50/30 transition-all duration-500"
+                                    style={{ zIndex: activeDropdownRow === rowIndex ? 50 : 0, position: 'relative' }}
+                                >
                                     <td className="px-4 py-3">
                                         <div className="space-y-2">
                                             <CustomSelect
@@ -264,6 +271,8 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                 value={row.clientId}
                                                 onChange={(val) => handleRowInfoChange(rowIndex, 'clientId', val)}
                                                 className="!bg-transparent"
+                                                onOpen={() => setActiveDropdownRow(rowIndex)}
+                                                onClose={() => setActiveDropdownRow(null)}
                                             />
                                             <CustomSelect
                                                 options={projects.filter(p => p.clientId === row.clientId).map(p => ({ id: p.id, name: p.name }))}
@@ -271,6 +280,8 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                 onChange={(val) => handleRowInfoChange(rowIndex, 'projectId', val)}
                                                 className="!bg-transparent"
                                                 placeholder="Select project..."
+                                                onOpen={() => setActiveDropdownRow(rowIndex)}
+                                                onClose={() => setActiveDropdownRow(null)}
                                             />
                                         </div>
                                     </td>
@@ -281,6 +292,8 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                             onChange={(val) => handleRowInfoChange(rowIndex, 'taskName', val)}
                                             className="!bg-transparent"
                                             placeholder="Select task..."
+                                            onOpen={() => setActiveDropdownRow(rowIndex)}
+                                            onClose={() => setActiveDropdownRow(null)}
                                         />
                                         <input
                                             type="text"
@@ -291,8 +304,11 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                         />
                                     </td>
                                     {weekDays.map(day => (
-                                        <td key={day.dateStr} className={`p-2 ${day.isToday ? 'bg-indigo-50/10' : ''}`}>
-                                            <div className="flex flex-col gap-1 items-center">
+                                        <td key={day.dateStr} className={`p-2 transition-all duration-700 ${day.isToday ? 'bg-indigo-50/10' : ''} ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'bg-emerald-50' : ''}`}>
+                                            <div className="flex flex-col gap-1 items-center relative">
+                                                {showSuccess && (row.days[day.dateStr]?.duration > 0) && (
+                                                    <i className="fa-solid fa-circle-check text-emerald-500 text-[10px] absolute -top-2 -right-1 animate-in fade-in zoom-in duration-300"></i>
+                                                )}
                                                 <input
                                                     type="number"
                                                     step="0.1"
@@ -300,14 +316,14 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                     placeholder="0.0"
                                                     value={row.days[day.dateStr]?.duration || ''}
                                                     onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'duration', e.target.value)}
-                                                    className="w-16 text-center text-sm font-black text-slate-700 bg-slate-50 border border-slate-200 rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                                    className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} border rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none`}
                                                 />
                                                 <input
                                                     type="text"
                                                     placeholder="Note..."
                                                     value={row.days[day.dateStr]?.note || ''}
                                                     onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'note', e.target.value)}
-                                                    className="w-16 text-[9px] bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 text-slate-400 focus:text-slate-700"
+                                                    className={`w-16 text-[9px] bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 transition-colors ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-600' : 'text-slate-400 focus:text-slate-700'}`}
                                                 />
                                             </div>
                                         </td>
@@ -351,10 +367,10 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                 <button
                     onClick={handleSubmit}
                     disabled={isLoading}
-                    className="bg-indigo-600 text-white px-10 py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/20 font-bold text-sm flex items-center gap-3 disabled:opacity-50"
+                    className={`bg-indigo-600 text-white px-10 py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/20 font-bold text-sm flex items-center gap-3 disabled:opacity-50 ${showSuccess ? 'bg-emerald-600 hover:bg-emerald-600 shadow-emerald-500/20' : ''}`}
                 >
-                    {isLoading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <i className="fa-solid fa-cloud-arrow-up"></i>}
-                    Submit Time
+                    {isLoading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : (showSuccess ? <i className="fa-solid fa-check"></i> : <i className="fa-solid fa-cloud-arrow-up"></i>)}
+                    {showSuccess ? 'Success!' : 'Submit Time'}
                 </button>
             </div>
         </div>
