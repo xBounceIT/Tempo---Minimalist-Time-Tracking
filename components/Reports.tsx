@@ -14,6 +14,7 @@ import {
   Legend
 } from 'recharts';
 import { TimeEntry, Project, Client, User } from '../types';
+import { COLORS } from '../constants';
 import CustomSelect, { Option } from './CustomSelect';
 
 interface ReportsProps {
@@ -403,7 +404,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                         dataKey="value"
                       >
                         {projectData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
                       <RechartsTooltip />

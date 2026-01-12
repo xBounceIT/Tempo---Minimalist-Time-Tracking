@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Project, Client, UserRole } from '../types';
+import { COLORS } from '../constants';
 import CustomSelect from './CustomSelect';
 
 interface ProjectsViewProps {
@@ -17,6 +18,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
   const [clientId, setClientId] = useState('');
   const [description, setDescription] = useState('');
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [color, setColor] = useState(COLORS[0]);
   const [tempIsDisabled, setTempIsDisabled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -27,7 +29,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
     e.preventDefault();
     if (name && clientId) {
       if (editingProject) {
-        onUpdateProject(editingProject.id, { name, clientId, description, isDisabled: tempIsDisabled });
+        onUpdateProject(editingProject.id, { name, clientId, description, color, isDisabled: tempIsDisabled });
       } else {
         onAddProject(name, clientId, description);
       }
@@ -40,6 +42,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
     setName('');
     setClientId('');
     setDescription('');
+    setColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
     setIsModalOpen(true);
   };
 
@@ -48,6 +51,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
     setName(project.name);
     setClientId(project.clientId);
     setDescription(project.description || '');
+    setColor(project.color);
     setTempIsDisabled(project.isDisabled || false);
     setIsModalOpen(true);
   };
@@ -161,6 +165,22 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                   rows={3}
                   className="w-full text-sm px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-all resize-none"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Project Color</label>
+                <div className="flex flex-wrap gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  {COLORS.map(c => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setColor(c)}
+                      className={`w-8 h-8 rounded-full border-2 transition-all transform active:scale-90 ${color === c ? 'border-indigo-600 scale-110 shadow-md' : 'border-transparent hover:scale-105'}`}
+                      style={{ backgroundColor: c }}
+                      title={c}
+                    />
+                  ))}
+                </div>
               </div>
 
               {(() => {

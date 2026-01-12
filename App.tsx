@@ -564,7 +564,12 @@ const App: React.FC = () => {
 
   const addProject = async (name: string, clientId: string, description?: string) => {
     try {
-      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      const usedColors = projects.map(p => p.color);
+      const availableColors = COLORS.filter(c => !usedColors.includes(c));
+      const color = availableColors.length > 0
+        ? availableColors[Math.floor(Math.random() * availableColors.length)]
+        : COLORS[Math.floor(Math.random() * COLORS.length)];
+
       const project = await api.projects.create(name, clientId, description, color);
       setProjects([...projects, project]);
     } catch (err) {
