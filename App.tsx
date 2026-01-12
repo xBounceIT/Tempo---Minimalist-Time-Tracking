@@ -255,7 +255,7 @@ const App: React.FC = () => {
     roleMappings: []
   });
   const [generalSettings, setGeneralSettings] = useState({
-    currency: '$'
+    currency: 'USD'
   });
 
   const [viewingUserId, setViewingUserId] = useState<string>('');
