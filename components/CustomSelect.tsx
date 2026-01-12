@@ -65,7 +65,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           if (nextState) onOpen?.();
           else onClose?.();
         }}
-        className={`w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm text-left transition-all
+        className={`w-full flex items-center justify-between px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm text-left transition-all
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-slate-300'}
           ${isOpen ? 'ring-2 ring-indigo-500 border-indigo-500' : ''}`}
       >
@@ -105,8 +105,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                   setSearchTerm('');
                 }}
                 className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between ${value === option.id
-                    ? 'bg-indigo-50 text-indigo-700 font-bold'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-indigo-50 text-indigo-700 font-bold'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
               >
                 <span className="truncate">{option.name}</span>
