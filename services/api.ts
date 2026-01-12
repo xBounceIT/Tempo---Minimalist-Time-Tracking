@@ -76,10 +76,10 @@ export const authApi = {
 export const usersApi = {
     list: (): Promise<User[]> => fetchApi('/users'),
 
-    create: (name: string, username: string, password: string, role: string): Promise<User> =>
+    create: (name: string, username: string, password: string, role: string, costPerHour?: number): Promise<User> =>
         fetchApi('/users', {
             method: 'POST',
-            body: JSON.stringify({ name, username, password, role }),
+            body: JSON.stringify({ name, username, password, role, costPerHour }),
         }),
 
     delete: (id: string): Promise<void> =>

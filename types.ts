@@ -8,6 +8,7 @@ export interface User {
   avatarInitials: string;
   username: string;
   password?: string;
+  costPerHour?: number;
   isDisabled?: boolean;
 }
 

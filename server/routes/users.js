@@ -13,12 +13,12 @@ router.get('/', authenticateToken, async (req, res, next) => {
         if (req.user.role === 'admin') {
             // Admin sees all users
             result = await query(
-                'SELECT id, name, username, role, avatar_initials, is_disabled FROM users ORDER BY name'
+                'SELECT id, name, username, role, avatar_initials, cost_per_hour, is_disabled FROM users ORDER BY name'
             );
         } else if (req.user.role === 'manager') {
             // Manager sees regular users and themselves
             result = await query(
-                `SELECT id, name, username, role, avatar_initials, is_disabled FROM users 
+                `SELECT id, name, username, role, avatar_initials, cost_per_hour, is_disabled FROM users 
           WHERE role = 'user' OR id = $1 ORDER BY name`,
                 [req.user.id]
             );
@@ -36,6 +36,7 @@ router.get('/', authenticateToken, async (req, res, next) => {
             username: u.username,
             role: u.role,
             avatarInitials: u.avatar_initials,
+            costPerHour: parseFloat(u.cost_per_hour || 0),
             isDisabled: !!u.is_disabled
         }));
 
@@ -48,7 +49,7 @@ router.get('/', authenticateToken, async (req, res, next) => {
 // POST /api/users - Create user (admin only)
 router.post('/', authenticateToken, requireRole('admin'), async (req, res, next) => {
     try {
-        const { name, username, password, role } = req.body;
+        const { name, username, password, role, costPerHour } = req.body;
 
         if (!name || !username || !password || !role) {
             return res.status(400).json({ error: 'Name, username, password, and role are required' });
@@ -63,9 +64,9 @@ router.post('/', authenticateToken, requireRole('admin'), async (req, res, next)
         const id = 'u-' + Date.now();
 
         await query(
-            `INSERT INTO users (id, name, username, password_hash, role, avatar_initials, is_disabled)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [id, name, username, passwordHash, role, avatarInitials, false]
+            `INSERT INTO users (id, name, username, password_hash, role, avatar_initials, cost_per_hour, is_disabled)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+            [id, name, username, passwordHash, role, avatarInitials, costPerHour || 0, false]
         );
 
         res.status(201).json({
@@ -104,11 +105,22 @@ router.delete('/:id', authenticateToken, requireRole('admin'), async (req, res, 
     }
 });
 
-// PUT /api/users/:id - Update user (admin only)
-router.put('/:id', authenticateToken, requireRole('admin'), async (req, res, next) => {
+// PUT /api/users/:id - Update user (admin and manager)
+router.put('/:id', authenticateToken, requireRole('admin', 'manager'), async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { name, isDisabled } = req.body;
+        const { name, isDisabled, costPerHour } = req.body;
+
+        // Managers can only edit users with role 'user'
+        if (req.user.role === 'manager') {
+            const userCheck = await query('SELECT role FROM users WHERE id = $1', [id]);
+            if (userCheck.rows.length === 0) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+            if (userCheck.rows[0].role !== 'user' && id !== req.user.id) {
+                return res.status(403).json({ error: 'Managers can only edit users' });
+            }
+        }
 
         if (id === req.user.id && isDisabled === true) {
             return res.status(400).json({ error: 'Cannot disable your own account' });
@@ -128,13 +140,18 @@ router.put('/:id', authenticateToken, requireRole('admin'), async (req, res, nex
             values.push(isDisabled);
         }
 
+        if (costPerHour !== undefined) {
+            updates.push(`cost_per_hour = $${paramIdx++}`);
+            values.push(costPerHour);
+        }
+
         if (updates.length === 0) {
             return res.status(400).json({ error: 'No fields to update' });
         }
 
         values.push(id);
         const result = await query(
-            `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIdx} RETURNING id, name, username, role, avatar_initials, is_disabled`,
+            `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIdx} RETURNING id, name, username, role, avatar_initials, cost_per_hour, is_disabled`,
             values
         );
 
@@ -149,6 +166,7 @@ router.put('/:id', authenticateToken, requireRole('admin'), async (req, res, nex
             username: u.username,
             role: u.role,
             avatarInitials: u.avatar_initials,
+            costPerHour: parseFloat(u.cost_per_hour || 0),
             isDisabled: !!u.is_disabled
         });
     } catch (err) {

@@ -37,6 +37,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editName, setEditName] = useState('');
+  const [editCostPerHour, setEditCostPerHour] = useState<string>('0');
   const [editIsDisabled, setEditIsDisabled] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -112,12 +113,17 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
   const handleEdit = (user: User) => {
     setEditingUser(user);
     setEditName(user.name);
+    setEditCostPerHour(user.costPerHour?.toString() || '0');
     setEditIsDisabled(!!user.isDisabled);
   };
 
   const saveEdit = () => {
     if (editingUser) {
-      onUpdateUser(editingUser.id, { name: editName, isDisabled: editIsDisabled });
+      onUpdateUser(editingUser.id, {
+        name: editName,
+        isDisabled: editIsDisabled,
+        costPerHour: parseFloat(editCostPerHour) || 0
+      });
       setEditingUser(null);
     }
   };
@@ -181,6 +187,21 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                     onChange={(e) => setEditName(e.target.value)}
                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Cost per Hour</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editCostPerHour}
+                      onChange={(e) => setEditCostPerHour(e.target.value)}
+                      className="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                      placeholder="0.00"
+                    />
+                  </div>
                 </div>
 
                 {editingUser.id !== currentUserId && (
@@ -346,6 +367,15 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                           <i className="fa-solid fa-trash-can"></i>
                         </button>
                       </>
+                    )}
+                    {currentUserRole === 'manager' && user.role === 'user' && (
+                      <button
+                        onClick={() => handleEdit(user)}
+                        className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
+                        title="Edit User"
+                      >
+                        <i className="fa-solid fa-user-pen"></i>
+                      </button>
                     )}
                   </div>
                 </td>

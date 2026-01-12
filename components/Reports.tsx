@@ -103,7 +103,8 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
     project: true,
     task: true,
     duration: true,
-    notes: true
+    notes: true,
+    cost: canFilterUsers
   });
 
   const [grouping, setGrouping] = useState<GroupingType[]>(['none', 'none', 'none']);
@@ -582,6 +583,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                       if (visibleFields.task) headers.push('Task');
                       if (visibleFields.notes) headers.push('Note');
                       if (visibleFields.duration) headers.push('Duration (hrs)');
+                      if (visibleFields.cost) headers.push('Cost');
 
                       // 2. Map Data
                       const csvRows = [headers.join(',')];
@@ -597,6 +599,11 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                           row.push(`"${safeNote}"`);
                         }
                         if (visibleFields.duration) row.push(e.duration.toFixed(2));
+                        if (visibleFields.cost) {
+                          const u = users.find(usr => usr.id === e.userId);
+                          const cost = (u?.costPerHour || 0) * e.duration;
+                          row.push(cost.toFixed(2));
+                        }
 
                         csvRows.push(row.join(','));
                       });
@@ -631,6 +638,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                       {visibleFields.task && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Task</th>}
                       {visibleFields.notes && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Note</th>}
                       {visibleFields.duration && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Dur.</th>}
+                      {visibleFields.cost && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Cost</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -647,6 +655,11 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                         {visibleFields.task && <td className="px-6 py-4 text-xs font-bold text-slate-800">{e.task}</td>}
                         {visibleFields.notes && <td className="px-6 py-4 text-xs text-slate-500 italic max-w-xs truncate">{e.notes || '-'}</td>}
                         {visibleFields.duration && <td className="px-6 py-4 text-sm font-black text-slate-900 text-right">{e.duration.toFixed(2)}</td>}
+                        {visibleFields.cost && (
+                          <td className="px-6 py-4 text-sm font-black text-slate-900 text-right">
+                            $ {((users.find(usr => usr.id === e.userId)?.costPerHour || 0) * e.duration).toFixed(2)}
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
