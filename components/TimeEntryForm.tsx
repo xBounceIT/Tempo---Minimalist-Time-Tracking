@@ -17,6 +17,26 @@ interface TimeEntryFormProps {
   currentDayTotal: number;
 }
 
+// Helper to format custom pattern
+const getRecurrenceLabel = (pattern: string) => {
+  if (pattern === 'daily') return 'Daily';
+  if (pattern === 'weekly') return 'Weekly';
+  if (pattern === 'monthly') return 'Monthly';
+
+  if (pattern.startsWith('monthly:')) {
+    const parts = pattern.split(':');
+    if (parts.length === 3) {
+      const type = parts[1]; // first/last
+      const day = parseInt(parts[2]);
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      // Capitalize type
+      const typeStr = type.charAt(0).toUpperCase() + type.slice(1);
+      return `Every ${typeStr} ${days[day]}`;
+    }
+  }
+  return 'Custom...';
+};
+
 const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
   clients,
   projects,
@@ -339,13 +359,13 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                       {makeRecurring && (
                         <div className="flex items-center gap-2 px-2 animate-in fade-in slide-in-from-left-2 duration-200">
                           <div className="h-4 w-px bg-indigo-200 mx-1"></div>
-                          <div className="w-32">
+                          <div className="min-w-[180px]">
                             <CustomSelect
                               options={[
                                 { id: 'daily', name: 'Daily' },
                                 { id: 'weekly', name: 'Weekly' },
                                 { id: 'monthly', name: 'Monthly' },
-                                { id: 'custom', name: recurrencePattern.startsWith('monthly:') ? 'Custom Configured' : 'Custom...' }
+                                { id: 'custom', name: recurrencePattern.startsWith('monthly:') ? getRecurrenceLabel(recurrencePattern) : 'Custom...' }
                               ]}
                               value={recurrencePattern.startsWith('monthly:') ? 'custom' : recurrencePattern}
                               onChange={handleRecurrenceChange}

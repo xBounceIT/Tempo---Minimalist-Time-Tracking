@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CustomSelect from './CustomSelect';
 
 interface CustomRepeatModalProps {
     isOpen: boolean;
@@ -13,13 +14,13 @@ const CustomRepeatModal: React.FC<CustomRepeatModalProps> = ({ isOpen, onClose, 
     if (!isOpen) return null;
 
     const days = [
-        { value: 1, label: 'Monday' },
-        { value: 2, label: 'Tuesday' },
-        { value: 3, label: 'Wednesday' },
-        { value: 4, label: 'Thursday' },
-        { value: 5, label: 'Friday' },
-        { value: 6, label: 'Saturday' },
-        { value: 0, label: 'Sunday' },
+        { id: '1', name: 'Monday' },
+        { id: '2', name: 'Tuesday' },
+        { id: '3', name: 'Wednesday' },
+        { id: '4', name: 'Thursday' },
+        { id: '5', name: 'Friday' },
+        { id: '6', name: 'Saturday' },
+        { id: '0', name: 'Sunday' },
     ];
 
     const handleSave = () => {
@@ -69,16 +70,13 @@ const CustomRepeatModal: React.FC<CustomRepeatModalProps> = ({ isOpen, onClose, 
                     </div>
 
                     <div className="space-y-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Day of Week</label>
-                        <select
-                            value={dayOfWeek}
-                            onChange={(e) => setDayOfWeek(parseInt(e.target.value))}
-                            className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 font-medium outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                            {days.map((d) => (
-                                <option key={d.value} value={d.value}>{d.label}</option>
-                            ))}
-                        </select>
+                        <CustomSelect
+                            label="Day of Week"
+                            options={days}
+                            value={dayOfWeek.toString()}
+                            onChange={(val) => setDayOfWeek(parseInt(val))}
+                            className="w-full"
+                        />
                     </div>
                 </div>
 
