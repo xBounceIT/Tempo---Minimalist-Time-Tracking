@@ -259,31 +259,29 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                 <tr key={rowIndex} className="group hover:bg-slate-50/30 transition-colors">
                                     <td className="px-4 py-3">
                                         <div className="space-y-2">
-                                            <select
+                                            <CustomSelect
+                                                options={clients.map(c => ({ id: c.id, name: c.name }))}
                                                 value={row.clientId}
-                                                onChange={(e) => handleRowInfoChange(rowIndex, 'clientId', e.target.value)}
-                                                className="w-full text-xs font-bold text-indigo-600 bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 uppercase"
-                                            >
-                                                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                            </select>
-                                            <select
+                                                onChange={(val) => handleRowInfoChange(rowIndex, 'clientId', val)}
+                                                className="!bg-transparent"
+                                            />
+                                            <CustomSelect
+                                                options={projects.filter(p => p.clientId === row.clientId).map(p => ({ id: p.id, name: p.name }))}
                                                 value={row.projectId}
-                                                onChange={(e) => handleRowInfoChange(rowIndex, 'projectId', e.target.value)}
-                                                className="w-full text-xs font-semibold text-slate-700 bg-transparent border-none focus:ring-1 focus:ring-slate-200 rounded p-1"
-                                            >
-                                                {projects.filter(p => p.clientId === row.clientId).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                            </select>
+                                                onChange={(val) => handleRowInfoChange(rowIndex, 'projectId', val)}
+                                                className="!bg-transparent"
+                                                placeholder="Select project..."
+                                            />
                                         </div>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <select
+                                        <CustomSelect
+                                            options={projectTasks.filter(t => t.projectId === row.projectId).map(t => ({ id: t.name, name: t.name }))}
                                             value={row.taskName}
-                                            onChange={(e) => handleRowInfoChange(rowIndex, 'taskName', e.target.value)}
-                                            className="w-full text-xs font-medium text-slate-600 bg-transparent border-none focus:ring-1 focus:ring-slate-200 rounded p-1"
-                                        >
-                                            <option value="">Select task...</option>
-                                            {projectTasks.filter(t => t.projectId === row.projectId).map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
-                                        </select>
+                                            onChange={(val) => handleRowInfoChange(rowIndex, 'taskName', val)}
+                                            className="!bg-transparent"
+                                            placeholder="Select task..."
+                                        />
                                         <input
                                             type="text"
                                             placeholder="Week note..."
@@ -304,15 +302,13 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                     onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'duration', e.target.value)}
                                                     className="w-16 text-center text-sm font-black text-slate-700 bg-slate-50 border border-slate-200 rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                                 />
-                                                <button
-                                                    className={`text-[9px] font-bold uppercase ${row.days[day.dateStr]?.note ? 'text-indigo-500' : 'text-slate-300 hover:text-slate-400'}`}
-                                                    onClick={() => {
-                                                        const n = prompt("Note for " + day.dayName, row.days[day.dateStr]?.note || "");
-                                                        if (n !== null) handleValueChange(rowIndex, day.dateStr, 'note', n);
-                                                    }}
-                                                >
-                                                    {row.days[day.dateStr]?.note ? 'Edit Note' : 'Add Note'}
-                                                </button>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Note..."
+                                                    value={row.days[day.dateStr]?.note || ''}
+                                                    onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'note', e.target.value)}
+                                                    className="w-16 text-[9px] bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 text-slate-400 focus:text-slate-700"
+                                                />
                                             </div>
                                         </td>
                                     ))}

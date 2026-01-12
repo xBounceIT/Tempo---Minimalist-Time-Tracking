@@ -97,6 +97,7 @@ const TrackerView: React.FC<{
             viewingUserId={viewingUserId}
             availableUsers={availableUsers}
             onViewUserChange={onViewUserChange}
+            onAddBulkEntries={onAddBulkEntries}
           />
         ) : (
           <div className="flex flex-col lg:flex-row gap-8">
