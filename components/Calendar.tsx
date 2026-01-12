@@ -35,6 +35,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
   const month = viewDate.getMonth();
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
   const today = currentDate.toISOString().split('T')[0];
 
   // Italian Holiday Logic (Anonymous Algorithm for Easter)
@@ -207,8 +208,10 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
                     setIsMonthPickerOpen(false);
                   }}
                   className={`text-[11px] font-bold py-2 rounded-lg transition-colors ${idx === month
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-slate-600 hover:bg-slate-50'
+                      ? 'bg-indigo-600 text-white'
+                      : idx === currentMonth
+                        ? 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-200'
+                        : 'text-slate-600 hover:bg-slate-50'
                     }`}
                 >
                   {mName.slice(0, 3)}
@@ -229,7 +232,9 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
                   }}
                   className={`text-[11px] font-bold py-2 rounded-lg transition-colors ${y === year
                       ? 'bg-indigo-600 text-white'
-                      : 'text-slate-600 hover:bg-slate-50'
+                      : y === currentYear
+                        ? 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-200'
+                        : 'text-slate-600 hover:bg-slate-50'
                     }`}
                 >
                   {y}
