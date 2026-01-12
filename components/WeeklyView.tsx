@@ -47,11 +47,18 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             const d = new Date(currentWeekStart);
             d.setDate(d.getDate() + offset);
             const dateStr = toLocalISOString(d);
+            const holidayName = isItalianHoliday(new Date(dateStr + 'T00:00:00'));
+            const isSunday = d.getDay() === 0;
+            const isSaturday = d.getDay() === 6;
+            const isForbidden = isSunday || (treatSaturdayAsHoliday && isSaturday) || !!holidayName;
+
             return {
                 dateStr,
                 dayName: d.toLocaleDateString('it-IT', { weekday: 'short' }).replace('.', ''),
                 dayNum: d.getDate(),
-                isToday: dateStr === toLocalISOString(new Date())
+                isToday: dateStr === toLocalISOString(new Date()),
+                isForbidden,
+                holidayName
             };
         });
     }, [currentWeekStart]);
@@ -263,9 +270,10 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                 <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-32">Project</th>
                                 <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-40">Task</th>
                                 {weekDays.map(day => (
-                                    <th key={day.dateStr} className={`px-2 py-3 text-center w-24 ${day.isToday ? 'bg-indigo-50/50' : ''}`}>
-                                        <p className={`text-[10px] font-black uppercase ${day.isToday ? 'text-indigo-600' : 'text-slate-400'}`}>{day.dayName}</p>
-                                        <p className={`text-lg font-black leading-none ${day.isToday ? 'text-indigo-600' : 'text-slate-700'}`}>{day.dayNum}</p>
+                                    <th key={day.dateStr} className={`px-2 py-3 text-center w-24 relative ${day.isToday ? 'bg-indigo-50/50' : ''} ${day.isForbidden ? 'bg-red-50/50' : ''}`}>
+                                        <p className={`text-[10px] font-black uppercase ${day.isToday ? 'text-indigo-600' : day.isForbidden ? 'text-red-500' : 'text-slate-400'}`}>{day.dayName}</p>
+                                        <p className={`text-lg font-black leading-none ${day.isToday ? 'text-indigo-600' : day.isForbidden ? 'text-red-600' : 'text-slate-700'}`}>{day.dayNum}</p>
+                                        {day.holidayName && <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" title={day.holidayName}></div>}
                                     </th>
                                 ))}
                                 <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-20 text-right">Total</th>
@@ -321,7 +329,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                         />
                                     </td>
                                     {weekDays.map(day => (
-                                        <td key={day.dateStr} className={`p-2 transition-all duration-700 ${day.isToday ? 'bg-indigo-50/10' : ''} ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'bg-emerald-50' : ''}`}>
+                                        <td key={day.dateStr} className={`p-2 transition-all duration-700 ${day.isToday ? 'bg-indigo-50/10' : ''} ${day.isForbidden ? 'bg-red-50/30' : ''} ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'bg-emerald-50' : ''}`}>
                                             <div className="flex flex-col gap-1 items-center relative">
                                                 {showSuccess && (row.days[day.dateStr]?.duration > 0) && (
                                                     <i className="fa-solid fa-circle-check text-emerald-500 text-[10px] absolute -top-2 -right-1 animate-in fade-in zoom-in duration-300"></i>
@@ -331,18 +339,18 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                     step="0.1"
                                                     min="0"
                                                     placeholder="0.0"
-                                                    disabled={(day.dayName === 'dom' || (treatSaturdayAsHoliday && day.dayName === 'sab')) || !!isItalianHoliday(new Date(day.dateStr + 'T00:00:00'))}
+                                                    disabled={day.isForbidden}
                                                     value={row.days[day.dateStr]?.duration || ''}
                                                     onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'duration', e.target.value)}
-                                                    className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} ${(day.dayName === 'dom' || (treatSaturdayAsHoliday && day.dayName === 'sab')) || !!isItalianHoliday(new Date(day.dateStr + 'T00:00:00')) ? 'opacity-50 cursor-not-allowed bg-red-50/50' : ''} border rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none`}
+                                                    className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} ${day.isForbidden ? 'opacity-50 cursor-not-allowed bg-red-50/50 border-red-100' : 'border-slate-200'} border rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none`}
                                                 />
                                                 <input
                                                     type="text"
                                                     placeholder="Note..."
-                                                    disabled={(day.dayName === 'dom' || (treatSaturdayAsHoliday && day.dayName === 'sab')) || !!isItalianHoliday(new Date(day.dateStr + 'T00:00:00'))}
+                                                    disabled={day.isForbidden}
                                                     value={row.days[day.dateStr]?.note || ''}
                                                     onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'note', e.target.value)}
-                                                    className={`w-16 text-[9px] bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 transition-colors ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-600' : 'text-slate-400 focus:text-slate-700'} ${(day.dayName === 'dom' || (treatSaturdayAsHoliday && day.dayName === 'sab')) || !!isItalianHoliday(new Date(day.dateStr + 'T00:00:00')) ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                    className={`w-16 text-[9px] bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 transition-colors ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-600' : 'text-slate-400 focus:text-slate-700'} ${day.isForbidden ? 'opacity-30 cursor-not-allowed' : ''}`}
                                                 />
                                             </div>
                                         </td>
@@ -366,7 +374,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                     </button>
                                 </td>
                                 {weekDays.map(day => (
-                                    <td key={day.dateStr} className={`px-2 py-3 text-center ${day.isToday ? 'bg-indigo-50/30' : ''}`}>
+                                    <td key={day.dateStr} className={`px-2 py-3 text-center ${day.isToday ? 'bg-indigo-50/30' : ''} ${day.isForbidden ? 'bg-red-50/50' : ''}`}>
                                         <p className={`text-xs font-black ${(dayTotals[day.dateStr] as number) > 8 ? 'text-red-600' : 'text-indigo-600'}`}>
                                             {(dayTotals[day.dateStr] as number).toFixed(1)}
                                         </p>
