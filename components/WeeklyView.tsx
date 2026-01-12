@@ -67,6 +67,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [activeDropdownRow, setActiveDropdownRow] = useState<number | null>(null);
+    const [hasChanges, setHasChanges] = useState(false);
 
     // Initialize rows from existing entries in this week
     useEffect(() => {
@@ -104,12 +105,14 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             });
         }
         setRows(initialRows);
+        setHasChanges(false);
     }, [entries, currentWeekStart, clients, projects, weekDays]);
 
     const handleWeekChange = (offset: number) => {
         const newStart = new Date(currentWeekStart);
         newStart.setDate(newStart.getDate() + offset * 7);
         setCurrentWeekStart(newStart);
+        setHasChanges(false);
     };
 
     const handleValueChange = (rowIndex: number, dateStr: string, field: 'duration' | 'note', value: string) => {
@@ -124,6 +127,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             newRows[rowIndex].days[dateStr].note = value;
         }
         setRows(newRows);
+        setHasChanges(true);
     };
 
     const handleRowInfoChange = (rowIndex: number, field: string, value: string) => {
@@ -144,6 +148,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
         }
 
         setRows(newRows);
+        setHasChanges(true);
     };
 
     const addRow = () => {
@@ -154,6 +159,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             days: {},
             weekNote: ''
         }]);
+        setHasChanges(true);
     };
 
     const deleteRow = (rowIndex: number) => {
@@ -169,6 +175,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             });
         }
         setRows(newRows);
+        setHasChanges(true);
     };
 
     const handleSubmit = async () => {
@@ -216,6 +223,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             await onAddBulkEntries(entriesToAdd as any);
         }
         setIsLoading(false);
+        setHasChanges(false);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
     };
@@ -425,8 +433,8 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             <div className="flex justify-end gap-4 p-4">
                 <button
                     onClick={handleSubmit}
-                    disabled={isLoading}
-                    className={`bg-indigo-600 text-white px-10 py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/20 font-bold text-sm flex items-center gap-3 disabled:opacity-50 ${showSuccess ? 'bg-emerald-600 hover:bg-emerald-600 shadow-emerald-500/20' : ''}`}
+                    disabled={isLoading || !hasChanges}
+                    className={`bg-indigo-600 text-white px-10 py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/20 font-bold text-sm flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:grayscale-[0.5] ${showSuccess ? 'bg-emerald-600 hover:bg-emerald-600 shadow-emerald-500/20' : ''}`}
                 >
                     {isLoading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : (showSuccess ? <i className="fa-solid fa-check"></i> : <i className="fa-solid fa-cloud-arrow-up"></i>)}
                     {showSuccess ? 'Success!' : 'Submit Time'}
