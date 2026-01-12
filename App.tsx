@@ -197,6 +197,7 @@ const TrackerView: React.FC<{
             entries={entries}
             startOfWeek={startOfWeek}
             treatSaturdayAsHoliday={treatSaturdayAsHoliday}
+            dailyGoal={dailyGoal}
           />
 
           <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 hidden lg:block">

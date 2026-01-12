@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { TimeEntry } from '../types';
 
 interface CalendarProps {
@@ -8,9 +8,10 @@ interface CalendarProps {
   entries: TimeEntry[];
   startOfWeek: 'Monday' | 'Sunday';
   treatSaturdayAsHoliday: boolean;
+  dailyGoal: number;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries, startOfWeek, treatSaturdayAsHoliday }) => {
+const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries, startOfWeek, treatSaturdayAsHoliday, dailyGoal }) => {
   const [viewDate, setViewDate] = useState(new Date(selectedDate || new Date()));
 
   const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -58,13 +59,13 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
 
     // Dynamic holidays
     const easter = getEaster(y);
-    const isSameDay = (d1: Date, d2: Date) => 
-      d1.getFullYear() === d2.getFullYear() && 
-      d1.getMonth() === d2.getMonth() && 
+    const isSameDay = (d1: Date, d2: Date) =>
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
       d1.getDate() === d2.getDate();
 
     if (isSameDay(date, easter)) return "Pasqua";
-    
+
     const easterMonday = new Date(easter);
     easterMonday.setDate(easter.getDate() + 1);
     if (isSameDay(date, easterMonday)) return "Lunedì dell'Angelo";
@@ -75,18 +76,25 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
   const days = [];
   const totalDays = daysInMonth(year, month);
   let offset = firstDayOfMonth(year, month);
-  
+
   // Adjust offset based on start of week
   if (startOfWeek === 'Monday') {
     offset = (offset + 6) % 7;
   }
 
   const entryDates = new Set(entries.map(e => e.date));
+  const dailyTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    entries.forEach(e => {
+      totals[e.date] = (totals[e.date] || 0) + e.duration;
+    });
+    return totals;
+  }, [entries]);
 
   const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
 
-  const dayHeaders = startOfWeek === 'Monday' 
+  const dayHeaders = startOfWeek === 'Monday'
     ? ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']
     : ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
 
@@ -103,7 +111,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
     const isSelected = dateStr === selectedDate;
     const isToday = dateStr === today;
     const hasActivity = entryDates.has(dateStr);
-    
+
     const dayOfWeek = dateObj.getDay();
     const holidayName = isItalianHoliday(dateObj);
     const isSunday = dayOfWeek === 0;
@@ -118,19 +126,20 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
         onClick={() => {
           if (!isForbidden) onDateSelect(dateStr);
         }}
-        className={`relative h-9 w-full flex flex-col items-center justify-center rounded-lg transition-all border ${
-          isSelected 
-            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md scale-105 z-10' 
-            : isForbidden
-              ? 'bg-red-50 text-red-500 border-red-100 cursor-not-allowed'
-              : isToday 
-                ? 'bg-indigo-50 text-indigo-700 border-indigo-200' 
+        className={`relative h-9 w-full flex flex-col items-center justify-center rounded-lg transition-all border ${isSelected
+          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md scale-105 z-10'
+          : isForbidden
+            ? 'bg-red-50 text-red-500 border-red-100 cursor-not-allowed'
+            : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0)
+              ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
+              : isToday
+                ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
                 : 'hover:bg-slate-50 border-transparent text-slate-700'
-        }`}
+          }`}
       >
         <span className={`text-sm font-bold ${isForbidden && !isSelected ? 'text-red-600' : ''}`}>{d}</span>
         {hasActivity && (
-          <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : isForbidden ? 'bg-red-300' : 'bg-indigo-400'}`}></span>
+          <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected || (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) ? 'bg-white' : isForbidden ? 'bg-red-300' : 'bg-indigo-400'}`}></span>
         )}
         {holidayName && (
           <span className="absolute top-0.5 right-0.5 w-1 h-1 bg-red-400 rounded-full animate-pulse"></span>
@@ -186,6 +195,10 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
         <span className="text-[10px] font-bold text-slate-400 uppercase">
           Festivo / {treatSaturdayAsHoliday ? 'Weekend' : 'Domenica'}
         </span>
+        <div className="flex items-center gap-2 ml-auto">
+          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase">Obiettivo Raggiunto</span>
+        </div>
       </div>
     </div>
   );
