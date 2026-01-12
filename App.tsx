@@ -47,7 +47,14 @@ const TrackerView: React.FC<{
   viewingUserId, onViewUserChange, availableUsers, currentUser, dailyGoal, onAddBulkEntries
 }) => {
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-    const [trackerMode, setTrackerMode] = useState<'daily' | 'weekly'>('daily');
+    const [trackerMode, setTrackerMode] = useState<'daily' | 'weekly'>(() => {
+      const saved = localStorage.getItem('trackerMode');
+      return (saved === 'daily' || saved === 'weekly') ? saved : 'daily';
+    });
+
+    useEffect(() => {
+      localStorage.setItem('trackerMode', trackerMode);
+    }, [trackerMode]);
 
     const filteredEntries = useMemo(() => {
       if (!selectedDate) return entries;
