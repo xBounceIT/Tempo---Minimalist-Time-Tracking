@@ -318,7 +318,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                 title="Delete row"
                                             >
                                                 <i className="fa-solid fa-trash-can text-[10px]"></i>
-                                                <span>Delete</span>
+                                                <span>Delete Row</span>
                                             </button>
                                         </div>
                                     </td>
@@ -398,7 +398,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                 <td colSpan={3} className="px-4 py-4">
                                     <button
                                         onClick={addRow}
-                                        className="text-xs font-bold text-purple-600 border-2 border-purple-500 bg-transparent hover:bg-purple-600 hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 uppercase tracking-widest transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-purple-500/20"
+                                        className="text-xs font-bold text-indigo-600 border-2 border-indigo-500 bg-transparent hover:bg-indigo-600 hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 uppercase tracking-widest transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-indigo-500/20"
                                     >
                                         <i className="fa-solid fa-plus"></i> Add Row
                                     </button>
