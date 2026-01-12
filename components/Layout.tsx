@@ -151,6 +151,14 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
                 isCollapsed={isCollapsed}
                 onClick={() => { onViewChange('admin-auth'); setIsMobileMenuOpen(false); }}
               />
+
+              <NavItem
+                icon="fa-sliders"
+                label="General"
+                active={activeView === 'administration-general'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('administration-general'); setIsMobileMenuOpen(false); }}
+              />
             </>
           )}
         </div>
@@ -166,7 +174,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
         <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-slate-800 capitalize flex items-center gap-3">
             <span className="md:hidden w-2 h-6 bg-indigo-500 rounded-full"></span>
-            {activeView === 'admin-auth' ? 'Authentication Settings' : activeView.replace('-', ' ')}
+            {activeView === 'admin-auth' ? 'Authentication Settings' :
+              activeView === 'administration-general' ? 'General Administration' :
+                activeView.replace('-', ' ')}
           </h2>
           <div className="flex items-center gap-6">
             <span className="text-sm text-slate-400 font-medium hidden lg:inline">

@@ -130,6 +130,16 @@ CREATE TABLE IF NOT EXISTS ldap_config (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- General settings table (single row)
+CREATE TABLE IF NOT EXISTS general_settings (
+    id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+    currency VARCHAR(10) DEFAULT 'USD',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert default general settings room
+INSERT INTO general_settings (id, currency) VALUES (1, 'USD') ON CONFLICT (id) DO NOTHING;
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_time_entries_user_id ON time_entries(user_id);
 CREATE INDEX IF NOT EXISTS idx_time_entries_date ON time_entries(date);

@@ -26,6 +26,7 @@ interface ReportsProps {
   startOfWeek: 'Monday' | 'Sunday';
   treatSaturdayAsHoliday: boolean;
   dailyGoal: number;
+  currency: string;
 }
 
 type GroupingType = 'none' | 'date' | 'client' | 'project' | 'task';
@@ -56,7 +57,7 @@ const toLocalISOString = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, currentUser, startOfWeek, treatSaturdayAsHoliday, dailyGoal }) => {
+const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, currentUser, startOfWeek, treatSaturdayAsHoliday, dailyGoal, currency }) => {
   // --- Dashboard State ---
   const [activeTab, setActiveTab] = useState<'dashboard' | 'detailed'>('dashboard');
 
@@ -657,7 +658,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                         {visibleFields.duration && <td className="px-6 py-4 text-sm font-black text-slate-900 text-right">{e.duration.toFixed(2)}</td>}
                         {visibleFields.cost && (
                           <td className="px-6 py-4 text-sm font-black text-slate-900 text-right">
-                            $ {((users.find(usr => usr.id === e.userId)?.costPerHour || 0) * e.duration).toFixed(2)}
+                            {currency} {((users.find(usr => usr.id === e.userId)?.costPerHour || 0) * e.duration).toFixed(2)}
                           </td>
                         )}
                       </tr>

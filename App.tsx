@@ -14,6 +14,7 @@ import ClientsView from './components/ClientsView';
 import ProjectsView from './components/ProjectsView';
 import TasksView from './components/TasksView';
 import AdminAuthentication from './components/AdminAuthentication';
+import GeneralSettings from './components/GeneralSettings';
 import CustomSelect from './components/CustomSelect';
 import { getInsights } from './services/geminiService';
 import api, { setAuthToken, getAuthToken } from './services/api';
@@ -253,12 +254,15 @@ const App: React.FC = () => {
     groupFilter: '(member={0})',
     roleMappings: []
   });
+  const [generalSettings, setGeneralSettings] = useState({
+    currency: '$'
+  });
 
   const [viewingUserId, setViewingUserId] = useState<string>('');
   const [viewingUserAssignments, setViewingUserAssignments] = useState<{ clientIds: string[], projectIds: string[], taskIds: string[] } | null>(null);
   const [activeView, setActiveView] = useState<View>(() => {
     const hash = window.location.hash.replace('#', '') as View;
-    const validViews: View[] = ['tracker', 'reports', 'projects', 'tasks', 'clients', 'settings', 'users', 'recurring', 'admin-auth'];
+    const validViews: View[] = ['tracker', 'reports', 'projects', 'tasks', 'clients', 'settings', 'users', 'recurring', 'admin-auth', 'administration-general'];
     return validViews.includes(hash) ? hash : 'tracker';
   });
   const [insights, setInsights] = useState<string>('Logging some time to see patterns!');
@@ -273,7 +277,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '') as View;
-      const validViews: View[] = ['tracker', 'reports', 'projects', 'tasks', 'clients', 'settings', 'users', 'recurring', 'admin-auth'];
+      const validViews: View[] = ['tracker', 'reports', 'projects', 'tasks', 'clients', 'settings', 'users', 'recurring', 'admin-auth', 'administration-general'];
       if (validViews.includes(hash) && hash !== activeView) {
         setActiveView(hash);
       }
@@ -320,6 +324,10 @@ const App: React.FC = () => {
         setProjects(projectsData);
         setProjectTasks(tasksData);
         setSettings(settingsData);
+
+        // Load global settings for all users
+        const genSettings = await api.generalSettings.get();
+        setGeneralSettings(genSettings);
 
         // Load LDAP config for admins
         if (currentUser.role === 'admin') {
@@ -659,6 +667,16 @@ const App: React.FC = () => {
     }
   };
 
+  const handleUpdateGeneralSettings = async (updates: Partial<{ currency: string }>) => {
+    try {
+      const updated = await api.generalSettings.update(updates);
+      setGeneralSettings(updated);
+    } catch (err) {
+      console.error('Failed to update general settings:', err);
+      alert('Failed to update settings');
+    }
+  };
+
   const generateInsights = async () => {
     if (entries.length < 3) return;
     setIsInsightLoading(true);
@@ -740,6 +758,7 @@ const App: React.FC = () => {
           startOfWeek={settings.startOfWeek}
           treatSaturdayAsHoliday={settings.treatSaturdayAsHoliday}
           dailyGoal={settings.dailyGoal}
+          currency={generalSettings.currency}
         />
       )}
 
@@ -794,6 +813,14 @@ const App: React.FC = () => {
           onUpdateUser={handleUpdateUser}
           currentUserId={currentUser.id}
           currentUserRole={currentUser.role}
+          currency={generalSettings.currency}
+        />
+      )}
+
+      {currentUser.role === 'admin' && activeView === 'administration-general' && (
+        <GeneralSettings
+          settings={generalSettings}
+          onUpdate={handleUpdateGeneralSettings}
         />
       )}
 

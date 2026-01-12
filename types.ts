@@ -12,6 +12,10 @@ export interface User {
   isDisabled?: boolean;
 }
 
+export interface GeneralSettings {
+  currency: string;
+}
+
 export interface Client {
   id: string;
   name: string;
@@ -71,4 +75,4 @@ export interface LdapConfig {
   roleMappings: LdapRoleMapping[];
 }
 
-export type View = 'tracker' | 'reports' | 'projects' | 'tasks' | 'clients' | 'settings' | 'users' | 'recurring' | 'admin-auth';
+export type View = 'tracker' | 'reports' | 'projects' | 'tasks' | 'clients' | 'settings' | 'users' | 'recurring' | 'admin-auth' | 'administration-general';

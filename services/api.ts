@@ -44,7 +44,7 @@ const fetchApi = async <T>(
 };
 
 // Types for API responses
-import type { User, Client, Project, ProjectTask, TimeEntry, LdapConfig } from '../types';
+import type { User, Client, Project, ProjectTask, TimeEntry, LdapConfig, GeneralSettings } from '../types';
 
 export interface LoginResponse {
     token: string;
@@ -211,6 +211,17 @@ export const ldapApi = {
         }),
 };
 
+// General Settings API
+export const generalSettingsApi = {
+    get: (): Promise<GeneralSettings> => fetchApi('/general-settings'),
+
+    update: (settings: Partial<GeneralSettings>): Promise<GeneralSettings> =>
+        fetchApi('/general-settings', {
+            method: 'PUT',
+            body: JSON.stringify(settings),
+        }),
+};
+
 export default {
     auth: authApi,
     users: usersApi,
@@ -220,6 +231,7 @@ export default {
     entries: entriesApi,
     settings: settingsApi,
     ldap: ldapApi,
+    generalSettings: generalSettingsApi,
     setAuthToken,
     getAuthToken,
 };

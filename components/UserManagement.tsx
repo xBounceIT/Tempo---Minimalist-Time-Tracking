@@ -13,6 +13,7 @@ interface UserManagementProps {
   onUpdateUser: (id: string, updates: Partial<User>) => void;
   currentUserId: string;
   currentUserRole: UserRole;
+  currency: string;
 }
 
 const ROLE_OPTIONS = [
@@ -21,7 +22,7 @@ const ROLE_OPTIONS = [
   { id: 'admin', name: 'Admin' },
 ];
 
-const UserManagement: React.FC<UserManagementProps> = ({ users, clients, projects, tasks, onAddUser, onDeleteUser, onUpdateUser, currentUserId, currentUserRole }) => {
+const UserManagement: React.FC<UserManagementProps> = ({ users, clients, projects, tasks, onAddUser, onDeleteUser, onUpdateUser, currentUserId, currentUserRole, currency }) => {
   const [newName, setNewName] = useState('');
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('password');
@@ -192,7 +193,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Cost per Hour</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">{currency}</span>
                     <input
                       type="number"
                       step="0.01"
@@ -368,7 +369,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                         </button>
                       </>
                     )}
-                    {currentUserRole === 'manager' && user.role === 'user' && (
+                    {currentUserRole === 'manager' && (user.role === 'user' || user.id === currentUserId) && (
                       <button
                         onClick={() => handleEdit(user)}
                         className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
