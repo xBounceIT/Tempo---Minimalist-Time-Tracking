@@ -8,7 +8,7 @@ interface CustomRepeatModalProps {
 }
 
 const CustomRepeatModal: React.FC<CustomRepeatModalProps> = ({ isOpen, onClose, onSave }) => {
-    const [type, setType] = useState<'first' | 'last'>('first');
+    const [type, setType] = useState<'first' | 'second' | 'third' | 'fourth' | 'last'>('first');
     const [dayOfWeek, setDayOfWeek] = useState<number>(1); // 1 = Monday, 7 = Sunday (standard JS getDay is 0=Sun, but usually we map 1-7 for UI)
 
     if (!isOpen) return null;
@@ -52,6 +52,58 @@ const CustomRepeatModal: React.FC<CustomRepeatModalProps> = ({ isOpen, onClose, 
                             />
                             <span className={`text-sm font-bold ${type === 'first' ? 'text-slate-800' : 'text-slate-500 group-hover:text-slate-700'}`}>
                                 Every <span className="text-indigo-600">First</span>...
+                            </span>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors group">
+                            <input
+                                type="radio"
+                                name="repeatType"
+                                checked={type === 'first'}
+                                onChange={() => setType('first')}
+                                className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                            />
+                            <span className={`text-sm font-bold ${type === 'first' ? 'text-slate-800' : 'text-slate-500 group-hover:text-slate-700'}`}>
+                                Every <span className="text-indigo-600">First</span>...
+                            </span>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors group">
+                            <input
+                                type="radio"
+                                name="repeatType"
+                                checked={type === 'second'}
+                                onChange={() => setType('second')}
+                                className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                            />
+                            <span className={`text-sm font-bold ${type === 'second' ? 'text-slate-800' : 'text-slate-500 group-hover:text-slate-700'}`}>
+                                Every <span className="text-indigo-600">Second</span>...
+                            </span>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors group">
+                            <input
+                                type="radio"
+                                name="repeatType"
+                                checked={type === 'third'}
+                                onChange={() => setType('third')}
+                                className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                            />
+                            <span className={`text-sm font-bold ${type === 'third' ? 'text-slate-800' : 'text-slate-500 group-hover:text-slate-700'}`}>
+                                Every <span className="text-indigo-600">Third</span>...
+                            </span>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors group">
+                            <input
+                                type="radio"
+                                name="repeatType"
+                                checked={type === 'fourth'}
+                                onChange={() => setType('fourth')}
+                                className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                            />
+                            <span className={`text-sm font-bold ${type === 'fourth' ? 'text-slate-800' : 'text-slate-500 group-hover:text-slate-700'}`}>
+                                Every <span className="text-indigo-600">Fourth</span>...
                             </span>
                         </label>
 

@@ -11,7 +11,7 @@ interface TimeEntryFormProps {
   projectTasks: ProjectTask[];
   onAdd: (entry: Omit<TimeEntry, 'id' | 'createdAt' | 'userId'>) => void;
   selectedDate: string;
-  onMakeRecurring?: (taskId: string, pattern: 'daily' | 'weekly' | 'monthly', endDate?: string) => void;
+  onMakeRecurring?: (taskId: string, pattern: 'daily' | 'weekly' | 'monthly', startDate?: string, endDate?: string) => void;
   userRole: UserRole;
   dailyGoal: number;
   currentDayTotal: number;
@@ -26,7 +26,7 @@ const getRecurrenceLabel = (pattern: string) => {
   if (pattern.startsWith('monthly:')) {
     const parts = pattern.split(':');
     if (parts.length === 3) {
-      const type = parts[1]; // first/last
+      const type = parts[1]; // first/second/third/fourth/last
       const day = parseInt(parts[2]);
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       // Capitalize type
@@ -135,7 +135,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
 
     // Handle recursion if checked
     if (makeRecurring && onMakeRecurring && selectedTaskId) {
-      onMakeRecurring(selectedTaskId, recurrencePattern, recurrenceEndDate || undefined);
+      onMakeRecurring(selectedTaskId, recurrencePattern, date, recurrenceEndDate || undefined);
     }
 
     // Reset form

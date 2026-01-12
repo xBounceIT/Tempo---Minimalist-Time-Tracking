@@ -49,19 +49,19 @@ router.get('/', authenticateToken, async (req, res, next) => {
 // POST /api/tasks - Create task
 router.post('/', authenticateToken, async (req, res, next) => {
     try {
-        const { name, projectId, description, isRecurring, recurrencePattern } = req.body;
+        const { name, projectId, description, isRecurring, recurrencePattern, recurrenceStart } = req.body;
 
         if (!name || !projectId) {
             return res.status(400).json({ error: 'Task name and project ID are required' });
         }
 
         const id = 't-' + Date.now();
-        const recurrenceStart = isRecurring ? new Date().toISOString().split('T')[0] : null;
+        const start = isRecurring ? (recurrenceStart || new Date().toISOString().split('T')[0]) : null;
 
         await query(
             `INSERT INTO tasks (id, name, project_id, description, is_recurring, recurrence_pattern, recurrence_start, is_disabled) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-            [id, name, projectId, description || null, isRecurring || false, recurrencePattern || null, recurrenceStart, false]
+            [id, name, projectId, description || null, isRecurring || false, recurrencePattern || null, start, false]
         );
 
         res.status(201).json({
@@ -71,7 +71,7 @@ router.post('/', authenticateToken, async (req, res, next) => {
             description,
             isRecurring: isRecurring || false,
             recurrencePattern,
-            recurrenceStart,
+            recurrenceStart: start,
             isDisabled: false
         });
     } catch (err) {

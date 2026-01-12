@@ -515,10 +515,19 @@ const App: React.FC = () => {
 
             if (d.getDay() === targetDay) {
               if (type === 'first') {
-                // It is the first occurrence if the date is <= 7
+                // First: dates 1-7
                 if (d.getDate() <= 7) matches = true;
+              } else if (type === 'second') {
+                // Second: dates 8-14
+                if (d.getDate() > 7 && d.getDate() <= 14) matches = true;
+              } else if (type === 'third') {
+                // Third: dates 15-21
+                if (d.getDate() > 14 && d.getDate() <= 21) matches = true;
+              } else if (type === 'fourth') {
+                // Fourth: dates 22-28
+                if (d.getDate() > 21 && d.getDate() <= 28) matches = true;
               } else if (type === 'last') {
-                // It is the last occurrence if adding 7 days puts us in next month
+                // Last: adding 7 days puts us next month
                 const nextWeek = new Date(d);
                 nextWeek.setDate(d.getDate() + 7);
                 if (nextWeek.getMonth() !== d.getMonth()) matches = true;
@@ -655,12 +664,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleMakeRecurring = async (taskId: string, pattern: 'daily' | 'weekly' | 'monthly', endDate?: string) => {
+  const handleMakeRecurring = async (taskId: string, pattern: 'daily' | 'weekly' | 'monthly', startDate?: string, endDate?: string) => {
     try {
       const updated = await api.tasks.update(taskId, {
         isRecurring: true,
         recurrencePattern: pattern,
-        recurrenceStart: new Date().toISOString().split('T')[0],
+        recurrenceStart: startDate || new Date().toISOString().split('T')[0],
         recurrenceEnd: endDate
       });
       setProjectTasks(projectTasks.map(t => t.id === taskId ? updated : t));
