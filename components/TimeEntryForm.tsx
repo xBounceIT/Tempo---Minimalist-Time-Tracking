@@ -345,7 +345,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                   </div>
                 )}
                 {selectedTaskId && (
-                  <div className={`transition-all duration-300 border rounded-xl ${makeRecurring ? 'bg-indigo-50 border-indigo-100' : 'bg-transparent border-transparent'}`}>
+                  <div className={`transition-all duration-300 border rounded-xl py-1 ${makeRecurring ? 'bg-indigo-50 border-indigo-100' : 'bg-transparent border-transparent'}`}>
                     <div className="flex items-center">
                       <button
                         type="button"
@@ -371,7 +371,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                               onChange={handleRecurrenceChange}
                               className="text-xs"
                               placeholder="Pattern..."
-                              buttonClassName="bg-white border border-indigo-200 text-indigo-700 font-medium py-1.5"
+                              buttonClassName="bg-white border border-indigo-200 text-indigo-700 font-medium py-2"
                             />
                           </div>
                           <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider ml-6">Until</span>
@@ -379,7 +379,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                             type="date"
                             value={recurrenceEndDate}
                             onChange={(e) => setRecurrenceEndDate(e.target.value)}
-                            className="text-xs bg-white border border-indigo-200 text-indigo-700 font-medium rounded-md px-2 py-1.5 outline-none focus:ring-1 focus:ring-indigo-500"
+                            className="text-xs bg-white border border-indigo-200 text-indigo-700 font-medium rounded-md px-2 py-2 outline-none focus:ring-1 focus:ring-indigo-500"
                           />
                         </div>
                       )}
