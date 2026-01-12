@@ -19,6 +19,7 @@ import CustomSelect from './components/CustomSelect';
 import WeeklyView from './components/WeeklyView';
 import { getInsights } from './services/geminiService';
 import api, { setAuthToken, getAuthToken } from './services/api';
+import NotFound from './components/NotFound';
 
 const TrackerView: React.FC<{
   entries: TimeEntry[];
@@ -318,11 +319,33 @@ const App: React.FC = () => {
 
   const [viewingUserId, setViewingUserId] = useState<string>('');
   const [viewingUserAssignments, setViewingUserAssignments] = useState<{ clientIds: string[], projectIds: string[], taskIds: string[] } | null>(null);
-  const [activeView, setActiveView] = useState<View>(() => {
-    const hash = window.location.hash.replace('#', '') as View;
+  const [activeView, setActiveView] = useState<View | '404'>(() => {
+    const rawHash = window.location.hash.replace('#', '');
+    const hash = rawHash as View;
     const validViews: View[] = ['tracker', 'reports', 'projects', 'tasks', 'clients', 'settings', 'users', 'recurring', 'admin-auth', 'administration-general'];
-    return validViews.includes(hash) ? hash : 'tracker';
+    return validViews.includes(hash) ? hash : (rawHash === '' ? 'tracker' : '404');
   });
+
+  const isRouteAccessible = useMemo(() => {
+    if (!currentUser) return false;
+    if (activeView === '404') return false;
+
+    const permissions: Record<View, UserRole[]> = {
+      'tracker': ['admin', 'manager', 'user'],
+      'reports': ['admin', 'manager', 'user'],
+      'projects': ['admin', 'manager', 'user'],
+      'tasks': ['admin', 'manager', 'user'],
+      'recurring': ['admin', 'manager', 'user'],
+      'settings': ['admin', 'manager', 'user'],
+      'clients': ['admin', 'manager'],
+      'users': ['admin', 'manager'],
+      'admin-auth': ['admin'],
+      'administration-general': ['admin']
+    };
+
+    const allowedRoles = permissions[activeView as View];
+    return allowedRoles ? allowedRoles.includes(currentUser.role) : false;
+  }, [activeView, currentUser]);
   const [insights, setInsights] = useState<string>('Logging some time to see patterns!');
   const [isInsightLoading, setIsInsightLoading] = useState(false);
 
@@ -334,10 +357,12 @@ const App: React.FC = () => {
   // Sync state with hash (for back/forward buttons)
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '') as View;
+      const rawHash = window.location.hash.replace('#', '');
+      const hash = rawHash as View;
       const validViews: View[] = ['tracker', 'reports', 'projects', 'tasks', 'clients', 'settings', 'users', 'recurring', 'admin-auth', 'administration-general'];
-      if (validViews.includes(hash) && hash !== activeView) {
-        setActiveView(hash);
+      const nextView = validViews.includes(hash) ? hash : (rawHash === '' ? 'tracker' : '404');
+      if (nextView !== activeView) {
+        setActiveView(nextView);
       }
     };
     window.addEventListener('hashchange', handleHashChange);
@@ -813,111 +838,123 @@ const App: React.FC = () => {
   if (!currentUser) return <Login users={users} onLogin={handleLogin} />;
 
   return (
-    <Layout activeView={activeView} onViewChange={setActiveView} currentUser={currentUser} onLogout={handleLogout}>
-      {activeView === 'tracker' && (
-        <TrackerView
-          entries={entries.filter(e => e.userId === viewingUserId)}
-          clients={filteredClients} projects={filteredProjects} projectTasks={filteredTasks}
-          onAddEntry={handleAddEntry} onDeleteEntry={handleDeleteEntry} onUpdateEntry={handleUpdateEntry}
-          insights={insights} isInsightLoading={isInsightLoading} onRefreshInsights={generateInsights}
-          startOfWeek={generalSettings.startOfWeek}
-          treatSaturdayAsHoliday={generalSettings.treatSaturdayAsHoliday}
-          onMakeRecurring={handleMakeRecurring} userRole={currentUser.role}
-          viewingUserId={viewingUserId}
-          onViewUserChange={setViewingUserId}
-          availableUsers={availableUsers}
-          currentUser={currentUser}
-          dailyGoal={generalSettings.dailyLimit}
-          onAddBulkEntries={handleAddBulkEntries}
-          enableAiInsights={generalSettings.enableAiInsights}
-        />
-      )}
-      {activeView === 'reports' && (
-        <Reports
-          entries={
-            (currentUser.role === 'admin' || currentUser.role === 'manager')
-              ? entries
-              : entries.filter(e => e.userId === currentUser.id)
-          }
-          projects={projects}
-          clients={clients}
-          users={users}
-          currentUser={currentUser}
-          startOfWeek={generalSettings.startOfWeek}
-          treatSaturdayAsHoliday={generalSettings.treatSaturdayAsHoliday}
-          dailyGoal={generalSettings.dailyLimit}
-          currency={generalSettings.currency}
-        />
-      )}
+    <Layout
+      activeView={!isRouteAccessible ? 'tracker' : (activeView as View)}
+      onViewChange={setActiveView}
+      currentUser={currentUser}
+      onLogout={handleLogout}
+      isNotFound={!isRouteAccessible}
+    >
+      {!isRouteAccessible ? (
+        <NotFound onReturn={() => setActiveView('tracker')} />
+      ) : (
+        <>
+          {activeView === 'tracker' && (
+            <TrackerView
+              entries={entries.filter(e => e.userId === viewingUserId)}
+              clients={filteredClients} projects={filteredProjects} projectTasks={filteredTasks}
+              onAddEntry={handleAddEntry} onDeleteEntry={handleDeleteEntry} onUpdateEntry={handleUpdateEntry}
+              insights={insights} isInsightLoading={isInsightLoading} onRefreshInsights={generateInsights}
+              startOfWeek={generalSettings.startOfWeek}
+              treatSaturdayAsHoliday={generalSettings.treatSaturdayAsHoliday}
+              onMakeRecurring={handleMakeRecurring} userRole={currentUser.role}
+              viewingUserId={viewingUserId}
+              onViewUserChange={setViewingUserId}
+              availableUsers={availableUsers}
+              currentUser={currentUser}
+              dailyGoal={generalSettings.dailyLimit}
+              onAddBulkEntries={handleAddBulkEntries}
+              enableAiInsights={generalSettings.enableAiInsights}
+            />
+          )}
+          {activeView === 'reports' && (
+            <Reports
+              entries={
+                (currentUser.role === 'admin' || currentUser.role === 'manager')
+                  ? entries
+                  : entries.filter(e => e.userId === currentUser.id)
+              }
+              projects={projects}
+              clients={clients}
+              users={users}
+              currentUser={currentUser}
+              startOfWeek={generalSettings.startOfWeek}
+              treatSaturdayAsHoliday={generalSettings.treatSaturdayAsHoliday}
+              dailyGoal={generalSettings.dailyLimit}
+              currency={generalSettings.currency}
+            />
+          )}
 
-      {activeView === 'clients' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
-        <ClientsView
-          clients={clients}
-          onAddClient={addClient}
-          onUpdateClient={handleUpdateClient}
-          onDeleteClient={handleDeleteClient}
-        />
-      )}
+          {activeView === 'clients' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
+            <ClientsView
+              clients={clients}
+              onAddClient={addClient}
+              onUpdateClient={handleUpdateClient}
+              onDeleteClient={handleDeleteClient}
+            />
+          )}
 
-      {activeView === 'projects' && (
-        <ProjectsView
-          projects={projects}
-          clients={clients}
-          role={currentUser.role}
-          onAddProject={addProject}
-          onUpdateProject={handleUpdateProject}
-          onDeleteProject={handleDeleteProject}
-        />
-      )}
+          {activeView === 'projects' && (
+            <ProjectsView
+              projects={projects}
+              clients={clients}
+              role={currentUser.role}
+              onAddProject={addProject}
+              onUpdateProject={handleUpdateProject}
+              onDeleteProject={handleDeleteProject}
+            />
+          )}
 
-      {activeView === 'tasks' && (
-        <TasksView
-          tasks={projectTasks}
-          projects={projects}
-          clients={clients}
-          role={currentUser.role}
-          onAddTask={addProjectTask}
-          onUpdateTask={handleUpdateTask}
-          onDeleteTask={async (id) => {
-            try {
-              await api.tasks.delete(id);
-              setProjectTasks(projectTasks.filter(t => t.id !== id));
-            } catch (err) {
-              console.error('Failed to delete task:', err);
-              alert('Failed to delete task');
-            }
-          }}
-        />
-      )}
+          {activeView === 'tasks' && (
+            <TasksView
+              tasks={projectTasks}
+              projects={projects}
+              clients={clients}
+              role={currentUser.role}
+              onAddTask={addProjectTask}
+              onUpdateTask={handleUpdateTask}
+              onDeleteTask={async (id) => {
+                try {
+                  await api.tasks.delete(id);
+                  setProjectTasks(projectTasks.filter(t => t.id !== id));
+                } catch (err) {
+                  console.error('Failed to delete task:', err);
+                  alert('Failed to delete task');
+                }
+              }}
+            />
+          )}
 
-      {(currentUser.role === 'admin' || currentUser.role === 'manager') && activeView === 'users' && (
-        <UserManagement
-          users={users}
-          clients={clients}
-          projects={projects}
-          tasks={projectTasks}
-          onAddUser={addUser}
-          onDeleteUser={deleteUser}
-          onUpdateUser={handleUpdateUser}
-          currentUserId={currentUser.id}
-          currentUserRole={currentUser.role}
-          currency={generalSettings.currency}
-        />
-      )}
+          {(currentUser.role === 'admin' || currentUser.role === 'manager') && activeView === 'users' && (
+            <UserManagement
+              users={users}
+              clients={clients}
+              projects={projects}
+              tasks={projectTasks}
+              onAddUser={addUser}
+              onDeleteUser={deleteUser}
+              onUpdateUser={handleUpdateUser}
+              currentUserId={currentUser.id}
+              currentUserRole={currentUser.role}
+              currency={generalSettings.currency}
+            />
+          )}
 
-      {currentUser.role === 'admin' && activeView === 'administration-general' && (
-        <GeneralSettings
-          settings={generalSettings}
-          onUpdate={handleUpdateGeneralSettings}
-        />
-      )}
+          {currentUser.role === 'admin' && activeView === 'administration-general' && (
+            <GeneralSettings
+              settings={generalSettings}
+              onUpdate={handleUpdateGeneralSettings}
+            />
+          )}
 
-      {currentUser.role === 'admin' && activeView === 'admin-auth' && (
-        <AdminAuthentication config={ldapConfig} onSave={handleSaveLdapConfig} />
-      )}
+          {currentUser.role === 'admin' && activeView === 'admin-auth' && (
+            <AdminAuthentication config={ldapConfig} onSave={handleSaveLdapConfig} />
+          )}
 
-      {activeView === 'recurring' && <RecurringManager tasks={projectTasks} projects={projects} clients={clients} onAction={handleRecurringAction} />}
-      {activeView === 'settings' && <Settings />}
+          {activeView === 'recurring' && <RecurringManager tasks={projectTasks} projects={projects} clients={clients} onAction={handleRecurringAction} />}
+          {activeView === 'settings' && <Settings />}
+        </>
+      )}
     </Layout>
   );
 };
