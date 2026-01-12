@@ -21,6 +21,13 @@ interface WeeklyViewProps {
     treatSaturdayAsHoliday: boolean;
 }
 
+const toLocalISOString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 const WeeklyView: React.FC<WeeklyViewProps> = ({
     entries, clients, projects, projectTasks, onAddBulkEntries, onDeleteEntry, onUpdateEntry,
     userRole, currentUser, viewingUserId, availableUsers, onViewUserChange,
@@ -36,14 +43,15 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
     });
 
     const weekDays = useMemo(() => {
-        return [0, 1, 2, 3, 4].map(offset => {
+        return [0, 1, 2, 3, 4, 5, 6].map(offset => {
             const d = new Date(currentWeekStart);
             d.setDate(d.getDate() + offset);
+            const dateStr = toLocalISOString(d);
             return {
-                dateStr: d.toISOString().split('T')[0],
-                dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+                dateStr,
+                dayName: d.toLocaleDateString('it-IT', { weekday: 'short' }).replace('.', ''),
                 dayNum: d.getDate(),
-                isToday: d.toISOString().split('T')[0] === new Date().toISOString().split('T')[0]
+                isToday: dateStr === toLocalISOString(new Date())
             };
         });
     }, [currentWeekStart]);
@@ -323,18 +331,18 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                     step="0.1"
                                                     min="0"
                                                     placeholder="0.0"
-                                                    disabled={(day.dayName === 'Sun' || (treatSaturdayAsHoliday && day.dayName === 'Sab')) || !!isItalianHoliday(new Date(day.dateStr))}
+                                                    disabled={(day.dayName === 'dom' || (treatSaturdayAsHoliday && day.dayName === 'sab')) || !!isItalianHoliday(new Date(day.dateStr + 'T00:00:00'))}
                                                     value={row.days[day.dateStr]?.duration || ''}
                                                     onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'duration', e.target.value)}
-                                                    className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} ${(day.dayName === 'Sun' || (treatSaturdayAsHoliday && day.dayName === 'Sab')) || !!isItalianHoliday(new Date(day.dateStr)) ? 'opacity-50 cursor-not-allowed bg-red-50/50' : ''} border rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none`}
+                                                    className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} ${(day.dayName === 'dom' || (treatSaturdayAsHoliday && day.dayName === 'sab')) || !!isItalianHoliday(new Date(day.dateStr + 'T00:00:00')) ? 'opacity-50 cursor-not-allowed bg-red-50/50' : ''} border rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none`}
                                                 />
                                                 <input
                                                     type="text"
                                                     placeholder="Note..."
-                                                    disabled={(day.dayName === 'Sun' || (treatSaturdayAsHoliday && day.dayName === 'Sab')) || !!isItalianHoliday(new Date(day.dateStr))}
+                                                    disabled={(day.dayName === 'dom' || (treatSaturdayAsHoliday && day.dayName === 'sab')) || !!isItalianHoliday(new Date(day.dateStr + 'T00:00:00'))}
                                                     value={row.days[day.dateStr]?.note || ''}
                                                     onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'note', e.target.value)}
-                                                    className={`w-16 text-[9px] bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 transition-colors ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-600' : 'text-slate-400 focus:text-slate-700'} ${(day.dayName === 'Sun' || (treatSaturdayAsHoliday && day.dayName === 'Sab')) || !!isItalianHoliday(new Date(day.dateStr)) ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                    className={`w-16 text-[9px] bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 transition-colors ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-600' : 'text-slate-400 focus:text-slate-700'} ${(day.dayName === 'dom' || (treatSaturdayAsHoliday && day.dayName === 'sab')) || !!isItalianHoliday(new Date(day.dateStr + 'T00:00:00')) ? 'opacity-30 cursor-not-allowed' : ''}`}
                                                 />
                                             </div>
                                         </td>

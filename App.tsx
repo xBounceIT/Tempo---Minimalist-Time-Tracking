@@ -67,16 +67,20 @@ const TrackerView: React.FC<{
       <div className="flex flex-col gap-6 animate-in fade-in duration-500">
         {/* Top Middle Toggle */}
         <div className="flex justify-center">
-          <div className="bg-white rounded-full shadow-sm border border-slate-200 p-1 flex gap-1">
+          <div className="relative grid grid-cols-2 bg-slate-200/50 p-1 rounded-full w-full max-w-[240px]">
+            <div
+              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-sm transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${trackerMode === 'daily' ? 'translate-x-0 left-1' : 'translate-x-full left-1'
+                }`}
+            ></div>
             <button
               onClick={() => setTrackerMode('daily')}
-              className={`px-6 py-1.5 rounded-full text-xs font-bold transition-all ${trackerMode === 'daily' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+              className={`relative z-10 w-full py-2 text-xs font-bold transition-colors duration-300 ${trackerMode === 'daily' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
             >
               Daily
             </button>
             <button
               onClick={() => setTrackerMode('weekly')}
-              className={`px-6 py-1.5 rounded-full text-xs font-bold transition-all ${trackerMode === 'weekly' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+              className={`relative z-10 w-full py-2 text-xs font-bold transition-colors duration-300 ${trackerMode === 'weekly' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
             >
               Weekly
             </button>
