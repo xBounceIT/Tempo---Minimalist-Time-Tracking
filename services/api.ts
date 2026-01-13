@@ -50,7 +50,7 @@ const fetchApi = async <T>(
 };
 
 // Types for API responses
-import type { User, Client, Project, ProjectTask, TimeEntry, LdapConfig, GeneralSettings, Product } from '../types';
+import type { User, Client, Project, ProjectTask, TimeEntry, LdapConfig, GeneralSettings, Product, Quote } from '../types';
 
 export interface LoginResponse {
     token: string;
@@ -249,6 +249,26 @@ export const generalSettingsApi = {
         }),
 };
 
+// Quotes API
+export const quotesApi = {
+    list: (): Promise<Quote[]> => fetchApi('/quotes'),
+
+    create: (quoteData: Partial<Quote>): Promise<Quote> =>
+        fetchApi('/quotes', {
+            method: 'POST',
+            body: JSON.stringify(quoteData),
+        }),
+
+    update: (id: string, updates: Partial<Quote>): Promise<Quote> =>
+        fetchApi(`/quotes/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        }),
+
+    delete: (id: string): Promise<void> =>
+        fetchApi(`/quotes/${id}`, { method: 'DELETE' }),
+};
+
 export default {
     auth: authApi,
     users: usersApi,
@@ -257,6 +277,7 @@ export default {
     tasks: tasksApi,
     entries: entriesApi,
     products: productsApi,
+    quotes: quotesApi,
     settings: settingsApi,
     ldap: ldapApi,
     generalSettings: generalSettingsApi,

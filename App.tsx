@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product } from './types';
+import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product, Quote } from './types';
 import { COLORS } from './constants';
 import Layout from './components/Layout';
 import TimeEntryForm from './components/TimeEntryForm';
@@ -24,6 +24,7 @@ import { isItalianHoliday } from './utils/holidays';
 import api, { setAuthToken, getAuthToken } from './services/api';
 import NotFound from './components/NotFound';
 import ProductsView from './components/ProductsView';
+import QuotesView from './components/QuotesView';
 
 const TrackerView: React.FC<{
   entries: TimeEntry[];
@@ -374,6 +375,7 @@ const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectTasks, setProjectTasks] = useState<ProjectTask[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [quotes, setQuotes] = useState<Quote[]>([]);
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [settings, setSettings] = useState({
     fullName: 'User',
@@ -406,7 +408,7 @@ const App: React.FC = () => {
     const validViews: View[] = [
       'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
       'configuration/users', 'configuration/authentication', 'configuration/general',
-      'crm/clients', 'crm/products',
+      'crm/clients', 'crm/products', 'crm/quotes',
       'projects/manage', 'projects/tasks',
       'settings'
     ];
@@ -431,6 +433,7 @@ const App: React.FC = () => {
       // CRM module - admin/manager
       'crm/clients': ['admin', 'manager'],
       'crm/products': ['admin', 'manager'],
+      'crm/quotes': ['admin', 'manager'],
       // Projects module - admin/manager
       'projects/manage': ['admin', 'manager'],
       'projects/tasks': ['admin', 'manager'],
@@ -464,7 +467,7 @@ const App: React.FC = () => {
       const validViews: View[] = [
         'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
         'configuration/users', 'configuration/authentication', 'configuration/general',
-        'crm/clients', 'crm/products',
+        'crm/clients', 'crm/products', 'crm/quotes',
         'projects/manage', 'projects/tasks',
         'settings'
       ];
@@ -509,14 +512,15 @@ const App: React.FC = () => {
 
     const loadData = async () => {
       try {
-        const [usersData, clientsData, projectsData, tasksData, settingsData, entriesData, productsData] = await Promise.all([
+        const [usersData, clientsData, projectsData, tasksData, settingsData, entriesData, productsData, quotesData] = await Promise.all([
           api.users.list(),
           api.clients.list(),
           api.projects.list(),
           api.tasks.list(),
           api.settings.get(),
           api.entries.list(),
-          api.products.list()
+          api.products.list(),
+          api.quotes.list()
         ]);
 
         setUsers(usersData);
@@ -526,6 +530,7 @@ const App: React.FC = () => {
         setSettings(settingsData);
         setEntries(entriesData);
         setProducts(productsData);
+        setQuotes(quotesData);
 
         // Load global settings for all users
         const genSettings = await api.generalSettings.get();
@@ -880,6 +885,33 @@ const App: React.FC = () => {
     }
   };
 
+  const addQuote = async (quoteData: Partial<Quote>) => {
+    try {
+      const quote = await api.quotes.create(quoteData);
+      setQuotes([...quotes, quote]);
+    } catch (err) {
+      console.error('Failed to add quote:', err);
+    }
+  };
+
+  const handleUpdateQuote = async (id: string, updates: Partial<Quote>) => {
+    try {
+      const updated = await api.quotes.update(id, updates);
+      setQuotes(quotes.map(q => q.id === id ? updated : q));
+    } catch (err) {
+      console.error('Failed to update quote:', err);
+    }
+  };
+
+  const handleDeleteQuote = async (id: string) => {
+    try {
+      await api.quotes.delete(id);
+      setQuotes(quotes.filter(q => q.id !== id));
+    } catch (err) {
+      console.error('Failed to delete quote:', err);
+    }
+  };
+
   const addProject = async (name: string, clientId: string, description?: string) => {
     try {
       const usedColors = projects.map(p => p.color);
@@ -991,6 +1023,7 @@ const App: React.FC = () => {
     setProjects([]);
     setProjectTasks([]);
     setProducts([]);
+    setQuotes([]);
     setEntries([]);
   };
 
@@ -1080,6 +1113,17 @@ const App: React.FC = () => {
               onAddProduct={addProduct}
               onUpdateProduct={handleUpdateProduct}
               onDeleteProduct={handleDeleteProduct}
+            />
+          )}
+
+          {activeView === 'crm/quotes' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
+            <QuotesView
+              quotes={quotes}
+              clients={clients}
+              products={products}
+              onAddQuote={addQuote}
+              onUpdateQuote={handleUpdateQuote}
+              onDeleteQuote={handleDeleteQuote}
             />
           )}
 

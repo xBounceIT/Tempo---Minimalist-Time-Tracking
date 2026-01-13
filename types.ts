@@ -105,6 +105,30 @@ export interface Product {
   isDisabled?: boolean;
 }
 
+export interface QuoteItem {
+  id: string;
+  quoteId: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  discount?: number; // item-level discount percentage
+}
+
+export interface Quote {
+  id: string;
+  clientId: string;
+  clientName: string;
+  items: QuoteItem[];
+  paymentTerms: 'immediate' | '15gg' | '21gg' | '30gg' | '45gg';
+  discount: number; // global discount percentage
+  status: 'quoted' | 'confirmed';
+  expirationDate: string; // ISO date string
+  notes?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export type View =
   // Tempo module
   | 'tempo/tracker'
@@ -119,6 +143,7 @@ export type View =
   // CRM module
   | 'crm/clients'
   | 'crm/products'
+  | 'crm/quotes'
   // Projects module
   | 'projects/manage'
   | 'projects/tasks'

@@ -208,3 +208,34 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);
+
+-- Quotes table
+CREATE TABLE IF NOT EXISTS quotes (
+    id VARCHAR(50) PRIMARY KEY,
+    client_id VARCHAR(50) NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    client_name VARCHAR(255) NOT NULL,
+    payment_terms VARCHAR(20) NOT NULL DEFAULT 'immediate',
+    discount DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'quoted' CHECK (status IN ('quoted', 'confirmed')),
+    expiration_date DATE NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_quotes_client_id ON quotes(client_id);
+CREATE INDEX IF NOT EXISTS idx_quotes_status ON quotes(status);
+
+-- Quote items table
+CREATE TABLE IF NOT EXISTS quote_items (
+    id VARCHAR(50) PRIMARY KEY,
+    quote_id VARCHAR(50) NOT NULL REFERENCES quotes(id) ON DELETE CASCADE,
+    product_id VARCHAR(50) NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
+    product_name VARCHAR(255) NOT NULL,
+    quantity DECIMAL(10, 2) NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    discount DECIMAL(5, 2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_quote_items_quote_id ON quote_items(quote_id);

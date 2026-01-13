@@ -256,6 +256,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
                 isCollapsed={isCollapsed}
                 onClick={() => { onViewChange('crm/products'); setIsMobileMenuOpen(false); }}
               />
+              <NavItem
+                icon="fa-file-invoice"
+                label="Quotes"
+                active={activeView === 'crm/quotes'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('crm/quotes'); setIsMobileMenuOpen(false); }}
+              />
             </>
           )}
 

@@ -12,6 +12,7 @@ import settingsRoutes from './routes/settings.js';
 import ldapRoutes from './routes/ldap.js';
 import generalSettingsRoutes from './routes/general-settings.js';
 import productsRoutes from './routes/products.js';
+import quotesRoutes from './routes/quotes.js';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/ldap', ldapRoutes);
 app.use('/api/general-settings', generalSettingsRoutes);
 app.use('/api/products', productsRoutes);
+app.use('/api/quotes', quotesRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
