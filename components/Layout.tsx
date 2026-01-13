@@ -12,9 +12,9 @@ interface Module {
 const modules: Module[] = [
   { id: 'tempo', name: 'Tempo', icon: 'fa-clock', active: true },
   { id: 'crm', name: 'CRM', icon: 'fa-handshake', active: false },
-  { id: 'dipendenti', name: 'Dipendenti', icon: 'fa-user-tie', active: false },
-  { id: 'fornitori', name: 'Fornitori', icon: 'fa-truck', active: false },
-  { id: 'configurazione', name: 'Configurazione', icon: 'fa-gears', active: false },
+  { id: 'employees', name: 'Employees', icon: 'fa-user-tie', active: false },
+  { id: 'suppliers', name: 'Suppliers', icon: 'fa-truck', active: false },
+  { id: 'configuration', name: 'Configuration', icon: 'fa-gears', active: false },
 ];
 
 interface LayoutProps {
