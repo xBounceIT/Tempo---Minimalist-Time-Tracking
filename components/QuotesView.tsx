@@ -274,7 +274,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                                     </div>
                                                     <div className="col-span-2">
                                                         <div className="flex items-center bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 transition-all overflow-hidden">
-                                                            <div className="w-10 flex items-center justify-center text-slate-400 text-[10px] font-black border-r border-slate-100 py-2 bg-slate-50/50">
+                                                            <div className="w-10 self-stretch flex items-center justify-center text-slate-400 text-[10px] font-black border-r border-slate-100 bg-slate-50/50">
                                                                 {currency}
                                                             </div>
                                                             <input
@@ -291,7 +291,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                                     </div>
                                                     <div className="col-span-2">
                                                         <div className="flex items-center bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 transition-all overflow-hidden">
-                                                            <div className="w-8 flex items-center justify-center text-slate-400 text-[10px] font-black border-r border-slate-100 py-2 bg-slate-50/50">
+                                                            <div className="w-8 self-stretch flex items-center justify-center text-slate-400 text-[10px] font-black border-r border-slate-100 bg-slate-50/50">
                                                                 %
                                                             </div>
                                                             <input
@@ -356,7 +356,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 ml-1">Global Discount</label>
                                         <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-indigo-500 transition-all overflow-hidden">
-                                            <div className="w-12 flex items-center justify-center text-slate-400 text-xs font-bold border-r border-slate-200 py-2.5 bg-slate-100/30">
+                                            <div className="w-12 self-stretch flex items-center justify-center text-slate-400 text-xs font-bold border-r border-slate-200 bg-slate-100/30">
                                                 %
                                             </div>
                                             <input
