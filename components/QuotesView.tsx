@@ -415,7 +415,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                     {(() => {
                                         const { subtotal, discountAmount, totalTax, total, margin, marginPercentage, taxGroups } = calculateTotals(formData.items, formData.discount || 0);
                                         return (
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
                                                 {/* Left Column: Detailed Breakdown */}
                                                 <div className="space-y-3">
                                                     <div className="flex justify-between items-center px-2">
@@ -461,17 +461,17 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                 </div>
                             )}
 
-                            <div className="flex gap-4 pt-4 border-t border-slate-100">
+                            <div className="flex justify-between items-center pt-8 border-t border-slate-100">
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
+                                    className="px-8 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-[2] py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                                    className="px-10 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
                                 >
                                     {editingQuote ? 'Update Quote' : 'Create Quote'}
                                 </button>
