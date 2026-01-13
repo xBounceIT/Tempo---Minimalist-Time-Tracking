@@ -409,42 +409,48 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
 
                             {/* Totals Section */}
                             {formData.items && formData.items.length > 0 && (
-                                <div className="pt-8 border-t border-slate-100 flex flex-col items-end space-y-4">
+                                <div className="pt-8 border-t border-slate-100">
                                     {(() => {
                                         const { subtotal, discountAmount, totalTax, total, margin, marginPercentage, taxGroups } = calculateTotals(formData.items, formData.discount || 0);
                                         return (
-                                            <div className="w-full max-w-md space-y-3">
-                                                <div className="flex justify-between items-center px-2">
-                                                    <span className="text-sm font-bold text-slate-500">Imponibile:</span>
-                                                    <span className="text-sm font-black text-slate-800">{subtotal.toFixed(2)} {currency}</span>
-                                                </div>
-
-                                                {formData.discount! > 0 && (
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                                                {/* Left Column: Detailed Breakdown */}
+                                                <div className="space-y-3">
                                                     <div className="flex justify-between items-center px-2">
-                                                        <span className="text-sm font-bold text-slate-500">Sconto ({formData.discount}%):</span>
-                                                        <span className="text-sm font-black text-amber-600">-{discountAmount.toFixed(2)} {currency}</span>
+                                                        <span className="text-sm font-bold text-slate-500">Imponibile:</span>
+                                                        <span className="text-sm font-black text-slate-800">{subtotal.toFixed(2)} {currency}</span>
                                                     </div>
-                                                )}
 
-                                                {Object.entries(taxGroups).map(([rate, amount]) => (
-                                                    <div key={rate} className="flex justify-between items-center px-2">
-                                                        <span className="text-sm font-bold text-slate-500">IVA ({rate}%):</span>
-                                                        <span className="text-sm font-black text-slate-800">{amount.toFixed(2)} {currency}</span>
-                                                    </div>
-                                                ))}
+                                                    {formData.discount! > 0 && (
+                                                        <div className="flex justify-between items-center px-2">
+                                                            <span className="text-sm font-bold text-slate-500">Sconto ({formData.discount}%):</span>
+                                                            <span className="text-sm font-black text-amber-600">-{discountAmount.toFixed(2)} {currency}</span>
+                                                        </div>
+                                                    )}
 
-                                                <div className="h-px bg-slate-100 my-2"></div>
-
-                                                <div className="flex justify-between items-center px-2 pb-4">
-                                                    <span className="text-xl font-black text-slate-800">Totale:</span>
-                                                    <span className="text-3xl font-black text-indigo-600">{total.toFixed(2)} {currency}</span>
+                                                    {Object.entries(taxGroups).map(([rate, amount]) => (
+                                                        <div key={rate} className="flex justify-between items-center px-2">
+                                                            <span className="text-sm font-bold text-slate-500">IVA ({rate}%):</span>
+                                                            <span className="text-sm font-black text-slate-800">{amount.toFixed(2)} {currency}</span>
+                                                        </div>
+                                                    ))}
                                                 </div>
 
-                                                <div className="bg-emerald-50/40 rounded-2xl p-6 flex justify-between items-center border border-emerald-100/30">
-                                                    <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Margine:</span>
-                                                    <div className="text-right">
-                                                        <div className="text-xl font-black text-emerald-700">{margin.toFixed(2)} {currency}</div>
-                                                        <div className="text-[10px] font-black text-emerald-500 opacity-60">({marginPercentage.toFixed(1)}%)</div>
+                                                {/* Middle Column: Final Total */}
+                                                <div className="flex flex-col items-center justify-center py-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Totale:</span>
+                                                    <span className="text-4xl font-black text-indigo-600 leading-none">
+                                                        {total.toFixed(2)}
+                                                        <span className="text-xl ml-1 opacity-60 text-indigo-400">{currency}</span>
+                                                    </span>
+                                                </div>
+
+                                                {/* Right Column: Margin */}
+                                                <div className="bg-emerald-50/40 rounded-2xl p-6 flex flex-col items-center justify-center border border-emerald-100/30">
+                                                    <span className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">Margine:</span>
+                                                    <div className="text-center">
+                                                        <div className="text-2xl font-black text-emerald-700 leading-none mb-1">{margin.toFixed(2)} {currency}</div>
+                                                        <div className="text-xs font-black text-emerald-500 opacity-60">({marginPercentage.toFixed(1)}%)</div>
                                                     </div>
                                                 </div>
                                             </div>
