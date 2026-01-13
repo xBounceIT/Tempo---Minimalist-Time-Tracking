@@ -192,3 +192,19 @@ CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id);
 
 -- Insert default LDAP config row
 INSERT INTO ldap_config (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+-- Products table
+CREATE TABLE IF NOT EXISTS products (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    sale_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    sale_unit VARCHAR(20) NOT NULL DEFAULT 'unit',
+    cost DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    cost_unit VARCHAR(20) NOT NULL DEFAULT 'unit',
+    category VARCHAR(100),
+    tax_rate DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings } from './types';
+import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product } from './types';
 import { COLORS } from './constants';
 import Layout from './components/Layout';
 import TimeEntryForm from './components/TimeEntryForm';
@@ -23,6 +23,7 @@ import { getInsights } from './services/geminiService';
 import { isItalianHoliday } from './utils/holidays';
 import api, { setAuthToken, getAuthToken } from './services/api';
 import NotFound from './components/NotFound';
+import ProductsView from './components/ProductsView';
 
 const TrackerView: React.FC<{
   entries: TimeEntry[];
@@ -372,6 +373,7 @@ const App: React.FC = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectTasks, setProjectTasks] = useState<ProjectTask[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [settings, setSettings] = useState({
     fullName: 'User',
@@ -404,7 +406,7 @@ const App: React.FC = () => {
     const validViews: View[] = [
       'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
       'configuration/users', 'configuration/authentication', 'configuration/general',
-      'crm/clients',
+      'crm/clients', 'crm/products',
       'projects/manage', 'projects/tasks',
       'settings'
     ];
@@ -428,6 +430,7 @@ const App: React.FC = () => {
       'configuration/general': ['admin'],
       // CRM module - admin/manager
       'crm/clients': ['admin', 'manager'],
+      'crm/products': ['admin', 'manager'],
       // Projects module - admin/manager
       'projects/manage': ['admin', 'manager'],
       'projects/tasks': ['admin', 'manager'],
@@ -461,7 +464,7 @@ const App: React.FC = () => {
       const validViews: View[] = [
         'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
         'configuration/users', 'configuration/authentication', 'configuration/general',
-        'crm/clients',
+        'crm/clients', 'crm/products',
         'projects/manage', 'projects/tasks',
         'settings'
       ];
@@ -506,13 +509,14 @@ const App: React.FC = () => {
 
     const loadData = async () => {
       try {
-        const [usersData, clientsData, projectsData, tasksData, settingsData, entriesData] = await Promise.all([
+        const [usersData, clientsData, projectsData, tasksData, settingsData, entriesData, productsData] = await Promise.all([
           api.users.list(),
           api.clients.list(),
           api.projects.list(),
           api.tasks.list(),
           api.settings.get(),
-          api.entries.list()
+          api.entries.list(),
+          api.products.list()
         ]);
 
         setUsers(usersData);
@@ -521,6 +525,7 @@ const App: React.FC = () => {
         setProjectTasks(tasksData);
         setSettings(settingsData);
         setEntries(entriesData);
+        setProducts(productsData);
 
         // Load global settings for all users
         const genSettings = await api.generalSettings.get();
@@ -848,6 +853,33 @@ const App: React.FC = () => {
     }
   };
 
+  const addProduct = async (productData: Partial<Product>) => {
+    try {
+      const product = await api.products.create(productData);
+      setProducts([...products, product]);
+    } catch (err) {
+      console.error('Failed to add product:', err);
+    }
+  };
+
+  const handleUpdateProduct = async (id: string, updates: Partial<Product>) => {
+    try {
+      const updated = await api.products.update(id, updates);
+      setProducts(products.map(p => p.id === id ? updated : p));
+    } catch (err) {
+      console.error('Failed to update product:', err);
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      await api.products.delete(id);
+      setProducts(products.filter(p => p.id !== id));
+    } catch (err) {
+      console.error('Failed to delete product:', err);
+    }
+  };
+
   const addProject = async (name: string, clientId: string, description?: string) => {
     try {
       const usedColors = projects.map(p => p.color);
@@ -958,6 +990,7 @@ const App: React.FC = () => {
     setClients([]);
     setProjects([]);
     setProjectTasks([]);
+    setProducts([]);
     setEntries([]);
   };
 
@@ -1038,6 +1071,15 @@ const App: React.FC = () => {
               onAddClient={addClient}
               onUpdateClient={handleUpdateClient}
               onDeleteClient={handleDeleteClient}
+            />
+          )}
+
+          {activeView === 'crm/products' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
+            <ProductsView
+              products={products}
+              onAddProduct={addProduct}
+              onUpdateProduct={handleUpdateProduct}
+              onDeleteProduct={handleDeleteProduct}
             />
           )}
 

@@ -241,13 +241,22 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
 
           {/* CRM Module Nav Items */}
           {activeModule.id === 'crm' && (
-            <NavItem
-              icon="fa-building"
-              label="Clients"
-              active={activeView === 'crm/clients'}
-              isCollapsed={isCollapsed}
-              onClick={() => { onViewChange('crm/clients'); setIsMobileMenuOpen(false); }}
-            />
+            <>
+              <NavItem
+                icon="fa-building"
+                label="Clients"
+                active={activeView === 'crm/clients'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('crm/clients'); setIsMobileMenuOpen(false); }}
+              />
+              <NavItem
+                icon="fa-box"
+                label="Products"
+                active={activeView === 'crm/products'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('crm/products'); setIsMobileMenuOpen(false); }}
+              />
+            </>
           )}
 
           {/* Projects Module Nav Items */}

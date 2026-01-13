@@ -1,0 +1,388 @@
+import React, { useState } from 'react';
+import { Product } from '../types';
+
+interface ProductsViewProps {
+    products: Product[];
+    onAddProduct: (productData: Partial<Product>) => void;
+    onUpdateProduct: (id: string, updates: Partial<Product>) => void;
+    onDeleteProduct: (id: string) => void;
+}
+
+const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onUpdateProduct, onDeleteProduct }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+
+    // Form State
+    const [formData, setFormData] = useState<Partial<Product>>({
+        name: '',
+        salePrice: 0,
+        saleUnit: 'unit',
+        cost: 0,
+        costUnit: 'unit',
+        category: '',
+        taxRate: 0,
+    });
+
+    const openAddModal = () => {
+        setEditingProduct(null);
+        setFormData({
+            name: '',
+            salePrice: 0,
+            saleUnit: 'unit',
+            cost: 0,
+            costUnit: 'unit',
+            category: '',
+            taxRate: 0,
+        });
+        setIsModalOpen(true);
+    };
+
+    const openEditModal = (product: Product) => {
+        setEditingProduct(product);
+        setFormData({
+            name: product.name || '',
+            salePrice: product.salePrice || 0,
+            saleUnit: product.saleUnit || 'unit',
+            cost: product.cost || 0,
+            costUnit: product.costUnit || 'unit',
+            category: product.category || '',
+            taxRate: product.taxRate || 0,
+        });
+        setIsModalOpen(true);
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (formData.name?.trim()) {
+            if (editingProduct) {
+                onUpdateProduct(editingProduct.id, formData);
+            } else {
+                onAddProduct(formData);
+            }
+            setIsModalOpen(false);
+        }
+    };
+
+    const confirmDelete = (product: Product) => {
+        setProductToDelete(product);
+        setIsDeleteConfirmOpen(true);
+    };
+
+    const handleDelete = () => {
+        if (productToDelete) {
+            onDeleteProduct(productToDelete.id);
+            setIsDeleteConfirmOpen(false);
+            setProductToDelete(null);
+        }
+    };
+
+    const activeProducts = products.filter(p => !p.isDisabled);
+    const disabledProducts = products.filter(p => p.isDisabled);
+
+    return (
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Add/Edit Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
+                                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+                                    <i className={`fa-solid ${editingProduct ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
+                                </div>
+                                {editingProduct ? 'Edit Product' : 'Add New Product'}
+                            </h3>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition-colors"
+                            >
+                                <i className="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                    Product Details
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="col-span-full space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 ml-1">Product Name</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            placeholder="e.g. Consulting Services"
+                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 ml-1">Category</label>
+                                        <input
+                                            type="text"
+                                            value={formData.category}
+                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                            placeholder="e.g. Services"
+                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 ml-1">Tax Rate (%)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            value={formData.taxRate}
+                                            onChange={(e) => setFormData({ ...formData, taxRate: parseFloat(e.target.value) })}
+                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                    Pricing and Unit
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 ml-1">Sale Price</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.salePrice}
+                                                onChange={(e) => setFormData({ ...formData, salePrice: parseFloat(e.target.value) })}
+                                                className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                            />
+                                            <select
+                                                value={formData.saleUnit}
+                                                onChange={(e) => setFormData({ ...formData, saleUnit: e.target.value as 'unit' | 'hours' })}
+                                                className="w-32 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                            >
+                                                <option value="unit">Unit</option>
+                                                <option value="hours">Hours</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 ml-1">Cost</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.cost}
+                                                onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) })}
+                                                className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                            />
+                                            <select
+                                                value={formData.costUnit}
+                                                onChange={(e) => setFormData({ ...formData, costUnit: e.target.value as 'unit' | 'hours' })}
+                                                className="w-32 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                            >
+                                                <option value="unit">Unit</option>
+                                                <option value="hours">Hours</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 pt-4 border-t border-slate-100">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-[2] py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                                >
+                                    {editingProduct ? 'Update Product' : 'Save Product'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteConfirmOpen && (
+                <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-200">
+                        <div className="p-6 text-center space-y-4">
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-600">
+                                <i className="fa-solid fa-triangle-exclamation text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-black text-slate-800">Delete Product?</h3>
+                                <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+                                    Are you sure you want to delete <span className="font-bold text-slate-800">{productToDelete?.name}</span>?
+                                    This action cannot be undone.
+                                </p>
+                            </div>
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setIsDeleteConfirmOpen(false)}
+                                    className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
+                                >
+                                    Yes, Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 className="text-2xl font-black text-slate-800">Products</h2>
+                    <p className="text-slate-500 text-sm">Manage products and services for billing</p>
+                </div>
+                <button
+                    onClick={openAddModal}
+                    className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-indigo-100 transition-all hover:bg-indigo-700 active:scale-95 flex items-center gap-2"
+                >
+                    <i className="fa-solid fa-plus"></i> Add New Product
+                </button>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Active Products</h4>
+                    <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{activeProducts.length} TOTAL</span>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Name / Category</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sale Price</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cost</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tax Rate</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {activeProducts.map(p => (
+                                <tr key={p.id} className="hover:bg-slate-50/50 transition-colors group">
+                                    <td className="px-8 py-5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center text-sm">
+                                                <i className="fa-solid fa-box"></i>
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-slate-800">{p.name}</div>
+                                                <div className="text-[10px] font-black text-slate-400 uppercase">{p.category || 'No Category'}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-5 text-sm font-semibold text-slate-700">
+                                        {p.salePrice.toFixed(2)} / {p.saleUnit}
+                                    </td>
+                                    <td className="px-8 py-5 text-sm font-semibold text-slate-500">
+                                        {p.cost.toFixed(2)} / {p.costUnit}
+                                    </td>
+                                    <td className="px-8 py-5 text-sm font-bold text-indigo-600">
+                                        {p.taxRate}%
+                                    </td>
+                                    <td className="px-8 py-5">
+                                        <div className="flex justify-end gap-2">
+                                            <button
+                                                onClick={() => openEditModal(p)}
+                                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                                title="Edit Product"
+                                            >
+                                                <i className="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button
+                                                onClick={() => onUpdateProduct(p.id, { isDisabled: true })}
+                                                className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                                                title="Disable Product"
+                                            >
+                                                <i className="fa-solid fa-ban"></i>
+                                            </button>
+                                            <button
+                                                onClick={() => confirmDelete(p)}
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                title="Delete Product"
+                                            >
+                                                <i className="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            {activeProducts.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="p-12 text-center">
+                                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
+                                            <i className="fa-solid fa-boxes-stacked text-2xl"></i>
+                                        </div>
+                                        <p className="text-slate-400 text-sm font-bold">No active products found.</p>
+                                        <button onClick={openAddModal} className="mt-4 text-indigo-600 text-sm font-black hover:underline">Add your first product</button>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {disabledProducts.length > 0 && (
+                <div className="bg-slate-50 rounded-3xl border border-slate-200 shadow-sm overflow-hidden border-dashed">
+                    <div className="px-8 py-4 bg-slate-100/50 border-b border-slate-200 flex justify-between items-center">
+                        <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Disabled Products</h4>
+                        <span className="bg-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black">{disabledProducts.length} DISABLED</span>
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                        {disabledProducts.map(p => (
+                            <div key={p.id} className="p-6 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all flex items-center justify-between gap-4">
+                                <div className="flex gap-4 items-center">
+                                    <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center">
+                                        <i className="fa-solid fa-box"></i>
+                                    </div>
+                                    <div>
+                                        <h5 className="font-bold text-slate-500 line-through">{p.name}</h5>
+                                        <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => onUpdateProduct(p.id, { isDisabled: false })}
+                                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                    >
+                                        <i className="fa-solid fa-rotate-left"></i>
+                                    </button>
+                                    <button
+                                        onClick={() => confirmDelete(p)}
+                                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    >
+                                        <i className="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default ProductsView;

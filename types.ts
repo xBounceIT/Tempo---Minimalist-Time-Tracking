@@ -93,6 +93,18 @@ export interface LdapConfig {
 
 export type TrackerViewMode = 'daily' | 'weekly';
 
+export interface Product {
+  id: string;
+  name: string;
+  salePrice: number;
+  saleUnit: 'unit' | 'hours';
+  cost: number;
+  costUnit: 'unit' | 'hours';
+  category?: string;
+  taxRate: number;
+  isDisabled?: boolean;
+}
+
 export type View =
   // Tempo module
   | 'tempo/tracker'
@@ -106,6 +118,7 @@ export type View =
   | 'configuration/general'
   // CRM module
   | 'crm/clients'
+  | 'crm/products'
   // Projects module
   | 'projects/manage'
   | 'projects/tasks'
