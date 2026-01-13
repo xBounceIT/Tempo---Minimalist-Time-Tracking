@@ -1124,6 +1124,7 @@ const App: React.FC = () => {
               onAddQuote={addQuote}
               onUpdateQuote={handleUpdateQuote}
               onDeleteQuote={handleDeleteQuote}
+              currency={generalSettings.currency}
             />
           )}
 
