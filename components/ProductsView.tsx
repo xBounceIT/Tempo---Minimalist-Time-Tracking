@@ -277,6 +277,12 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                 </div>
                             </div>
 
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                    Pricing and Unit
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 ml-1">Sale Price</label>
                                         <div className="flex gap-2">
@@ -321,45 +327,45 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                 </button>
                             </div>
                         </form>
-                    </div >
-                </div >
-            )}
-
-{/* Delete Confirmation Modal */ }
-{
-    isDeleteConfirmOpen && (
-        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-200">
-                <div className="p-6 text-center space-y-4">
-                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-600">
-                        <i className="fa-solid fa-triangle-exclamation text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-black text-slate-800">Delete Product?</h3>
-                        <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                            Are you sure you want to delete <span className="font-bold text-slate-800">{productToDelete?.name}</span>?
-                            This action cannot be undone.
-                        </p>
-                    </div>
-                    <div className="flex gap-3 pt-2">
-                        <button
-                            onClick={() => setIsDeleteConfirmOpen(false)}
-                            className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleDelete}
-                            className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
-                        >
-                            Yes, Delete
-                        </button>
                     </div>
                 </div>
-            </div>
-        </div>
-    )
-}
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {
+                isDeleteConfirmOpen && (
+                    <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-200">
+                            <div className="p-6 text-center space-y-4">
+                                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-600">
+                                    <i className="fa-solid fa-triangle-exclamation text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black text-slate-800">Delete Product?</h3>
+                                    <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+                                        Are you sure you want to delete <span className="font-bold text-slate-800">{productToDelete?.name}</span>?
+                                        This action cannot be undone.
+                                    </p>
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        onClick={() => setIsDeleteConfirmOpen(false)}
+                                        className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
+                                    >
+                                        Yes, Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -462,45 +468,45 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                 </div>
             </div>
 
-{
-    disabledProducts.length > 0 && (
-        <div className="bg-slate-50 rounded-3xl border border-slate-200 shadow-sm overflow-hidden border-dashed">
-            <div className="px-8 py-4 bg-slate-100/50 border-b border-slate-200 flex justify-between items-center">
-                <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Disabled Products</h4>
-                <span className="bg-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black">{disabledProducts.length} DISABLED</span>
-            </div>
-            <div className="divide-y divide-slate-100">
-                {disabledProducts.map(p => (
-                    <div key={p.id} className="p-6 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all flex items-center justify-between gap-4">
-                        <div className="flex gap-4 items-center">
-                            <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center">
-                                <i className="fa-solid fa-box"></i>
-                            </div>
-                            <div>
-                                <h5 className="font-bold text-slate-500 line-through">{p.name}</h5>
-                                <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
-                            </div>
+            {
+                disabledProducts.length > 0 && (
+                    <div className="bg-slate-50 rounded-3xl border border-slate-200 shadow-sm overflow-hidden border-dashed">
+                        <div className="px-8 py-4 bg-slate-100/50 border-b border-slate-200 flex justify-between items-center">
+                            <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Disabled Products</h4>
+                            <span className="bg-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black">{disabledProducts.length} DISABLED</span>
                         </div>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => onUpdateProduct(p.id, { isDisabled: false })}
-                                className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                            >
-                                <i className="fa-solid fa-rotate-left"></i>
-                            </button>
-                            <button
-                                onClick={() => confirmDelete(p)}
-                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                                <i className="fa-solid fa-trash-can"></i>
-                            </button>
+                        <div className="divide-y divide-slate-100">
+                            {disabledProducts.map(p => (
+                                <div key={p.id} className="p-6 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all flex items-center justify-between gap-4">
+                                    <div className="flex gap-4 items-center">
+                                        <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center">
+                                            <i className="fa-solid fa-box"></i>
+                                        </div>
+                                        <div>
+                                            <h5 className="font-bold text-slate-500 line-through">{p.name}</h5>
+                                            <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => onUpdateProduct(p.id, { isDisabled: false })}
+                                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                        >
+                                            <i className="fa-solid fa-rotate-left"></i>
+                                        </button>
+                                        <button
+                                            onClick={() => confirmDelete(p)}
+                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        >
+                                            <i className="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                ))}
-            </div>
-        </div>
-    )
-}
+                )
+            }
         </div >
     );
 };
