@@ -143,16 +143,16 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                     className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 />
                             </div>
-                            <div className="flex gap-3">
+                            <div className="flex justify-between gap-3">
                                 <button
                                     onClick={() => setIsAddCategoryModalOpen(false)}
-                                    className="flex-1 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
+                                    className="px-6 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleAddCategory}
-                                    className="flex-1 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                                    className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
                                 >
                                     Add Category
                                 </button>
@@ -201,7 +201,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <div className="flex justify-between items-center ml-1">
+                                        <div className="flex justify-between items-center ml-1 min-h-[16px]">
                                             <label className="text-xs font-bold text-slate-500">Category</label>
                                             <button
                                                 type="button"
@@ -221,7 +221,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Tax Rate (%)</label>
+                                        <div className="flex items-center ml-1 min-h-[16px]">
+                                            <label className="text-xs font-bold text-slate-500">Tax Rate (%)</label>
+                                        </div>
                                         <input
                                             type="number"
                                             step="0.01"
@@ -283,17 +285,17 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                 </div>
                             </div>
 
-                            <div className="flex gap-4 pt-4 border-t border-slate-100">
+                            <div className="flex justify-between pt-8 border-t border-slate-100 mt-4">
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
+                                    className="px-10 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-[2] py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                                    className="px-12 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
                                 >
                                     {editingProduct ? 'Update Product' : 'Save Product'}
                                 </button>
