@@ -12,10 +12,28 @@ interface Module {
 const modules: Module[] = [
   { id: 'tempo', name: 'Tempo', icon: 'fa-clock', active: true },
   { id: 'crm', name: 'CRM', icon: 'fa-handshake', active: false },
+  { id: 'projects', name: 'Projects', icon: 'fa-folder-tree', active: false },
   { id: 'employees', name: 'Employees', icon: 'fa-user-tie', active: false },
   { id: 'suppliers', name: 'Suppliers', icon: 'fa-truck', active: false },
   { id: 'configuration', name: 'Configuration', icon: 'fa-gears', active: false },
 ];
+
+// Default route for each module
+const moduleDefaultRoutes: Record<string, View> = {
+  'tempo': 'tempo/tracker',
+  'crm': 'crm/clients',
+  'projects': 'projects/manage',
+  'configuration': 'configuration/users',
+};
+
+// Get module from route
+const getModuleFromRoute = (route: View): string => {
+  if (route.startsWith('tempo/')) return 'tempo';
+  if (route.startsWith('crm/')) return 'crm';
+  if (route.startsWith('projects/')) return 'projects';
+  if (route.startsWith('configuration/')) return 'configuration';
+  return 'tempo'; // default
+};
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,9 +49,20 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isModuleSwitcherOpen, setIsModuleSwitcherOpen] = useState(false);
-  const [activeModule, setActiveModule] = useState<Module>(modules[0]);
   const menuRef = useRef<HTMLDivElement>(null);
   const moduleSwitcherRef = useRef<HTMLDivElement>(null);
+
+  // Compute active module from current route
+  const activeModule = modules.find(m => m.id === getModuleFromRoute(activeView)) || modules[0];
+
+  // Filter modules based on user role
+  const accessibleModules = modules.filter(m => {
+    if (m.id === 'configuration') return currentUser.role === 'admin';
+    if (m.id === 'crm' || m.id === 'projects') return currentUser.role === 'admin' || currentUser.role === 'manager';
+    // employees and suppliers are placeholders for future
+    if (m.id === 'employees' || m.id === 'suppliers') return false;
+    return true;
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -49,12 +78,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
   }, []);
 
   const handleModuleSwitch = (module: Module) => {
-    setActiveModule(module);
     setIsModuleSwitcherOpen(false);
-    // Future: Handle navigation to different modules
-    if (module.id !== 'tempo') {
-      // Placeholder for future module navigation
-      console.log(`Switching to module: ${module.name}`);
+    // Navigate to the default route for the selected module
+    const defaultRoute = moduleDefaultRoutes[module.id];
+    if (defaultRoute) {
+      onViewChange(defaultRoute);
     }
   };
 
@@ -132,7 +160,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
                 ${isCollapsed ? 'left-full ml-2 top-0 w-56' : 'left-0 right-0'}`}
               >
                 <div className="p-2 space-y-1">
-                  {modules.map((module) => (
+                  {accessibleModules.map((module) => (
                     <button
                       key={module.id}
                       onClick={() => handleModuleSwitch(module)}
@@ -166,91 +194,108 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
             )}
           </div>
 
-          <NavItem
-            icon="fa-list-check"
-            label="Time Tracker"
-            active={activeView === 'tracker'}
-            isCollapsed={isCollapsed}
-            onClick={() => { onViewChange('tracker'); setIsMobileMenuOpen(false); }}
-          />
+          {/* Tempo Module Nav Items */}
+          {activeModule.id === 'tempo' && (
+            <>
+              <NavItem
+                icon="fa-list-check"
+                label="Time Tracker"
+                active={activeView === 'tempo/tracker'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('tempo/tracker'); setIsMobileMenuOpen(false); }}
+              />
 
-          <NavItem
-            icon="fa-chart-pie"
-            label="Reports"
-            active={activeView === 'reports'}
-            isCollapsed={isCollapsed}
-            onClick={() => { onViewChange('reports'); setIsMobileMenuOpen(false); }}
-          />
+              <NavItem
+                icon="fa-chart-pie"
+                label="Reports"
+                active={activeView === 'tempo/reports'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('tempo/reports'); setIsMobileMenuOpen(false); }}
+              />
 
-          {isManagement && (
+              <NavItem
+                icon="fa-repeat"
+                label="Recurring Tasks"
+                active={activeView === 'tempo/recurring'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('tempo/recurring'); setIsMobileMenuOpen(false); }}
+              />
+
+              <NavItem
+                icon="fa-folder-tree"
+                label="Projects"
+                active={activeView === 'tempo/projects'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('tempo/projects'); setIsMobileMenuOpen(false); }}
+              />
+
+              <NavItem
+                icon="fa-tasks"
+                label="Tasks"
+                active={activeView === 'tempo/tasks'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('tempo/tasks'); setIsMobileMenuOpen(false); }}
+              />
+            </>
+          )}
+
+          {/* CRM Module Nav Items */}
+          {activeModule.id === 'crm' && (
             <NavItem
               icon="fa-building"
               label="Clients"
-              active={activeView === 'clients'}
+              active={activeView === 'crm/clients'}
               isCollapsed={isCollapsed}
-              onClick={() => { onViewChange('clients'); setIsMobileMenuOpen(false); }}
+              onClick={() => { onViewChange('crm/clients'); setIsMobileMenuOpen(false); }}
             />
           )}
 
-          <NavItem
-            icon="fa-folder-tree"
-            label="Projects"
-            active={activeView === 'projects'}
-            isCollapsed={isCollapsed}
-            onClick={() => { onViewChange('projects'); setIsMobileMenuOpen(false); }}
-          />
-
-          <NavItem
-            icon="fa-tasks"
-            label="Tasks"
-            active={activeView === 'tasks'}
-            isCollapsed={isCollapsed}
-            onClick={() => { onViewChange('tasks'); setIsMobileMenuOpen(false); }}
-          />
-
-          {isManagement && (
-            <NavItem
-              icon="fa-users"
-              label="Users"
-              active={activeView === 'users'}
-              isCollapsed={isCollapsed}
-              onClick={() => { onViewChange('users'); setIsMobileMenuOpen(false); }}
-            />
-          )}
-
-          <NavItem
-            icon="fa-repeat"
-            label="Recurring Tasks"
-            active={activeView === 'recurring'}
-            isCollapsed={isCollapsed}
-            onClick={() => { onViewChange('recurring'); setIsMobileMenuOpen(false); }}
-          />
-
-          {isAdmin && (
+          {/* Projects Module Nav Items */}
+          {activeModule.id === 'projects' && (
             <>
-              {!isCollapsed && (
-                <div className="px-2 mt-6 mb-2">
-                  <div className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
-                    Administration
-                  </div>
-                </div>
-              )}
-              {isCollapsed && <div className="h-4"></div>}
+              <NavItem
+                icon="fa-folder-tree"
+                label="Manage Projects"
+                active={activeView === 'projects/manage'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('projects/manage'); setIsMobileMenuOpen(false); }}
+              />
+
+              <NavItem
+                icon="fa-tasks"
+                label="Manage Tasks"
+                active={activeView === 'projects/tasks'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('projects/tasks'); setIsMobileMenuOpen(false); }}
+              />
+            </>
+          )}
+
+          {/* Configuration Module Nav Items */}
+          {activeModule.id === 'configuration' && (
+            <>
+              <NavItem
+                icon="fa-users"
+                label="Users"
+                active={activeView === 'configuration/users'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('configuration/users'); setIsMobileMenuOpen(false); }}
+              />
 
               <NavItem
                 icon="fa-shield-halved"
                 label="Authentication"
-                active={activeView === 'admin-auth'}
+                active={activeView === 'configuration/authentication'}
                 isCollapsed={isCollapsed}
-                onClick={() => { onViewChange('admin-auth'); setIsMobileMenuOpen(false); }}
+                onClick={() => { onViewChange('configuration/authentication'); setIsMobileMenuOpen(false); }}
               />
 
               <NavItem
                 icon="fa-sliders"
                 label="General"
-                active={activeView === 'administration-general'}
+                active={activeView === 'configuration/general'}
                 isCollapsed={isCollapsed}
-                onClick={() => { onViewChange('administration-general'); setIsMobileMenuOpen(false); }}
+                onClick={() => { onViewChange('configuration/general'); setIsMobileMenuOpen(false); }}
               />
             </>
           )}
@@ -268,9 +313,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
           <h2 className="text-lg font-semibold text-slate-800 capitalize flex items-center gap-3">
             <span className="md:hidden w-2 h-6 bg-indigo-500 rounded-full"></span>
             {isNotFound ? 'Page Not Found' :
-              activeView === 'admin-auth' ? 'Authentication Settings' :
-                activeView === 'administration-general' ? 'General Administration' :
-                  activeView.replace('-', ' ')}
+              activeView === 'configuration/authentication' ? 'Authentication Settings' :
+                activeView === 'configuration/general' ? 'General Administration' :
+                  activeView === 'projects/manage' ? 'Project Management' :
+                    activeView === 'projects/tasks' ? 'Task Management' :
+                      activeView.split('/').pop()?.replace('-', ' ') || activeView}
           </h2>
           <div className="flex items-center gap-6">
             <span className="text-sm text-slate-400 font-medium hidden lg:inline">

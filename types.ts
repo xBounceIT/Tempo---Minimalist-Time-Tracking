@@ -83,4 +83,22 @@ export interface LdapConfig {
 
 export type TrackerViewMode = 'daily' | 'weekly';
 
-export type View = 'tracker' | 'reports' | 'projects' | 'tasks' | 'clients' | 'settings' | 'users' | 'recurring' | 'admin-auth' | 'administration-general';
+export type View =
+  // Tempo module
+  | 'tempo/tracker'
+  | 'tempo/reports'
+  | 'tempo/recurring'
+  | 'tempo/tasks'
+  | 'tempo/projects'
+  // Configuration module (admin)
+  | 'configuration/users'
+  | 'configuration/authentication'
+  | 'configuration/general'
+  // CRM module
+  | 'crm/clients'
+  // Projects module
+  | 'projects/manage'
+  | 'projects/tasks'
+  // Standalone
+  | 'settings';
+

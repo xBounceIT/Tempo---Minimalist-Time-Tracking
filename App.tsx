@@ -13,6 +13,8 @@ import RecurringManager from './components/RecurringManager';
 import ClientsView from './components/ClientsView';
 import ProjectsView from './components/ProjectsView';
 import TasksView from './components/TasksView';
+import TasksReadOnly from './components/TasksReadOnly';
+import ProjectsReadOnly from './components/ProjectsReadOnly';
 import AdminAuthentication from './components/AdminAuthentication';
 import GeneralSettings from './components/GeneralSettings';
 import CustomSelect from './components/CustomSelect';
@@ -397,10 +399,16 @@ const App: React.FC = () => {
   const [viewingUserId, setViewingUserId] = useState<string>('');
   const [viewingUserAssignments, setViewingUserAssignments] = useState<{ clientIds: string[], projectIds: string[], taskIds: string[] } | null>(null);
   const [activeView, setActiveView] = useState<View | '404'>(() => {
-    const rawHash = window.location.hash.replace('#', '');
+    const rawHash = window.location.hash.replace('#/', '').replace('#', '');
     const hash = rawHash as View;
-    const validViews: View[] = ['tracker', 'reports', 'projects', 'tasks', 'clients', 'settings', 'users', 'recurring', 'admin-auth', 'administration-general'];
-    return validViews.includes(hash) ? hash : (rawHash === '' ? 'tracker' : '404');
+    const validViews: View[] = [
+      'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
+      'configuration/users', 'configuration/authentication', 'configuration/general',
+      'crm/clients',
+      'projects/manage', 'projects/tasks',
+      'settings'
+    ];
+    return validViews.includes(hash) ? hash : (rawHash === '' ? 'tempo/tracker' : '404');
   });
 
   const isRouteAccessible = useMemo(() => {
@@ -408,16 +416,23 @@ const App: React.FC = () => {
     if (activeView === '404') return false;
 
     const permissions: Record<View, UserRole[]> = {
-      'tracker': ['admin', 'manager', 'user'],
-      'reports': ['admin', 'manager', 'user'],
-      'projects': ['admin', 'manager', 'user'],
-      'tasks': ['admin', 'manager', 'user'],
-      'recurring': ['admin', 'manager', 'user'],
-      'settings': ['admin', 'manager', 'user'],
-      'clients': ['admin', 'manager'],
-      'users': ['admin', 'manager'],
-      'admin-auth': ['admin'],
-      'administration-general': ['admin']
+      // Tempo module - all users
+      'tempo/tracker': ['admin', 'manager', 'user'],
+      'tempo/reports': ['admin', 'manager', 'user'],
+      'tempo/recurring': ['admin', 'manager', 'user'],
+      'tempo/tasks': ['admin', 'manager', 'user'],
+      'tempo/projects': ['admin', 'manager', 'user'],
+      // Configuration module - admin only (users is admin/manager)
+      'configuration/users': ['admin', 'manager'],
+      'configuration/authentication': ['admin'],
+      'configuration/general': ['admin'],
+      // CRM module - admin/manager
+      'crm/clients': ['admin', 'manager'],
+      // Projects module - admin/manager
+      'projects/manage': ['admin', 'manager'],
+      'projects/tasks': ['admin', 'manager'],
+      // Standalone
+      'settings': ['admin', 'manager', 'user']
     };
 
     const allowedRoles = permissions[activeView as View];
@@ -435,16 +450,22 @@ const App: React.FC = () => {
 
   // Sync hash with activeView
   useEffect(() => {
-    window.location.hash = activeView;
+    window.location.hash = '/' + activeView;
   }, [activeView]);
 
   // Sync state with hash (for back/forward buttons)
   useEffect(() => {
     const handleHashChange = () => {
-      const rawHash = window.location.hash.replace('#', '');
+      const rawHash = window.location.hash.replace('#/', '').replace('#', '');
       const hash = rawHash as View;
-      const validViews: View[] = ['tracker', 'reports', 'projects', 'tasks', 'clients', 'settings', 'users', 'recurring', 'admin-auth', 'administration-general'];
-      const nextView = validViews.includes(hash) ? hash : (rawHash === '' ? 'tracker' : '404');
+      const validViews: View[] = [
+        'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
+        'configuration/users', 'configuration/authentication', 'configuration/general',
+        'crm/clients',
+        'projects/manage', 'projects/tasks',
+        'settings'
+      ];
+      const nextView = validViews.includes(hash) ? hash : (rawHash === '' ? 'tempo/tracker' : '404');
       if (nextView !== activeView) {
         setActiveView(nextView);
       }
@@ -455,7 +476,7 @@ const App: React.FC = () => {
 
   // Reset viewingUserId when navigating away from tracker
   useEffect(() => {
-    if (activeView !== 'tracker' && currentUser && viewingUserId !== currentUser.id) {
+    if (activeView !== 'tempo/tracker' && currentUser && viewingUserId !== currentUser.id) {
       setViewingUserId(currentUser.id);
     }
   }, [activeView, currentUser, viewingUserId]);
@@ -971,10 +992,10 @@ const App: React.FC = () => {
       isNotFound={!isRouteAccessible}
     >
       {!isRouteAccessible ? (
-        <NotFound onReturn={() => setActiveView('tracker')} />
+        <NotFound onReturn={() => setActiveView('tempo/tracker')} />
       ) : (
         <>
-          {activeView === 'tracker' && (
+          {activeView === 'tempo/tracker' && (
             <TrackerView
               entries={entries.filter(e => e.userId === viewingUserId)}
               clients={filteredClients} projects={filteredProjects} projectTasks={filteredTasks}
@@ -993,7 +1014,7 @@ const App: React.FC = () => {
               onRecurringAction={handleRecurringAction}
             />
           )}
-          {activeView === 'reports' && (
+          {activeView === 'tempo/reports' && (
             <Reports
               entries={
                 (currentUser.role === 'admin' || currentUser.role === 'manager')
@@ -1011,7 +1032,7 @@ const App: React.FC = () => {
             />
           )}
 
-          {activeView === 'clients' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
+          {activeView === 'crm/clients' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
             <ClientsView
               clients={clients}
               onAddClient={addClient}
@@ -1020,7 +1041,22 @@ const App: React.FC = () => {
             />
           )}
 
-          {activeView === 'projects' && (
+          {activeView === 'tempo/projects' && (
+            <ProjectsReadOnly
+              projects={projects}
+              clients={clients}
+            />
+          )}
+
+          {activeView === 'tempo/tasks' && (
+            <TasksReadOnly
+              tasks={projectTasks}
+              projects={projects}
+              clients={clients}
+            />
+          )}
+
+          {activeView === 'projects/manage' && (
             <ProjectsView
               projects={projects}
               clients={clients}
@@ -1031,7 +1067,7 @@ const App: React.FC = () => {
             />
           )}
 
-          {activeView === 'tasks' && (
+          {activeView === 'projects/tasks' && (
             <TasksView
               tasks={projectTasks}
               projects={projects}
@@ -1051,7 +1087,7 @@ const App: React.FC = () => {
             />
           )}
 
-          {(currentUser.role === 'admin' || currentUser.role === 'manager') && activeView === 'users' && (
+          {(currentUser.role === 'admin' || currentUser.role === 'manager') && activeView === 'configuration/users' && (
             <UserManagement
               users={users}
               clients={clients}
@@ -1066,18 +1102,18 @@ const App: React.FC = () => {
             />
           )}
 
-          {currentUser.role === 'admin' && activeView === 'administration-general' && (
+          {currentUser.role === 'admin' && activeView === 'configuration/general' && (
             <GeneralSettings
               settings={generalSettings}
               onUpdate={handleUpdateGeneralSettings}
             />
           )}
 
-          {currentUser.role === 'admin' && activeView === 'admin-auth' && (
+          {currentUser.role === 'admin' && activeView === 'configuration/authentication' && (
             <AdminAuthentication config={ldapConfig} onSave={handleSaveLdapConfig} />
           )}
 
-          {activeView === 'recurring' && <RecurringManager tasks={projectTasks} projects={projects} clients={clients} onAction={handleRecurringAction} />}
+          {activeView === 'tempo/recurring' && <RecurringManager tasks={projectTasks} projects={projects} clients={clients} onAction={handleRecurringAction} />}
           {activeView === 'settings' && <Settings />}
         </>
       )}
