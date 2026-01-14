@@ -528,7 +528,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                       />
                     </div>
                     <div className="space-y-2">
-                    <div className="space-y-2">
                       {visibleClients.map(client => (
                         <label key={client.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${assignments.clientIds.includes(client.id)
                           ? 'bg-indigo-50 border-indigo-200 shadow-sm'
@@ -652,10 +651,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
               </button>
             </div>
           </div>
-          </div>
-      )}
         </div>
-      );
+      )}
+    </div>
+  );
 };
 
-      export default UserManagement;
+export default UserManagement;
