@@ -184,6 +184,7 @@ const TrackerView: React.FC<{
                 userRole={userRole}
                 dailyGoal={dailyGoal}
                 currentDayTotal={dailyTotal}
+                enableAiInsights={enableAiInsights}
               />
 
               <div className="space-y-4">

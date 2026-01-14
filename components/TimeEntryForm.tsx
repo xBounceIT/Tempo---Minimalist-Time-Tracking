@@ -15,6 +15,7 @@ interface TimeEntryFormProps {
   userRole: UserRole;
   dailyGoal: number;
   currentDayTotal: number;
+  enableAiInsights: boolean;
 }
 
 // Helper to format custom pattern
@@ -46,11 +47,19 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
   onMakeRecurring,
   userRole,
   dailyGoal,
-  currentDayTotal
+  currentDayTotal,
+  enableAiInsights
 }) => {
   const [isSmartMode, setIsSmartMode] = useState(false);
   const [smartInput, setSmartInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Pivot back to manual mode if AI is disabled
+  useEffect(() => {
+    if (!enableAiInsights && isSmartMode) {
+      setIsSmartMode(false);
+    }
+  }, [enableAiInsights, isSmartMode]);
 
   // Manual fields
   const [date, setDate] = useState(selectedDate || new Date().toISOString().split('T')[0]);
@@ -227,12 +236,14 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
             For {new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
           </span>
         </div>
-        <button
-          onClick={() => setIsSmartMode(!isSmartMode)}
-          className="text-xs font-medium text-indigo-600 hover:text-indigo-700 underline underline-offset-4"
-        >
-          {isSmartMode ? 'Switch to Manual' : 'Switch to Magic Input'}
-        </button>
+        {enableAiInsights && (
+          <button
+            onClick={() => setIsSmartMode(!isSmartMode)}
+            className="text-xs font-medium text-indigo-600 hover:text-indigo-700 underline underline-offset-4"
+          >
+            {isSmartMode ? 'Switch to Manual' : 'Switch to Magic Input'}
+          </button>
+        )}
       </div>
 
       {isSmartMode ? (
