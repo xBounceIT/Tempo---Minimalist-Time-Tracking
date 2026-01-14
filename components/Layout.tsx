@@ -432,7 +432,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, active, isCollapsed, onC
       : 'text-slate-400 hover:bg-slate-800 hover:text-white'
       } ${isCollapsed ? 'justify-center' : ''}`}
   >
-    <i className={`fa-solid ${icon} w-5 text-center text-lg ${active ? 'text-white' : 'text-slate-500 group-hover:text-praetor'}`}></i>
+    <i className={`fa-solid ${icon} w-5 text-center text-lg ${active ? 'text-white' : 'text-slate-500 group-hover:text-white'}`}></i>
     {!isCollapsed && <span className="font-semibold text-sm whitespace-nowrap overflow-hidden">{label}</span>}
 
     {isCollapsed && (
