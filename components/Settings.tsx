@@ -90,7 +90,7 @@ const Settings: React.FC = () => {
     return (
       <div className="max-w-4xl mx-auto flex items-center justify-center py-20">
         <div className="text-center">
-          <i className="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-600 mb-3"></i>
+          <i className="fa-solid fa-circle-notch fa-spin text-praetor text-3xl mb-3"></i>
           <p className="text-slate-500 font-medium">Loading settings...</p>
         </div>
       </div>
@@ -110,7 +110,7 @@ const Settings: React.FC = () => {
       <div className="space-y-8">
         <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
-            <i className="fa-solid fa-user text-indigo-500"></i>
+            <i className="fa-solid fa-user text-praetor"></i>
             <h3 className="font-bold text-slate-800">User Profile</h3>
           </div>
           <div className="p-6 space-y-6">
@@ -121,7 +121,7 @@ const Settings: React.FC = () => {
                   type="text"
                   value={settings.fullName}
                   onChange={e => setSettings({ ...settings, fullName: e.target.value })}
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-semibold"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none transition-all text-sm font-semibold"
                 />
               </div>
               <div>
@@ -130,7 +130,7 @@ const Settings: React.FC = () => {
                   type="email"
                   value={settings.email}
                   onChange={e => setSettings({ ...settings, email: e.target.value })}
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-semibold"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none transition-all text-sm font-semibold"
                 />
               </div>
             </div>
@@ -138,7 +138,7 @@ const Settings: React.FC = () => {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className={`px-8 py-3 text-white font-bold rounded-xl transition-all duration-300 ease-in-out shadow-md flex items-center gap-2 disabled:opacity-50 ${isSaved ? 'bg-emerald-500 shadow-emerald-100 hover:bg-emerald-600' : 'bg-indigo-600 shadow-indigo-100 hover:bg-indigo-700'}`}
+                className={`px-8 py-3 text-white font-bold rounded-xl transition-all duration-300 ease-in-out shadow-md flex items-center gap-2 disabled:opacity-50 ${isSaved ? 'bg-emerald-500 shadow-emerald-100 hover:bg-emerald-600' : 'bg-praetor shadow-slate-200 hover:bg-slate-800'}`}
               >
                 {isSaving ? (
                   <>
@@ -161,7 +161,7 @@ const Settings: React.FC = () => {
 
         <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
-            <i className="fa-solid fa-lock text-indigo-500"></i>
+            <i className="fa-solid fa-lock text-praetor"></i>
             <h3 className="font-bold text-slate-800">Password Settings</h3>
           </div>
           <div className="p-6">
@@ -179,7 +179,7 @@ const Settings: React.FC = () => {
                   type="password"
                   value={currentPassword}
                   onChange={e => setCurrentPassword(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-semibold"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none transition-all text-sm font-semibold"
                   placeholder="••••••••"
                   required
                 />
@@ -191,7 +191,7 @@ const Settings: React.FC = () => {
                   type="password"
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-semibold"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none transition-all text-sm font-semibold"
                   placeholder="••••••••"
                   required
                 />
@@ -202,7 +202,7 @@ const Settings: React.FC = () => {
                   type="password"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-semibold"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none transition-all text-sm font-semibold"
                   placeholder="••••••••"
                   required
                 />
@@ -213,7 +213,7 @@ const Settings: React.FC = () => {
               <button
                 onClick={handlePasswordUpdate}
                 disabled={isSavingPassword}
-                className={`px-8 py-3 text-white font-bold rounded-xl transition-all duration-300 ease-in-out shadow-md flex items-center gap-2 disabled:opacity-50 ${passwordSuccess ? 'bg-emerald-500 shadow-emerald-100 hover:bg-emerald-600' : 'bg-indigo-600 shadow-indigo-100 hover:bg-indigo-700'}`}
+                className={`px-8 py-3 text-white font-bold rounded-xl transition-all duration-300 ease-in-out shadow-md flex items-center gap-2 disabled:opacity-50 ${passwordSuccess ? 'bg-emerald-500 shadow-emerald-100 hover:bg-emerald-600' : 'bg-praetor shadow-slate-200 hover:bg-slate-800'}`}
               >
                 {isSavingPassword ? (
                   <>

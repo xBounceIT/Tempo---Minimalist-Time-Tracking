@@ -309,13 +309,13 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
         ></div>
         <button
           onClick={() => setActiveTab('dashboard')}
-          className={`relative z-10 w-full py-2 text-sm font-bold transition-colors duration-300 ${activeTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`relative z-10 w-full py-2 text-sm font-bold transition-colors duration-300 ${activeTab === 'dashboard' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
         >
           Dashboard
         </button>
         <button
           onClick={() => setActiveTab('detailed')}
-          className={`relative z-10 w-full py-2 text-sm font-bold transition-colors duration-300 ${activeTab === 'detailed' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`relative z-10 w-full py-2 text-sm font-bold transition-colors duration-300 ${activeTab === 'detailed' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
         >
           Detailed Report
         </button>
@@ -366,12 +366,12 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                       />
                       <Bar
                         dataKey="hours"
-                        fill="#6366f1"
+                        fill="#272b3e"
                         radius={[4, 4, 0, 0]}
                         barSize={40}
                       >
                         {weeklyActivityData.map((entry, index) => {
-                          let color = '#6366f1'; // Default Purple (Below Goal)
+                          let color = '#272b3e'; // Default Praetor (Below Goal)
 
                           if (entry.isHoliday && entry.hours === 0) {
                             color = '#e2e8f0'; // Gray for empty holidays
@@ -423,7 +423,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-4">1. Time Period</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">1. Time Period</h4>
                 <div className="space-y-4">
                   <CustomSelect
                     label="Selection"
@@ -462,7 +462,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-4">2. Detailed Filters</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">2. Detailed Filters</h4>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-4">
                     {canFilterUsers && (
@@ -514,7 +514,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
 
             <div className="border-t border-slate-100 pt-8 grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-4">3. Visible Fields</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">3. Visible Fields</h4>
                 <div className="flex flex-wrap gap-6">
                   {Object.entries(visibleFields).map(([key, value]) => (
                     <label key={key} className="flex items-center gap-2 cursor-pointer">
@@ -522,7 +522,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                         type="checkbox"
                         checked={value}
                         onChange={e => setVisibleFields({ ...visibleFields, [key]: e.target.checked })}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        className="rounded border-slate-300 text-praetor focus:ring-praetor"
                       />
                       <span className="text-xs font-bold text-slate-600 capitalize">{key}</span>
                     </label>
@@ -531,7 +531,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-4">4. Grouping</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">4. Grouping</h4>
                 <div className="flex gap-4">
                   {[0, 1, 2].map(i => (
                     <CustomSelect
@@ -554,7 +554,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
             <div className="pt-6 flex justify-center">
               <button
                 onClick={generateReport}
-                className="bg-indigo-600 text-white px-12 py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95 flex items-center gap-3"
+                className="bg-praetor text-white px-12 py-3 rounded-xl font-bold hover:bg-slate-800 shadow-xl shadow-slate-200 transition-all active:scale-95 flex items-center gap-3"
               >
                 <i className="fa-solid fa-file-invoice"></i>
                 Generate Report
@@ -566,14 +566,14 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
             <div className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
               <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-black italic tracking-tighter">PRAETOR <span className="text-indigo-400 font-normal not-italic tracking-normal text-sm ml-2">DETAILED REPORT</span></h3>
+                  <h3 className="text-xl font-black italic tracking-tighter">PRAETOR <span className="text-slate-400 font-normal not-italic tracking-normal text-sm ml-2">DETAILED REPORT</span></h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Generated: {new Date().toLocaleString()}</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-right flex items-center gap-6">
                     <div>
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Grand Total</p>
-                      <p className="text-2xl font-black text-indigo-400">{generatedEntries.reduce((s, e) => s + e.duration, 0).toFixed(2)} hrs</p>
+                      <p className="text-2xl font-black text-white">{generatedEntries.reduce((s, e) => s + e.duration, 0).toFixed(2)} hrs</p>
                     </div>
                     {visibleFields.cost && (
                       <div>
@@ -629,7 +629,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                       link.click();
                       document.body.removeChild(link);
                     }}
-                    className="bg-indigo-600 hover:bg-slate-700 text-white text-xs font-bold uppercase tracking-widest py-2 px-4 rounded-lg transition-colors border border-indigo-500 hover:border-slate-600 shadow-lg shadow-indigo-900/20"
+                    className="bg-praetor hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-widest py-2 px-4 rounded-lg transition-colors border border-slate-600 hover:border-slate-500 shadow-lg shadow-slate-900/20"
                   >
                     <i className="fa-solid fa-download mr-2"></i>
                     Export CSV
@@ -659,7 +659,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                     ) : generatedEntries.map(e => (
                       <tr key={e.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-6 py-4 text-xs font-bold text-slate-600 whitespace-nowrap">{new Date(e.date).toLocaleDateString()}</td>
-                        {visibleFields.user && <td className="px-6 py-4 text-xs font-bold text-indigo-600">{getUserName(e.userId)}</td>}
+                        {visibleFields.user && <td className="px-6 py-4 text-xs font-bold text-praetor">{getUserName(e.userId)}</td>}
                         {visibleFields.client && <td className="px-6 py-4 text-xs font-medium text-slate-800">{e.clientName}</td>}
                         {visibleFields.project && <td className="px-6 py-4 text-xs font-medium text-slate-800">{e.projectName}</td>}
                         {visibleFields.task && <td className="px-6 py-4 text-xs font-bold text-slate-800">{e.task}</td>}

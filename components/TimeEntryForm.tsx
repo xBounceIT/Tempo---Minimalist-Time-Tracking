@@ -232,14 +232,14 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">
             {isSmartMode ? 'Magic Entry (AI)' : 'Log Time'}
           </h3>
-          <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded uppercase tracking-tight">
+          <span className="px-2 py-0.5 bg-slate-100 text-praetor text-[10px] font-bold rounded uppercase tracking-tight">
             For {new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
           </span>
         </div>
         {enableAiInsights && (
           <button
             onClick={() => setIsSmartMode(!isSmartMode)}
-            className="text-xs font-medium text-indigo-600 hover:text-indigo-700 underline underline-offset-4"
+            className="text-xs font-medium text-praetor hover:text-slate-700 underline underline-offset-4"
           >
             {isSmartMode ? 'Switch to Manual' : 'Switch to Magic Input'}
           </button>
@@ -254,12 +254,12 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
               value={smartInput}
               onChange={(e) => setSmartInput(e.target.value)}
               placeholder="e.g., '3 hours on Frontend Dev for Website Redesign with some extra notes'"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all pr-12 text-slate-700"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor focus:outline-none transition-all pr-12 text-slate-700"
               disabled={isLoading}
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
               {isLoading ? (
-                <i className="fa-solid fa-circle-notch fa-spin text-indigo-500"></i>
+                <i className="fa-solid fa-circle-notch fa-spin text-praetor"></i>
               ) : (
                 <i className="fa-solid fa-wand-magic-sparkles text-slate-300"></i>
               )}
@@ -268,7 +268,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
           <button
             type="submit"
             disabled={isLoading || !smartInput}
-            className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 bg-praetor text-white font-semibold rounded-lg hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
           >
             Log with AI
           </button>
@@ -311,7 +311,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                   placeholder="Type custom task name..."
                   value={selectedTaskName === 'custom' ? '' : selectedTaskName}
                   onChange={(e) => { setSelectedTaskName(e.target.value); setSelectedTaskId(''); }}
-                  className="mt-2 w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm animate-in fade-in slide-in-from-top-1 duration-200"
+                  className="mt-2 w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-sm animate-in fade-in slide-in-from-top-1 duration-200"
                 />
               )}
             </div>
@@ -327,7 +327,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                   if (errors.hours) setErrors({});
                 }}
                 placeholder="0.0"
-                className={`w-full px-3 py-2 bg-slate-50 border rounded-lg focus:ring-2 outline-none text-sm font-bold transition-colors ${errors.hours ? 'border-red-500 focus:ring-red-200 bg-red-50' : 'border-slate-200 focus:ring-indigo-500'}`}
+                className={`w-full px-3 py-2 bg-slate-50 border rounded-lg focus:ring-2 outline-none text-sm font-bold transition-colors ${errors.hours ? 'border-red-500 focus:ring-red-200 bg-red-50' : 'border-slate-200 focus:ring-praetor'}`}
               />
               {errors.hours && <p className="text-[10px] text-red-500 mt-1 font-bold animate-in fade-in">{errors.hours}</p>}
             </div>
@@ -341,7 +341,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Additional details about the task..."
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-sm"
               />
             </div>
 
@@ -356,12 +356,12 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                   </div>
                 )}
                 {selectedTaskId && (
-                  <div className={`transition-all duration-300 border rounded-xl py-1 ${makeRecurring ? 'bg-indigo-50 border-indigo-100' : 'bg-transparent border-transparent'}`}>
+                  <div className={`transition-all duration-300 border rounded-xl py-1 ${makeRecurring ? 'bg-slate-50 border-slate-200' : 'bg-transparent border-transparent'}`}>
                     <div className="flex items-center">
                       <button
                         type="button"
                         onClick={() => setMakeRecurring(!makeRecurring)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors ${makeRecurring ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors ${makeRecurring ? 'text-praetor' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                       >
                         <i className={`fa-solid fa-repeat ${makeRecurring ? 'fa-spin' : ''}`}></i>
                         Repeat Task?
@@ -369,7 +369,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
 
                       {makeRecurring && (
                         <div className="flex items-center gap-2 px-2 animate-in fade-in slide-in-from-left-2 duration-200">
-                          <div className="h-4 w-px bg-indigo-200 mx-1"></div>
+                          <div className="h-4 w-px bg-slate-200 mx-1"></div>
                           <div className="min-w-[180px]">
                             <CustomSelect
                               options={[
@@ -382,15 +382,15 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                               onChange={handleRecurrenceChange}
                               className="text-xs"
                               placeholder="Pattern..."
-                              buttonClassName="bg-white border border-indigo-200 text-indigo-700 font-medium py-2 px-2 text-xs"
+                              buttonClassName="bg-white border border-slate-200 text-praetor font-medium py-2 px-2 text-xs"
                             />
                           </div>
-                          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider ml-6">Until</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-6">Until</span>
                           <input
                             type="date"
                             value={recurrenceEndDate}
                             onChange={(e) => setRecurrenceEndDate(e.target.value)}
-                            className="text-xs bg-white border border-indigo-200 text-indigo-700 font-medium rounded-md px-2 py-2 outline-none focus:ring-1 focus:ring-indigo-500"
+                            className="text-xs bg-white border border-slate-200 text-praetor font-medium rounded-md px-2 py-2 outline-none focus:ring-1 focus:ring-praetor"
                           />
                         </div>
                       )}
@@ -401,7 +401,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
 
               <button
                 onClick={handleSubmit}
-                className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap"
+                className="bg-praetor text-white px-6 py-2.5 rounded-xl hover:bg-slate-700 transition-all shadow-md hover:shadow-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap"
               >
                 <i className="fa-solid fa-check"></i> Log Time
               </button>

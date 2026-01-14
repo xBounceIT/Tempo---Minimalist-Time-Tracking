@@ -42,7 +42,7 @@ const CustomRepeatModal: React.FC<CustomRepeatModalProps> = ({ isOpen, onClose, 
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
                 <div className="p-6 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
                     <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i className="fa-solid fa-calendar-days text-indigo-500"></i>
+                        <i className="fa-solid fa-calendar-days text-praetor"></i>
                         Custom Repeat
                     </h3>
                     <p className="text-xs text-slate-500 mt-1">Configure complex recurrence patterns</p>
@@ -81,7 +81,7 @@ const CustomRepeatModal: React.FC<CustomRepeatModalProps> = ({ isOpen, onClose, 
                     </button>
                     <button
                         onClick={handleSave}
-                        className="flex-1 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95"
+                        className="flex-1 py-2.5 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                     >
                         Set Pattern
                     </button>

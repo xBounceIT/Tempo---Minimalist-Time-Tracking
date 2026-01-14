@@ -93,24 +93,24 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
             <div className="flex border-b border-slate-200 gap-8">
                 <button
                     onClick={() => setActiveTab('localization')}
-                    className={`pb-4 text-sm font-bold transition-all relative ${activeTab === 'localization' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`pb-4 text-sm font-bold transition-all relative ${activeTab === 'localization' ? 'text-praetor' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     Localization
-                    {activeTab === 'localization' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"></div>}
+                    {activeTab === 'localization' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-praetor rounded-full"></div>}
                 </button>
                 <button
                     onClick={() => setActiveTab('tracking')}
-                    className={`pb-4 text-sm font-bold transition-all relative ${activeTab === 'tracking' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`pb-4 text-sm font-bold transition-all relative ${activeTab === 'tracking' ? 'text-praetor' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     Tracking Preferences
-                    {activeTab === 'tracking' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"></div>}
+                    {activeTab === 'tracking' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-praetor rounded-full"></div>}
                 </button>
                 <button
                     onClick={() => setActiveTab('ai')}
-                    className={`pb-4 text-sm font-bold transition-all relative ${activeTab === 'ai' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`pb-4 text-sm font-bold transition-all relative ${activeTab === 'ai' ? 'text-praetor' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     AI Capabilities
-                    {activeTab === 'ai' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"></div>}
+                    {activeTab === 'ai' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-praetor rounded-full"></div>}
                 </button>
             </div>
 
@@ -118,7 +118,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                 {activeTab === 'localization' && (
                     <section className="bg-white rounded-2xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-left-4 duration-300">
                         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3 rounded-t-2xl">
-                            <i className="fa-solid fa-globe text-indigo-500"></i>
+                            <i className="fa-solid fa-globe text-praetor"></i>
                             <h3 className="font-bold text-slate-800">Localization & Display</h3>
                         </div>
 
@@ -141,7 +141,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                 {activeTab === 'tracking' && (
                     <section className="bg-white rounded-2xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-300">
                         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3 rounded-t-2xl">
-                            <i className="fa-solid fa-clock text-indigo-500"></i>
+                            <i className="fa-solid fa-clock text-praetor"></i>
                             <h3 className="font-bold text-slate-800">Global Tracking Preferences</h3>
                         </div>
 
@@ -155,7 +155,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                                             step="0.5"
                                             value={dailyLimit}
                                             onChange={e => setDailyLimit(parseFloat(e.target.value))}
-                                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-bold"
+                                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none transition-all text-sm font-bold"
                                         />
                                         <span className="text-xs font-bold text-slate-400 uppercase whitespace-nowrap">hrs / day</span>
                                     </div>
@@ -188,7 +188,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                                         onChange={e => setTreatSaturdayAsHoliday(e.target.checked)}
                                         className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-praetor"></div>
                                 </label>
                             </div>
                         </div>
@@ -198,12 +198,12 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                 {activeTab === 'ai' && (
                     <section className="bg-white rounded-2xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-right-4 duration-300">
                         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3 rounded-t-2xl">
-                            <i className="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
+                            <i className="fa-solid fa-wand-magic-sparkles text-praetor"></i>
                             <h3 className="font-bold text-slate-800">AI Capabilities</h3>
                         </div>
 
                         <div className="p-6 space-y-6">
-                            <div className="flex items-center justify-between p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
                                 <div className="max-w-md">
                                     <p className="text-sm font-bold text-slate-800">Enable AI Coach for all users</p>
                                     <p className="text-xs text-slate-500 italic leading-relaxed">When enabled, Gemini will analyze user logs to provide personalized productivity insights and coaching.</p>
@@ -215,7 +215,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                                         onChange={e => setEnableAiInsights(e.target.checked)}
                                         className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-praetor"></div>
                                 </label>
                             </div>
 
@@ -228,14 +228,14 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                                             value={geminiApiKey}
                                             onChange={e => setGeminiApiKey(e.target.value)}
                                             placeholder="Enter your Google Gemini API Key"
-                                            className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-semibold pr-10"
+                                            className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none transition-all text-sm font-semibold pr-10"
                                         />
                                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
                                             <i className="fa-brands fa-google"></i>
                                         </div>
                                     </div>
                                     <p className="mt-2 text-[10px] text-slate-500 italic leading-relaxed">
-                                        Required for AI features. Your key is stored securely. Get one at <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Google AI Studio</a>.
+                                        Required for AI features. Your key is stored securely. Get one at <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-praetor hover:underline">Google AI Studio</a>.
                                     </p>
                                 </div>
                             )}
@@ -251,7 +251,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                             ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100'
                             : isSaving || !hasChanges
                                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-                                : 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700'
+                                : 'bg-praetor text-white shadow-lg shadow-slate-200 hover:bg-slate-700'
                             }`}
                     >
                         {isSaving ? (

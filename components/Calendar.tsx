@@ -94,19 +94,19 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
           if (!isForbidden) onDateSelect(dateStr);
         }}
         className={`relative h-9 w-full flex flex-col items-center justify-center rounded-lg transition-all border ${isSelected
-          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md scale-105 z-10'
+          ? 'bg-praetor text-white border-praetor shadow-md scale-105 z-10'
           : isForbidden
             ? 'bg-red-50 text-red-500 border-red-100 cursor-not-allowed'
             : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0)
               ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
               : isToday
-                ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                ? 'bg-slate-100 text-praetor border-slate-200'
                 : 'hover:bg-slate-50 border-transparent text-slate-700'
           }`}
       >
         <span className={`text-sm font-bold ${isForbidden && !isSelected ? 'text-red-600' : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) && !isSelected ? 'text-emerald-700' : ''}`}>{d}</span>
         {hasActivity && (
-          <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : isForbidden ? 'bg-red-300' : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) ? 'bg-emerald-400' : 'bg-indigo-400'}`}></span>
+          <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : isForbidden ? 'bg-red-300' : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) ? 'bg-emerald-400' : 'bg-praetor'}`}></span>
         )}
         {holidayName && (
           <span className="absolute top-0.5 right-0.5 w-1 h-1 bg-red-400 rounded-full animate-pulse"></span>
@@ -158,9 +158,9 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
                     setIsMonthPickerOpen(false);
                   }}
                   className={`text-[11px] font-bold py-2 rounded-lg transition-colors ${idx === month
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-praetor text-white'
                     : idx === currentMonth
-                      ? 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-200'
+                      ? 'bg-slate-100 text-praetor ring-1 ring-inset ring-slate-200'
                       : 'text-slate-600 hover:bg-slate-50'
                     }`}
                 >
@@ -181,9 +181,9 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
                     setIsYearPickerOpen(false);
                   }}
                   className={`text-[11px] font-bold py-2 rounded-lg transition-colors ${y === year
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-praetor text-white'
                     : y === currentYear
-                      ? 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-200'
+                      ? 'bg-slate-100 text-praetor ring-1 ring-inset ring-slate-200'
                       : 'text-slate-600 hover:bg-slate-50'
                     }`}
                 >
@@ -197,7 +197,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
           <button onClick={prevMonth} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors">
             <i className="fa-solid fa-chevron-left text-xs"></i>
           </button>
-          <button onClick={handleTodayClick} className="px-2 text-[10px] font-bold uppercase tracking-wider text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+          <button onClick={handleTodayClick} className="px-2 text-[10px] font-bold uppercase tracking-wider text-praetor hover:bg-slate-100 rounded-lg transition-colors">
             Oggi
           </button>
           <button onClick={nextMonth} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors">

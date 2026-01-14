@@ -250,7 +250,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
                             {currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(new Date(currentWeekStart).setDate(currentWeekStart.getDate() + 4)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </h3>
-                        <p className="text-[10px] font-bold text-indigo-500 uppercase">Week View</p>
+                        <p className="text-[10px] font-bold text-praetor uppercase">Week View</p>
                     </div>
                     <button onClick={() => handleWeekChange(1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                         <i className="fa-solid fa-chevron-right"></i>
@@ -264,7 +264,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                             start.setHours(0, 0, 0, 0);
                             setCurrentWeekStart(start);
                         }}
-                        className="text-[10px] font-bold text-slate-400 hover:text-indigo-600 uppercase tracking-widest ml-2"
+                        className="text-[10px] font-bold text-slate-400 hover:text-praetor uppercase tracking-widest ml-2"
                     >
                         Go to Today
                     </button>
@@ -293,9 +293,9 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                 <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-40">Project</th>
                                 <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-48">Task</th>
                                 {weekDays.map(day => (
-                                    <th key={day.dateStr} className={`px-2 py-4 text-center w-24 relative ${day.isToday ? 'bg-indigo-50/50' : ''} ${day.isForbidden ? 'bg-red-50/50' : ''}`}>
-                                        <p className={`text-[10px] font-black uppercase ${day.isToday ? 'text-indigo-600' : day.isForbidden ? 'text-red-500' : 'text-slate-400'}`}>{day.dayName}</p>
-                                        <p className={`text-lg font-black leading-none ${day.isToday ? 'text-indigo-600' : day.isForbidden ? 'text-red-600' : 'text-slate-700'}`}>{day.dayNum}</p>
+                                    <th key={day.dateStr} className={`px-2 py-4 text-center w-24 relative ${day.isToday ? 'bg-slate-100' : ''} ${day.isForbidden ? 'bg-red-50/50' : ''}`}>
+                                        <p className={`text-[10px] font-black uppercase ${day.isToday ? 'text-praetor' : day.isForbidden ? 'text-red-500' : 'text-slate-400'}`}>{day.dayName}</p>
+                                        <p className={`text-lg font-black leading-none ${day.isToday ? 'text-praetor' : day.isForbidden ? 'text-red-600' : 'text-slate-700'}`}>{day.dayNum}</p>
                                         {day.holidayName && <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" title={day.holidayName}></div>}
                                     </th>
                                 ))}
@@ -355,12 +355,12 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                 placeholder="Week note..."
                                                 value={row.weekNote}
                                                 onChange={(e) => handleRowInfoChange(rowIndex, 'weekNote', e.target.value)}
-                                                className="w-full text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-600 h-7"
+                                                className="w-full text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:border-praetor focus:ring-1 focus:ring-praetor text-slate-600 h-7"
                                             />
                                         </div>
                                     </td>
                                     {weekDays.map(day => (
-                                        <td key={day.dateStr} className={`px-2 py-4 transition-all duration-700 ${day.isToday ? 'bg-indigo-50/10' : ''} ${day.isForbidden ? 'bg-red-50/30' : ''} ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'bg-emerald-50' : ''}`}>
+                                        <td key={day.dateStr} className={`px-2 py-4 transition-all duration-700 ${day.isToday ? 'bg-slate-50' : ''} ${day.isForbidden ? 'bg-red-50/30' : ''} ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'bg-emerald-50' : ''}`}>
                                             <div className="flex flex-col gap-2 items-center relative">
                                                 {showSuccess && (row.days[day.dateStr]?.duration > 0) && (
                                                     <i className="fa-solid fa-circle-check text-emerald-500 text-[10px] absolute -top-2 -right-1 animate-in fade-in zoom-in duration-300"></i>
@@ -373,7 +373,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                     disabled={day.isForbidden}
                                                     value={row.days[day.dateStr]?.duration || ''}
                                                     onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'duration', e.target.value)}
-                                                    className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} ${day.isForbidden ? 'opacity-50 cursor-not-allowed bg-red-50/50 border-red-100' : 'border-slate-200'} border rounded-lg py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none`}
+                                                    className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} ${day.isForbidden ? 'opacity-50 cursor-not-allowed bg-red-50/50 border-red-100' : 'border-slate-200'} border rounded-lg py-2.5 focus:ring-2 focus:ring-praetor outline-none`}
                                                 />
                                                 <input
                                                     type="text"
@@ -381,7 +381,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                     disabled={day.isForbidden}
                                                     value={row.days[day.dateStr]?.note || ''}
                                                     onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'note', e.target.value)}
-                                                    className={`w-16 text-xs bg-slate-50 border border-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded px-2 py-1.5 transition-colors h-7 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-600' : 'text-slate-500 focus:text-slate-700'} ${day.isForbidden ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                    className={`w-16 text-xs bg-slate-50 border border-slate-100 focus:border-praetor focus:ring-1 focus:ring-praetor rounded px-2 py-1.5 transition-colors h-7 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-600' : 'text-slate-500 focus:text-slate-700'} ${day.isForbidden ? 'opacity-30 cursor-not-allowed' : ''}`}
                                                 />
                                             </div>
                                         </td>
@@ -408,14 +408,14 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                 <td colSpan={3} className="px-4 py-4">
                                     <button
                                         onClick={addRow}
-                                        className="text-xs font-bold text-indigo-600 border-2 border-indigo-500 bg-transparent hover:bg-indigo-600 hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 uppercase tracking-widest transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-indigo-500/20"
+                                        className="text-xs font-bold text-praetor border-2 border-praetor bg-transparent hover:bg-praetor hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 uppercase tracking-widest transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-slate-200"
                                     >
                                         <i className="fa-solid fa-plus"></i> Add Row
                                     </button>
                                 </td>
                                 {weekDays.map(day => (
-                                    <td key={day.dateStr} className={`px-2 py-4 text-center ${day.isToday ? 'bg-indigo-50/30' : ''} ${day.isForbidden ? 'bg-red-50/50' : ''}`}>
-                                        <p className={`text-xs font-black ${(dayTotals[day.dateStr] as number) > 8 ? 'text-red-600' : 'text-indigo-600'}`}>
+                                    <td key={day.dateStr} className={`px-2 py-4 text-center ${day.isToday ? 'bg-slate-100' : ''} ${day.isForbidden ? 'bg-red-50/50' : ''}`}>
+                                        <p className={`text-xs font-black ${(dayTotals[day.dateStr] as number) > 8 ? 'text-red-600' : 'text-praetor'}`}>
                                             {(dayTotals[day.dateStr] as number).toFixed(1)}
                                         </p>
                                     </td>
@@ -434,7 +434,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                 <button
                     onClick={handleSubmit}
                     disabled={isLoading || !hasChanges}
-                    className={`bg-indigo-600 text-white px-10 py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/20 font-bold text-sm flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:grayscale-[0.5] ${showSuccess ? 'bg-emerald-600 hover:bg-emerald-600 shadow-emerald-500/20' : ''}`}
+                    className={`bg-praetor text-white px-10 py-3 rounded-xl hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-200 font-bold text-sm flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:grayscale-[0.5] ${showSuccess ? 'bg-emerald-600 hover:bg-emerald-600 shadow-emerald-500/20' : ''}`}
                 >
                     {isLoading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : (showSuccess ? <i className="fa-solid fa-check"></i> : <i className="fa-solid fa-cloud-arrow-up"></i>)}
                     {showSuccess ? 'Success!' : 'Submit Time'}

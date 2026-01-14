@@ -103,9 +103,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           if (nextState) onOpen?.();
           else onClose?.();
         }}
-        className={`w-full flex items-center justify-between rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-left transition-all
+        className={`w-full flex items-center justify-between rounded-lg focus:ring-2 focus:ring-praetor outline-none text-left transition-all
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-slate-300'}
-          ${isOpen ? 'ring-2 ring-indigo-500 border-indigo-500' : ''}
+          ${isOpen ? 'ring-2 ring-praetor border-praetor' : ''}
           ${buttonClassName ? buttonClassName : 'px-3 py-2.5 bg-slate-50 border border-slate-200 text-sm'}`}
       >
         <div className="flex-1 min-w-0">
@@ -114,14 +114,14 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               {(selectedOptions as Option[]).map(option => (
                 <span
                   key={option.id}
-                  className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-indigo-200"
+                  className="bg-slate-100 text-praetor px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-slate-200"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {option.name}
                   <button
                     type="button"
                     onClick={(e) => handleToggle(option.id, e)}
-                    className="hover:text-indigo-900 text-indigo-400 transition-colors w-3 h-3 flex items-center justify-center rounded-full hover:bg-indigo-200"
+                    className="hover:text-slate-900 text-slate-400 transition-colors w-3 h-3 flex items-center justify-center rounded-full hover:bg-slate-200"
                   >
                     <i className="fa-solid fa-xmark text-[10px]"></i>
                   </button>
@@ -161,7 +161,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search..."
-                className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-700"
+                className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-praetor text-slate-700"
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
@@ -180,7 +180,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                       const allIds = options.map(o => o.id);
                       onChange(allIds);
                     }}
-                    className="flex-1 text-[10px] font-bold py-1 px-2 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                    className="flex-1 text-[10px] font-bold py-1 px-2 rounded bg-slate-100 text-praetor hover:bg-slate-200 transition-colors"
                   >
                     Select All
                   </button>
@@ -202,7 +202,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                   type="button"
                   onClick={(e) => handleToggle(option.id, e)}
                   className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between ${isSelected(option.id)
-                    ? 'bg-indigo-50 text-indigo-700 font-bold'
+                    ? 'bg-slate-100 text-praetor font-bold'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                 >

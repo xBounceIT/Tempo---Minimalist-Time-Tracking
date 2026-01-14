@@ -46,7 +46,7 @@ const TasksReadOnly: React.FC<TasksReadOnlyProps> = ({ tasks, projects, clients 
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: project?.color || '#ccc' }}></div>
-                                                    <span className={`text-[10px] font-black uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 ${isProjectDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-indigo-600'}`}>
+                                                    <span className={`text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${isProjectDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-praetor'}`}>
                                                         {project?.name || 'Unknown'}
                                                         {isProjectDisabled && <span className="ml-1 text-[8px]">(DISABLED)</span>}
                                                     </span>

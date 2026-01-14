@@ -122,7 +122,7 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, o
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <i className="fa-solid fa-pen-to-square text-indigo-500"></i>
+                <i className="fa-solid fa-pen-to-square text-praetor"></i>
                 Edit Task
               </h3>
               <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 transition-colors">
@@ -149,7 +149,7 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, o
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g. Frontend Implementation"
-                  className="w-full text-sm px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-all"
+                  className="w-full text-sm px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-praetor bg-slate-50 focus:bg-white transition-all"
                   autoFocus
                 />
               </div>
@@ -161,7 +161,7 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, o
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Task context..."
                   rows={3}
-                  className="w-full text-sm px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-all resize-none"
+                  className="w-full text-sm px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-praetor bg-slate-50 focus:bg-white transition-all resize-none"
                 />
               </div>
 
@@ -225,7 +225,7 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, o
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg transform active:scale-95 transition-all bg-indigo-600 shadow-indigo-200 hover:bg-indigo-700"
+                    className="px-6 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg transform active:scale-95 transition-all bg-praetor shadow-slate-200 hover:bg-slate-700"
                   >
                     Save Changes
                   </button>
@@ -240,7 +240,7 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, o
       {isManagement && (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <i className="fa-solid fa-list-check text-indigo-500"></i>
+            <i className="fa-solid fa-list-check text-praetor"></i>
             Create New Task
           </h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
@@ -261,7 +261,7 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, o
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. Frontend Implementation"
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-sm font-semibold"
               />
             </div>
             <div className="lg:col-span-1">
@@ -271,13 +271,13 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, o
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Task context..."
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-sm font-semibold"
               />
             </div>
             <div className="lg:col-span-1">
               <button
                 type="submit"
-                className="w-full px-6 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-all h-[38px] shadow-sm active:scale-95 flex items-center justify-center gap-2"
+                className="w-full px-6 py-2 bg-praetor text-white font-bold rounded-lg hover:bg-slate-700 transition-all h-[38px] shadow-sm active:scale-95 flex items-center justify-center gap-2"
               >
                 <i className="fa-solid fa-plus"></i> Add Task
               </button>
@@ -326,7 +326,7 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, o
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: project?.color || '#ccc' }}></div>
-                          <span className={`text-[10px] font-black uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 ${isProjectDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-indigo-600'}`}>
+                          <span className={`text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${isProjectDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-praetor'}`}>
                             {project?.name || 'Unknown'}
                             {isProjectDisabled && <span className="ml-1 text-[8px]">(DISABLED)</span>}
                           </span>
@@ -357,7 +357,7 @@ const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, o
                       {isManagement && (
                         <button
                           onClick={(e) => { e.stopPropagation(); startEditing(task); }}
-                          className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
+                          className="text-slate-400 hover:text-praetor transition-colors p-2"
                           title="Edit Task"
                         >
                           <i className="fa-solid fa-pen-to-square"></i>

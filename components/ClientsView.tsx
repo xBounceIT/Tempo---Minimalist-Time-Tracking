@@ -145,7 +145,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in duration-200 flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-praetor">
                   <i className={`fa-solid ${editingClient ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
                 </div>
                 {editingClient ? 'Edit Client' : 'Add New Client'}
@@ -161,8 +161,8 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
             <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8" noValidate>
               {/* Section 1: Identification */}
               <div className="space-y-4">
-                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                   Dati Identificativi
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -176,14 +176,14 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       <button
                         type="button"
                         onClick={() => setFormData({ ...formData, type: 'company' })}
-                        className={`relative z-10 flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-300 ${formData.type === 'company' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`relative z-10 flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-300 ${formData.type === 'company' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
                       >
                         Azienda
                       </button>
                       <button
                         type="button"
                         onClick={() => setFormData({ ...formData, type: 'individual' })}
-                        className={`relative z-10 flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-300 ${formData.type === 'individual' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`relative z-10 flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-300 ${formData.type === 'individual' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
                       >
                         Persona Fisica
                       </button>
@@ -199,7 +199,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                         if (errors.clientCode) setErrors({ ...errors, clientCode: '' });
                       }}
                       placeholder="es. CL-001"
-                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${errors.clientCode ? 'border-red-500 bg-red-50' : 'border-slate-200'
+                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all ${errors.clientCode ? 'border-red-500 bg-red-50' : 'border-slate-200'
                         }`}
                     />
                     {errors.clientCode && (
@@ -218,7 +218,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                         if (errors.name) setErrors({ ...errors, name: '' });
                       }}
                       placeholder={formData.type === 'company' ? 'es. Acme Corp S.r.l.' : 'es. Mario Rossi'}
-                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-slate-200'
+                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-slate-200'
                         }`}
                     />
                     {errors.name && (
@@ -230,8 +230,8 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
 
               {/* Section 2: Contacts */}
               <div className="space-y-4">
-                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                   Contatti e Indirizzi
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,7 +242,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="email@esempio.com"
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -252,7 +252,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="+39 000 0000000"
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                     />
                   </div>
                   <div className="col-span-full space-y-1.5">
@@ -262,7 +262,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       value={formData.contactName}
                       onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
                       placeholder="es. Marco Bianchi (Ufficio Acquisti)"
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                     />
                   </div>
                   <div className="col-span-full space-y-1.5">
@@ -272,7 +272,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       placeholder="Via Esempio 123, 00100 Roma (RM)"
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all resize-none"
                     />
                   </div>
                 </div>
@@ -280,8 +280,8 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
 
               {/* Section 3: Administrative */}
               <div className="space-y-4">
-                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                   Dati Amministrativi e Fiscali
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -295,7 +295,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                         if (errors.vatNumber) setErrors({ ...errors, vatNumber: '', taxCode: '' });
                       }}
                       placeholder="IT01234567890"
-                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${errors.vatNumber ? 'border-red-500 bg-red-50' : 'border-slate-200'
+                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all ${errors.vatNumber ? 'border-red-500 bg-red-50' : 'border-slate-200'
                         }`}
                     />
                     {errors.vatNumber && (
@@ -311,7 +311,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                         setFormData({ ...formData, taxCode: e.target.value });
                         if (errors.taxCode) setErrors({ ...errors, taxCode: '', vatNumber: '' });
                       }}
-                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${errors.taxCode ? 'border-red-500 bg-red-50' : 'border-slate-200'
+                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all ${errors.taxCode ? 'border-red-500 bg-red-50' : 'border-slate-200'
                         }`}
                     />
                     {errors.taxCode && (
@@ -325,7 +325,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       value={formData.billingCode}
                       onChange={(e) => setFormData({ ...formData, billingCode: e.target.value })}
                       placeholder="es. KRRH6B9"
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono uppercase"
+                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all font-mono uppercase"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -335,7 +335,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       value={formData.paymentTerms}
                       onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })}
                       placeholder="es. 30 gg D.F.F.M."
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -351,7 +351,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                 </button>
                 <button
                   type="submit"
-                  className="px-10 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                  className="px-10 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                 >
                   {editingClient ? 'Update Client' : 'Save Client'}
                 </button>
@@ -402,7 +402,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
         </div>
         <button
           onClick={openAddModal}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-indigo-100 transition-all hover:bg-indigo-700 active:scale-95 flex items-center gap-2"
+          className="bg-praetor text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-slate-200 transition-all hover:bg-slate-700 active:scale-95 flex items-center gap-2"
         >
           <i className="fa-solid fa-plus"></i> Add New Client
         </button>
@@ -411,14 +411,14 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm">
         <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center rounded-t-3xl">
           <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Active Clients</h4>
-          <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{activeClientsTotal.length} TOTAL</span>
+          <span className="bg-slate-100 text-praetor px-3 py-1 rounded-full text-[10px] font-black">{activeClientsTotal.length} TOTAL</span>
         </div>
         <div className="divide-y divide-slate-100">
           {activeClients.map(c => (
             <div key={c.id} onClick={() => openEditModal(c)} className="p-6 hover:bg-slate-50/50 transition-colors group cursor-pointer">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex gap-4 items-start">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-sm ${c.type === 'individual' ? 'bg-amber-100 text-amber-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-sm ${c.type === 'individual' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-praetor'}`}>
                     <i className={`fa-solid ${c.type === 'individual' ? 'fa-user' : 'fa-building'}`}></i>
                   </div>
                   <div>
@@ -452,7 +452,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       e.stopPropagation();
                       openEditModal(c);
                     }}
-                    className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                    className="p-2.5 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-xl transition-all"
                     title="Edit Client"
                   >
                     <i className="fa-solid fa-pen-to-square"></i>
@@ -487,7 +487,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                 <i className="fa-solid fa-users text-2xl"></i>
               </div>
               <p className="text-slate-400 text-sm font-bold">No active clients found.</p>
-              <button onClick={openAddModal} className="mt-4 text-indigo-600 text-sm font-black hover:underline">Add your first client</button>
+              <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">Add your first client</button>
             </div>
           )}
         </div>
@@ -528,7 +528,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${currentPage === page
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
+                    ? 'bg-praetor text-white shadow-md shadow-slate-200'
                     : 'text-slate-500 hover:bg-slate-100'
                     }`}
                 >
@@ -571,7 +571,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       e.stopPropagation();
                       onUpdateClient(c.id, { isDisabled: false });
                     }}
-                    className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
                   >
                     <i className="fa-solid fa-rotate-left"></i>
                   </button>

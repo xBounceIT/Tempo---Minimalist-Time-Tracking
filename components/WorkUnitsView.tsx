@@ -136,7 +136,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                 </div>
                 <button
                     onClick={openCreateModal}
-                    className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95 flex items-center justify-center gap-2"
+                    className="px-6 py-3 bg-praetor text-white font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95 flex items-center justify-center gap-2"
                 >
                     <i className="fa-solid fa-plus"></i> New Work Unit
                 </button>
@@ -147,13 +147,13 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                 {workUnits.map(unit => (
                     <div key={unit.id} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
                         <div className="flex justify-between items-start mb-4">
-                            <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                            <div className="w-12 h-12 rounded-xl bg-slate-100 text-praetor flex items-center justify-center text-xl">
                                 <i className="fa-solid fa-sitemap"></i>
                             </div>
                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                     onClick={() => openEditModal(unit)}
-                                    className="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center transition-colors"
+                                    className="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:text-praetor hover:bg-slate-100 flex items-center justify-center transition-colors"
                                     title="Edit"
                                 >
                                     <i className="fa-solid fa-pen"></i>
@@ -181,7 +181,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                     <div className="flex flex-wrap gap-1 mt-1">
                                         {unit.managers && unit.managers.length > 0 ? (
                                             unit.managers.map(m => (
-                                                <span key={m.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700">
+                                                <span key={m.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-praetor">
                                                     {m.name}
                                                 </span>
                                             ))
@@ -204,7 +204,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 </div>
                                 <button
                                     onClick={() => openAssignments(unit)}
-                                    className="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                                    className="text-xs font-bold text-praetor hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
                                 >
                                     Manage Members
                                 </button>
@@ -231,7 +231,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-semibold text-slate-700"
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-semibold text-slate-700"
                                     required
                                 />
                             </div>
@@ -252,7 +252,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 <textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-slate-600 min-h-[100px]"
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-medium text-slate-600 min-h-[100px]"
                                 />
                             </div>
                             <div className="flex gap-3 pt-4">
@@ -266,7 +266,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 <button
                                     type="submit"
                                     disabled={selectedManagerIds.length === 0}
-                                    className="flex-1 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+                                    className="flex-1 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
                                 >
                                     Create Unit
                                 </button>
@@ -293,7 +293,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-semibold text-slate-700"
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-semibold text-slate-700"
                                     required
                                 />
                             </div>
@@ -313,7 +313,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 <textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-slate-600 min-h-[100px]"
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-medium text-slate-600 min-h-[100px]"
                                 />
                             </div>
                             <div className="flex gap-3 pt-4">
@@ -326,7 +326,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                                    className="flex-1 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                                 >
                                     Save Changes
                                 </button>
@@ -343,7 +343,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                         <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
                             <div>
                                 <h3 className="text-lg font-bold text-slate-800">Manage Members</h3>
-                                <p className="text-sm text-slate-500 font-medium">Add or remove users from <span className="text-indigo-600">{targetUnit.name}</span></p>
+                                <p className="text-sm text-slate-500 font-medium">Add or remove users from <span className="text-praetor">{targetUnit.name}</span></p>
                             </div>
                             <button onClick={() => setIsAssignmentModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                                 <i className="fa-solid fa-xmark text-xl"></i>
@@ -356,14 +356,14 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 placeholder="Search users..."
                                 value={assignmentSearch}
                                 onChange={(e) => setAssignmentSearch(e.target.value)}
-                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none"
                             />
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-4">
                             {isLoadingAssignments ? (
                                 <div className="flex justify-center py-12">
-                                    <i className="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-500"></i>
+                                    <i className="fa-solid fa-circle-notch fa-spin text-3xl text-praetor"></i>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -371,22 +371,22 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                         <label
                                             key={user.id}
                                             className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${assignedUserIds.includes(user.id)
-                                                ? 'bg-indigo-50 border-indigo-200 shadow-sm'
-                                                : 'bg-white border-slate-200 hover:border-indigo-200'
+                                                ? 'bg-slate-50 border-slate-300 shadow-sm'
+                                                : 'bg-white border-slate-200 hover:border-slate-300'
                                                 }`}
                                         >
                                             <input
                                                 type="checkbox"
                                                 checked={assignedUserIds.includes(user.id)}
                                                 onChange={() => toggleUserAssignment(user.id)}
-                                                className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                                className="w-5 h-5 text-praetor rounded focus:ring-praetor border-gray-300"
                                             />
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                                                <div className="w-8 h-8 rounded-full bg-slate-100 text-praetor flex items-center justify-center text-xs font-bold">
                                                     {user.avatarInitials}
                                                 </div>
                                                 <div>
-                                                    <p className={`text-sm font-bold ${assignedUserIds.includes(user.id) ? 'text-indigo-900' : 'text-slate-700'}`}>{user.name}</p>
+                                                    <p className={`text-sm font-bold ${assignedUserIds.includes(user.id) ? 'text-praetor' : 'text-slate-700'}`}>{user.name}</p>
                                                     <p className="text-xs text-slate-500">{user.role}</p>
                                                 </div>
                                             </div>
@@ -409,7 +409,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                             <button
                                 onClick={saveAssignments}
                                 disabled={isLoadingAssignments}
-                                className="px-8 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50"
+                                className="px-8 py-2.5 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95 disabled:opacity-50"
                             >
                                 Save Assignments
                             </button>

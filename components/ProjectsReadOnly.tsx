@@ -38,7 +38,7 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                                 return (
                                     <tr key={project.id} className={`group hover:bg-slate-50 transition-colors ${isEffectivelyDisabled ? 'opacity-60 grayscale bg-slate-50/50' : ''}`}>
                                         <td className="px-6 py-4">
-                                            <span className={`text-[10px] font-black uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 ${isClientDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-indigo-600'}`}>
+                                            <span className={`text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${isClientDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-praetor'}`}>
                                                 {client?.name || 'Unknown'}
                                                 {isClientDisabled && <span className="ml-1 text-[8px]">(DISABLED)</span>}
                                             </span>

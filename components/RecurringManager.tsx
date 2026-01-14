@@ -31,7 +31,7 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
             <h3 className="text-lg font-bold text-slate-800">Recurring Task Schedule</h3>
             <p className="text-xs text-slate-500">Manage automated tasks and patterns</p>
           </div>
-          <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">
+          <span className="bg-slate-100 text-praetor px-3 py-1 rounded-full text-xs font-bold">
             {recurringTasks.length} Active
           </span>
         </div>
@@ -63,7 +63,7 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
                       <div className="flex flex-col">
                         <span className="font-bold text-slate-800 text-sm">{task.name}</span>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] font-black uppercase text-indigo-500 tracking-wide">{client?.name || 'Unknown'}</span>
+                          <span className="text-[10px] font-black uppercase text-praetor tracking-wide">{client?.name || 'Unknown'}</span>
                           <span className="text-slate-300">•</span>
                           <span className="text-xs text-slate-500 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project?.color || '#ccc' }}></span>
@@ -73,7 +73,7 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide bg-indigo-50 text-indigo-700 border border-indigo-100">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide bg-slate-50 text-praetor border border-slate-200">
                         <i className="fa-solid fa-repeat text-[10px]"></i>
                         {task.recurrencePattern}
                       </span>
@@ -121,11 +121,11 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
             <div className="p-4 space-y-3">
               <button
                 onClick={() => { onAction(selectedTask.id, 'stop'); closeModal(); }}
-                className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all group"
+                className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all group"
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-slate-800 group-hover:text-indigo-700">Only Stop Recurrence</span>
-                  <i className="fa-solid fa-pause text-slate-300 group-hover:text-indigo-500"></i>
+                  <span className="font-bold text-slate-800 group-hover:text-praetor">Only Stop Recurrence</span>
+                  <i className="fa-solid fa-pause text-slate-300 group-hover:text-praetor"></i>
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   Keeps all existing history. Just stops the task from repeating in the future.

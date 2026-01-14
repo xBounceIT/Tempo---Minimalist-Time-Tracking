@@ -263,7 +263,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in duration-200 flex flex-col max-h-[90vh]">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+                                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-praetor">
                                     <i className={`fa-solid ${editingSale ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
                                 </div>
                                 {editingSale ? 'Edit Sale' : 'Create New Sale'}
@@ -279,21 +279,21 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                         <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
                             {/* Linked Quote Info */}
                             {formData.linkedQuoteId && (
-                                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
+                                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+                                        <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-praetor">
                                             <i className="fa-solid fa-link"></i>
                                         </div>
                                         <div>
-                                            <div className="text-sm font-bold text-indigo-900">Linked to Quote</div>
-                                            <div className="text-xs text-indigo-600">Created from quote #{formData.linkedQuoteId}</div>
+                                            <div className="text-sm font-bold text-slate-900">Linked to Quote</div>
+                                            <div className="text-xs text-praetor">Created from quote #{formData.linkedQuoteId}</div>
                                         </div>
                                     </div>
                                     {onViewQuote && (
                                         <button
                                             type="button"
                                             onClick={() => onViewQuote(formData.linkedQuoteId!)}
-                                            className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline"
+                                            className="text-xs font-bold text-praetor hover:text-slate-800 hover:underline"
                                         >
                                             View Quote
                                         </button>
@@ -303,8 +303,8 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
 
                             {/* Client Selection */}
                             <div className="space-y-4">
-                                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                                     Client Information
                                 </h4>
                                 <div className="space-y-1.5">
@@ -326,14 +326,14 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                             {/* Products */}
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                    <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                                         Products / Services
                                     </h4>
                                     <button
                                         type="button"
                                         onClick={addProductRow}
-                                        className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                                        className="text-xs font-bold text-praetor hover:text-slate-700 flex items-center gap-1"
                                     >
                                         <i className="fa-solid fa-plus"></i> Add Product
                                     </button>
@@ -376,11 +376,11 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                             placeholder="Qty"
                                                             value={item.quantity}
                                                             onChange={(e) => updateProductRow(index, 'quantity', parseFloat(e.target.value) || 0)}
-                                                            className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                                                            className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none"
                                                         />
                                                     </div>
                                                     <div className="col-span-2">
-                                                        <div className="flex items-center bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 transition-all overflow-hidden">
+                                                        <div className="flex items-center bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-praetor transition-all overflow-hidden">
                                                             <div className="w-10 self-stretch flex items-center justify-center text-slate-400 text-xs font-black border-r border-slate-100 bg-slate-50/50">
                                                                 {currency}
                                                             </div>
@@ -397,7 +397,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                         </div>
                                                     </div>
                                                     <div className="col-span-2">
-                                                        <div className="flex items-center bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 transition-all overflow-hidden">
+                                                        <div className="flex items-center bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-praetor transition-all overflow-hidden">
                                                             <div className="w-10 self-stretch flex items-center justify-center text-slate-400 text-xs font-black border-r border-slate-100 bg-slate-50/50">
                                                                 %
                                                             </div>
@@ -438,8 +438,8 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
 
                             {/* Sale Details */}
                             <div className="space-y-4">
-                                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                                     Sale Details
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -455,7 +455,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
 
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 ml-1">Global Discount</label>
-                                        <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-indigo-500 transition-all overflow-hidden">
+                                        <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-praetor transition-all overflow-hidden">
                                             <div className="w-12 self-stretch flex items-center justify-center text-slate-400 text-xs font-bold border-r border-slate-200 bg-slate-100/30">
                                                 %
                                             </div>
@@ -488,7 +488,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                             value={formData.notes}
                                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                             placeholder="Additional notes or terms..."
-                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all resize-none"
                                         />
                                     </div>
                                 </div>
@@ -526,9 +526,9 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                 {/* Middle Column: Final Total */}
                                                 <div className="flex flex-col items-center justify-center py-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
                                                     <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Totale:</span>
-                                                    <span className="text-4xl font-black text-indigo-600 leading-none">
+                                                    <span className="text-4xl font-black text-praetor leading-none">
                                                         {total.toFixed(2)}
-                                                        <span className="text-xl ml-1 opacity-60 text-indigo-400">{currency}</span>
+                                                        <span className="text-xl ml-1 opacity-60 text-slate-400">{currency}</span>
                                                     </span>
                                                 </div>
 
@@ -556,7 +556,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-10 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                                    className="px-10 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                                 >
                                     {editingSale ? 'Update Sale' : 'Create Sale'}
                                 </button>
@@ -607,7 +607,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                 </div>
                 <button
                     onClick={openAddModal}
-                    className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-indigo-100 transition-all hover:bg-indigo-700 active:scale-95 flex items-center gap-2"
+                    className="bg-praetor text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-slate-200 transition-all hover:bg-slate-700 active:scale-95 flex items-center gap-2"
                 >
                     <i className="fa-solid fa-plus"></i> Create New Sale
                 </button>
@@ -622,7 +622,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                         placeholder="Search sales or products..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm placeholder:font-normal"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-praetor outline-none shadow-sm placeholder:font-normal"
                     />
                 </div>
                 <div>
@@ -650,7 +650,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm">
                 <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center rounded-t-3xl">
                     <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">All Sales</h4>
-                    <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{filteredSales.length} TOTAL</span>
+                    <span className="bg-slate-100 text-praetor px-3 py-1 rounded-full text-[10px] font-black">{filteredSales.length} TOTAL</span>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -675,7 +675,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                     >
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center text-sm">
+                                                <div className="w-10 h-10 bg-slate-100 text-praetor rounded-xl flex items-center justify-center text-sm">
                                                     <i className="fa-solid fa-cart-shopping"></i>
                                                 </div>
                                                 <div>
@@ -686,10 +686,10 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                         </td>
                                         <td className="px-8 py-5">
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-black ${sale.status === 'completed'
-                                                    ? 'bg-emerald-100 text-emerald-700'
-                                                    : sale.status === 'cancelled'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-amber-100 text-amber-700'
+                                                ? 'bg-emerald-100 text-emerald-700'
+                                                : sale.status === 'cancelled'
+                                                    ? 'bg-red-100 text-red-700'
+                                                    : 'bg-amber-100 text-amber-700'
                                                 }`}>
                                                 {sale.status.toUpperCase()}
                                             </span>
@@ -702,7 +702,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                         </td>
                                         <td className="px-8 py-5">
                                             {sale.linkedQuoteId && (
-                                                <div className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg inline-flex items-center gap-1">
+                                                <div className="text-xs font-bold text-praetor bg-slate-100 px-2 py-1 rounded-lg inline-flex items-center gap-1">
                                                     <i className="fa-solid fa-link text-[10px]"></i>
                                                     Quote
                                                 </div>
@@ -715,7 +715,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                         e.stopPropagation();
                                                         openEditModal(sale);
                                                     }}
-                                                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                                    className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
                                                     title="Edit Sale"
                                                 >
                                                     <i className="fa-solid fa-pen-to-square"></i>
@@ -742,7 +742,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                             <i className="fa-solid fa-cart-shopping text-2xl"></i>
                                         </div>
                                         <p className="text-slate-400 text-sm font-bold">No sales found.</p>
-                                        <button onClick={openAddModal} className="mt-4 text-indigo-600 text-sm font-black hover:underline">Create your first sale</button>
+                                        <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">Create your first sale</button>
                                     </td>
                                 </tr>
                             )}
@@ -786,7 +786,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
                                     className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${currentPage === page
-                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
+                                        ? 'bg-praetor text-white shadow-md shadow-slate-200'
                                         : 'text-slate-500 hover:bg-slate-100'
                                         }`}
                                 >

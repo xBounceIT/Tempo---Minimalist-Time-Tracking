@@ -141,7 +141,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
             <button
               onClick={() => setIsModuleSwitcherOpen(!isModuleSwitcherOpen)}
               className={`group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 
-                bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800 hover:border-indigo-500/30
+                bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800 hover:border-slate-500/50
                 ${isCollapsed ? 'justify-center' : ''}`}
             >
               <div className="w-8 h-8 bg-gradient-to-br from-praetor to-slate-800 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-slate-900/20">
@@ -367,7 +367,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="group flex items-center gap-3 p-1 pr-3 rounded-full bg-slate-50 border border-slate-200 hover:border-indigo-200 hover:bg-white transition-all focus:outline-none"
+                className="group flex items-center gap-3 p-1 pr-3 rounded-full bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-white transition-all focus:outline-none"
               >
                 <div className="w-8 h-8 rounded-full bg-praetor text-white flex items-center justify-center font-bold text-xs shadow-md group-hover:scale-105 transition-transform">
                   {currentUser.avatarInitials}
@@ -388,7 +388,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
 
                   <button
                     onClick={() => { setIsProfileMenuOpen(false); onViewChange('settings'); }}
-                    className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${activeView === 'settings' ? 'bg-indigo-50 text-praetor' : 'text-slate-700 hover:bg-slate-50'}`}
+                    className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${activeView === 'settings' ? 'bg-slate-100 text-praetor' : 'text-slate-700 hover:bg-slate-50'}`}
                   >
                     <i className="fa-solid fa-gear w-4 text-center"></i>
                     Settings

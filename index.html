@@ -12,7 +12,7 @@
             theme: {
                 extend: {
                     colors: {
-                        praetor: '#272b3e',
+                        praetor: 'var(--color-primary)',
                     }
                 }
             }
@@ -31,6 +31,11 @@
 }
 </script>
     <style>
+        :root {
+            --color-primary: #272b3e;
+            --color-primary-hover: #1e2130;
+        }
+
         /* Chrome, Safari, Edge, Opera */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {

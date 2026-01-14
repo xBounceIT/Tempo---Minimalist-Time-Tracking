@@ -156,7 +156,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-200">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <h3 className="text-lg font-black text-slate-800 flex items-center gap-3">
-                                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+                                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-praetor">
                                     <i className="fa-solid fa-plus"></i>
                                 </div>
                                 Add Category
@@ -178,7 +178,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                     onChange={(e) => setNewCategoryName(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                                     placeholder="e.g. Software Licenses"
-                                    className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                                 />
                             </div>
                             <div className="flex justify-between gap-3">
@@ -190,7 +190,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                 </button>
                                 <button
                                     onClick={handleAddCategory}
-                                    className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                                    className="px-6 py-2.5 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                                 >
                                     Add Category
                                 </button>
@@ -206,7 +206,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in duration-200 flex flex-col max-h-[90vh]">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+                                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-praetor">
                                     <i className={`fa-solid ${editingProduct ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
                                 </div>
                                 {editingProduct ? 'Edit Product' : 'Add New Product'}
@@ -221,8 +221,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
 
                         <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
                             <div className="space-y-4">
-                                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                                     Product Details
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -234,7 +234,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             placeholder="e.g. Consulting Services"
-                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                                         />
                                     </div>
 
@@ -244,7 +244,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                             <button
                                                 type="button"
                                                 onClick={() => setIsAddCategoryModalOpen(true)}
-                                                className="text-[10px] font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-tighter flex items-center gap-1"
+                                                className="text-[10px] font-black text-praetor hover:text-slate-700 uppercase tracking-tighter flex items-center gap-1"
                                             >
                                                 <i className="fa-solid fa-plus"></i> Add Category
                                             </button>
@@ -267,7 +267,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                             step="0.01"
                                             value={formData.taxRate}
                                             onChange={(e) => setFormData({ ...formData, taxRate: parseFloat(e.target.value) })}
-                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                                         />
                                     </div>
 
@@ -297,8 +297,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                             </div>
 
                             <div className="space-y-4">
-                                <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                                     Pricing and Unit
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -310,7 +310,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                                 step="0.01"
                                                 value={formData.salePrice}
                                                 onChange={(e) => setFormData({ ...formData, salePrice: parseFloat(e.target.value) })}
-                                                className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-w-0"
+                                                className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all min-w-0"
                                             />
                                         </div>
                                     </div>
@@ -323,7 +323,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                                 step="0.01"
                                                 value={formData.cost}
                                                 onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) })}
-                                                className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-w-0"
+                                                className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all min-w-0"
                                             />
                                         </div>
                                     </div>
@@ -340,7 +340,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-12 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                                    className="px-12 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                                 >
                                     {editingProduct ? 'Update Product' : 'Save Product'}
                                 </button>
@@ -393,7 +393,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                 </div>
                 <button
                     onClick={openAddModal}
-                    className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-indigo-100 transition-all hover:bg-indigo-700 active:scale-95 flex items-center gap-2"
+                    className="bg-praetor text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-slate-200 transition-all hover:bg-slate-700 active:scale-95 flex items-center gap-2"
                 >
                     <i className="fa-solid fa-plus"></i> Add New Product
                 </button>
@@ -402,7 +402,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm">
                 <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center rounded-t-3xl">
                     <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Active Products</h4>
-                    <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{activeProducts.length} TOTAL</span>
+                    <span className="bg-slate-100 text-praetor px-3 py-1 rounded-full text-[10px] font-black">{activeProducts.length} TOTAL</span>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -421,7 +421,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                 <tr key={p.id} onClick={() => openEditModal(p)} className="hover:bg-slate-50/50 transition-colors group cursor-pointer">
                                     <td className="px-8 py-5">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center text-sm">
+                                            <div className="w-10 h-10 bg-slate-100 text-praetor rounded-xl flex items-center justify-center text-sm">
                                                 <i className="fa-solid fa-box"></i>
                                             </div>
                                             <div>
@@ -441,7 +441,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                     <td className="px-8 py-5 text-sm font-semibold text-slate-500">
                                         {p.cost.toFixed(2)} / {p.costUnit}
                                     </td>
-                                    <td className="px-8 py-5 text-sm font-bold text-indigo-600">
+                                    <td className="px-8 py-5 text-sm font-bold text-praetor">
                                         {p.taxRate}%
                                     </td>
                                     <td className="px-8 py-5">
@@ -451,7 +451,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                                     e.stopPropagation();
                                                     openEditModal(p);
                                                 }}
-                                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                                className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
                                                 title="Edit Product"
                                             >
                                                 <i className="fa-solid fa-pen-to-square"></i>
@@ -487,7 +487,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                             <i className="fa-solid fa-boxes-stacked text-2xl"></i>
                                         </div>
                                         <p className="text-slate-400 text-sm font-bold">No active products found.</p>
-                                        <button onClick={openAddModal} className="mt-4 text-indigo-600 text-sm font-black hover:underline">Add your first product</button>
+                                        <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">Add your first product</button>
                                     </td>
                                 </tr>
                             )}
@@ -531,7 +531,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
                                     className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${currentPage === page
-                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
+                                        ? 'bg-praetor text-white shadow-md shadow-slate-200'
                                         : 'text-slate-500 hover:bg-slate-100'
                                         }`}
                                 >
@@ -575,7 +575,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                                 e.stopPropagation();
                                                 onUpdateProduct(p.id, { isDisabled: false });
                                             }}
-                                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                            className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
                                         >
                                             <i className="fa-solid fa-rotate-left"></i>
                                         </button>
