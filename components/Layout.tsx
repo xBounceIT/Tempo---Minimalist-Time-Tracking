@@ -104,7 +104,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
       >
         <div className={`p-6 flex items-center justify-between ${isCollapsed ? 'md:justify-center' : ''}`}>
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
+            <div className="w-8 h-8 bg-praetor rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-slate-900/20">
               <i className="fa-solid fa-clock text-white text-lg"></i>
             </div>
             {!isCollapsed && (
@@ -120,7 +120,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
 
           <button
             onClick={toggleSidebar}
-            className={`hidden md:flex absolute -right-3 top-12 w-6 h-6 bg-slate-800 border border-slate-700 rounded-full items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-600 transition-all z-40
+            className={`hidden md:flex absolute -right-3 top-12 w-6 h-6 bg-slate-800 border border-slate-700 rounded-full items-center justify-center text-slate-400 hover:text-white hover:bg-praetor transition-all z-40
               ${isCollapsed ? 'rotate-180' : ''}`}
           >
             <i className="fa-solid fa-chevron-left text-[10px]"></i>
@@ -144,7 +144,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
                 bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800 hover:border-indigo-500/30
                 ${isCollapsed ? 'justify-center' : ''}`}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
+              <div className="w-8 h-8 bg-gradient-to-br from-praetor to-slate-800 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-slate-900/20">
                 <i className={`fa-solid ${activeModule.icon} text-white text-sm`}></i>
               </div>
               {!isCollapsed && (
@@ -169,7 +169,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
                       onClick={() => handleModuleSwitch(module)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
                         ${activeModule.id === module.id
-                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/30'
+                          ? 'bg-praetor text-white shadow-lg shadow-slate-900/30'
                           : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}
                     >
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0
@@ -351,7 +351,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
       <main className="flex-1 overflow-y-auto">
         <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-slate-800 capitalize flex items-center gap-3">
-            <span className="md:hidden w-2 h-6 bg-indigo-500 rounded-full"></span>
+            <span className="md:hidden w-2 h-6 bg-praetor rounded-full"></span>
             {isNotFound ? 'Page Not Found' :
               activeView === 'configuration/authentication' ? 'Authentication Settings' :
                 activeView === 'configuration/general' ? 'General Administration' :
@@ -369,7 +369,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 className="group flex items-center gap-3 p-1 pr-3 rounded-full bg-slate-50 border border-slate-200 hover:border-indigo-200 hover:bg-white transition-all focus:outline-none"
               >
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-md group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-full bg-praetor text-white flex items-center justify-center font-bold text-xs shadow-md group-hover:scale-105 transition-transform">
                   {currentUser.avatarInitials}
                 </div>
                 <div className="text-left hidden sm:block">
@@ -388,7 +388,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
 
                   <button
                     onClick={() => { setIsProfileMenuOpen(false); onViewChange('settings'); }}
-                    className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${activeView === 'settings' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-700 hover:bg-slate-50'}`}
+                    className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${activeView === 'settings' ? 'bg-indigo-50 text-praetor' : 'text-slate-700 hover:bg-slate-50'}`}
                   >
                     <i className="fa-solid fa-gear w-4 text-center"></i>
                     Settings
@@ -428,11 +428,11 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, active, isCollapsed, onC
   <button
     onClick={onClick}
     className={`group relative w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${active
-      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40'
+      ? 'bg-praetor text-white shadow-lg shadow-slate-900/40'
       : 'text-slate-400 hover:bg-slate-800 hover:text-white'
       } ${isCollapsed ? 'justify-center' : ''}`}
   >
-    <i className={`fa-solid ${icon} w-5 text-center text-lg ${active ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400'}`}></i>
+    <i className={`fa-solid ${icon} w-5 text-center text-lg ${active ? 'text-white' : 'text-slate-500 group-hover:text-praetor'}`}></i>
     {!isCollapsed && <span className="font-semibold text-sm whitespace-nowrap overflow-hidden">{label}</span>}
 
     {isCollapsed && (

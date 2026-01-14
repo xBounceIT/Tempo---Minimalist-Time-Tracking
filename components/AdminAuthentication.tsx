@@ -114,7 +114,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
         <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <i className="fa-solid fa-server text-indigo-500"></i>
+              <i className="fa-solid fa-server text-praetor"></i>
               <h3 className="font-bold text-slate-800">LDAP Server Configuration</h3>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -124,7 +124,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                 onChange={e => setFormData({ ...formData, enabled: e.target.checked })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-praetor"></div>
               <span className="ms-3 text-sm font-medium text-slate-600">Enabled</span>
             </label>
           </div>
@@ -137,7 +137,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                 value={formData.serverUrl}
                 onChange={e => setFormData({ ...formData, serverUrl: e.target.value })}
                 placeholder="ldap://ldap.example.com:389"
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm"
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-mono text-sm"
               />
             </div>
 
@@ -148,7 +148,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                 value={formData.baseDn}
                 onChange={e => setFormData({ ...formData, baseDn: e.target.value })}
                 placeholder="dc=example,dc=com"
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm"
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-mono text-sm"
               />
             </div>
 
@@ -159,7 +159,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                 value={formData.userFilter}
                 onChange={e => setFormData({ ...formData, userFilter: e.target.value })}
                 placeholder="(uid={0}) or (sAMAccountName={0})"
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm"
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-mono text-sm"
               />
             </div>
 
@@ -170,7 +170,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                 value={formData.bindDn}
                 onChange={e => setFormData({ ...formData, bindDn: e.target.value })}
                 placeholder="cn=admin,dc=example,dc=com"
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm"
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-mono text-sm"
               />
             </div>
 
@@ -180,7 +180,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                 type="password"
                 value={formData.bindPassword}
                 onChange={e => setFormData({ ...formData, bindPassword: e.target.value })}
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm"
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-mono text-sm"
               />
             </div>
           </div>
@@ -189,7 +189,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
         {/* Authorization & Provisioning */}
         <section className={`bg-white rounded-2xl border border-slate-200 shadow-sm transition-opacity ${!formData.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
           <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3 rounded-t-2xl">
-            <i className="fa-solid fa-users-gear text-indigo-500"></i>
+            <i className="fa-solid fa-users-gear text-praetor"></i>
             <h3 className="font-bold text-slate-800">Authorization & Provisioning</h3>
           </div>
 
@@ -202,7 +202,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                   value={formData.groupBaseDn}
                   onChange={e => setFormData({ ...formData, groupBaseDn: e.target.value })}
                   placeholder="ou=groups,dc=example,dc=com"
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-mono text-sm"
                 />
               </div>
               <div>
@@ -212,7 +212,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                   value={formData.groupFilter}
                   onChange={e => setFormData({ ...formData, groupFilter: e.target.value })}
                   placeholder="(member={0}) or (memberUid={0})"
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-mono text-sm"
                 />
               </div>
             </div>
@@ -223,7 +223,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                 <button
                   type="button"
                   onClick={addRoleMapping}
-                  className="text-xs bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-100 transition-colors"
+                  className="text-xs bg-slate-100 text-praetor px-3 py-1.5 rounded-lg font-bold hover:bg-slate-200 transition-colors"
                 >
                   <i className="fa-solid fa-plus mr-1"></i> Add Mapping
                 </button>
@@ -241,7 +241,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                           value={mapping.ldapGroup}
                           onChange={e => updateRoleMapping(idx, 'ldapGroup', e.target.value)}
                           placeholder="LDAP Group CN (e.g. cn=admins)"
-                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-praetor outline-none"
                         />
                       </div>
                       <i className="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
@@ -270,7 +270,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95"
+            className="bg-praetor text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all active:scale-95"
           >
             Save Configuration
           </button>
@@ -280,7 +280,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
       {/* Tester */}
       <section className={`bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-12 transition-opacity ${!formData.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
-          <i className="fa-solid fa-vial text-indigo-500"></i>
+          <i className="fa-solid fa-vial text-praetor"></i>
           <h3 className="font-bold text-slate-800">Connection Tester</h3>
         </div>
         <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -293,7 +293,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                   type="text"
                   value={testUser}
                   onChange={e => setTestUser(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-700"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-sm font-semibold text-slate-700"
                 />
               </div>
               <div>
@@ -302,13 +302,13 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                   type="password"
                   value={testPass}
                   onChange={e => setTestPass(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-700"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-sm font-semibold text-slate-700"
                 />
               </div>
               <button
                 type="submit"
                 disabled={isTestLoading || !formData.enabled}
-                className="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-md shadow-indigo-100"
+                className="w-full bg-praetor text-white py-2 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 shadow-md shadow-slate-100"
               >
                 {isTestLoading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Test Authentication'}
               </button>
@@ -326,8 +326,8 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                 {testResult.details && (
                   <>
                     <div className="text-slate-500 mt-2 border-b border-slate-800 pb-1 mb-2">-- Provisioning Details --</div>
-                    <div className="text-slate-400">DN: <span className="text-indigo-300">{testResult.details.dn}</span></div>
-                    <div className="text-slate-400">Role: <span className="text-purple-300 uppercase font-bold">{testResult.details.mappedRole}</span></div>
+                    <div className="text-slate-400">DN: <span className="text-slate-200">{testResult.details.dn}</span></div>
+                    <div className="text-slate-400">Role: <span className="text-slate-400 uppercase font-bold">{testResult.details.mappedRole}</span></div>
                     <div className="text-slate-400 mt-2">Groups Found:</div>
                     <ul className="list-disc pl-4 text-slate-500">
                       {testResult.details.groups.map((g: string, i: number) => (

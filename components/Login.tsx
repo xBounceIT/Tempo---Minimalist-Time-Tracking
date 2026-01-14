@@ -31,7 +31,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-praetor flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <img src="/praetor-logo.png" alt="Praetor Logo" className="h-56 mx-auto object-contain" />
@@ -45,7 +45,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold text-slate-700"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all font-semibold text-slate-700"
               placeholder="Enter username"
               disabled={isLoading}
             />
@@ -58,7 +58,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all pr-10 font-semibold text-slate-700"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all pr-10 font-semibold text-slate-700"
                 placeholder="Enter password"
                 disabled={isLoading}
               />
@@ -82,7 +82,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-2 active:scale-[0.98] mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-praetor text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-2 active:scale-[0.98] mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
