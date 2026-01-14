@@ -134,11 +134,43 @@ function convertH2Request(h2Req, h2Res) {
   });
   
   // Create a response object that mimics http.ServerResponse
-  const res = Object.create(http.ServerResponse.prototype);
-  res.statusCode = 200;
-  res.statusMessage = 'OK';
-  res.headersSent = false;
-  res.finished = false;
+  // Use a plain object wrapper to avoid read-only property issues
+  const res = {};
+  
+  // Track response state
+  let statusCode = 200;
+  let statusMessage = 'OK';
+  let headersSent = false;
+  let finished = false;
+  
+  // Define properties with getters/setters
+  Object.defineProperty(res, 'statusCode', {
+    get: () => statusCode,
+    set: (val) => { statusCode = val; },
+    enumerable: true,
+    configurable: true
+  });
+  
+  Object.defineProperty(res, 'statusMessage', {
+    get: () => statusMessage,
+    set: (val) => { statusMessage = val; },
+    enumerable: true,
+    configurable: true
+  });
+  
+  Object.defineProperty(res, 'headersSent', {
+    get: () => headersSent,
+    set: (val) => { headersSent = val; },
+    enumerable: true,
+    configurable: true
+  });
+  
+  Object.defineProperty(res, 'finished', {
+    get: () => finished,
+    set: (val) => { finished = val; },
+    enumerable: true,
+    configurable: true
+  });
   
   // Implement Express response methods
   res.status = function(code) {
@@ -147,11 +179,7 @@ function convertH2Request(h2Req, h2Res) {
   };
   
   res.setHeader = function(name, value) {
-    if (Array.isArray(value)) {
-      h2Res.setHeader(name, value);
-    } else {
-      h2Res.setHeader(name, value);
-    }
+    h2Res.setHeader(name, value);
   };
   
   res.getHeader = function(name) {
@@ -166,36 +194,36 @@ function convertH2Request(h2Req, h2Res) {
     return h2Res.getHeaders();
   };
   
-  res.writeHead = function(statusCode, statusMessage, headers) {
-    if (!this.headersSent) {
-      this.statusCode = statusCode;
-      if (typeof statusMessage === 'string') {
-        this.statusMessage = statusMessage;
-      } else if (statusMessage) {
-        headers = statusMessage;
+  res.writeHead = function(code, msg, headers) {
+    if (!headersSent) {
+      statusCode = code;
+      if (typeof msg === 'string') {
+        statusMessage = msg;
+      } else if (msg) {
+        headers = msg;
       }
       if (headers) {
         Object.entries(headers).forEach(([key, value]) => {
           h2Res.setHeader(key, value);
         });
       }
-      h2Res.writeHead(statusCode, headers);
-      this.headersSent = true;
+      h2Res.writeHead(code, headers);
+      headersSent = true;
     }
   };
   
   res.write = function(chunk, encoding, callback) {
-    if (!this.headersSent) {
-      this.writeHead(this.statusCode);
+    if (!headersSent) {
+      res.writeHead(statusCode);
     }
     return h2Res.write(chunk, encoding, callback);
   };
   
   res.end = function(chunk, encoding, callback) {
-    if (!this.headersSent) {
-      this.writeHead(this.statusCode);
+    if (!headersSent) {
+      res.writeHead(statusCode);
     }
-    this.finished = true;
+    finished = true;
     if (chunk) {
       h2Res.end(chunk, encoding, callback);
     } else {
@@ -204,20 +232,20 @@ function convertH2Request(h2Req, h2Res) {
   };
   
   res.json = function(obj) {
-    if (!this.getHeader('Content-Type')) {
-      this.setHeader('Content-Type', 'application/json');
+    if (!res.getHeader('Content-Type')) {
+      res.setHeader('Content-Type', 'application/json');
     }
-    this.end(JSON.stringify(obj));
+    res.end(JSON.stringify(obj));
   };
   
   res.send = function(data) {
     if (typeof data === 'object' && !Buffer.isBuffer(data) && data !== null) {
-      if (!this.getHeader('Content-Type')) {
-        this.setHeader('Content-Type', 'application/json');
+      if (!res.getHeader('Content-Type')) {
+        res.setHeader('Content-Type', 'application/json');
       }
-      this.end(JSON.stringify(data));
+      res.end(JSON.stringify(data));
     } else {
-      this.end(data);
+      res.end(data);
     }
   };
   
