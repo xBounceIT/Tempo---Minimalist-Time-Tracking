@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import http2 from 'http2';
 import http from 'http';
-import { Readable } from 'stream';
+import { Readable, PassThrough } from 'stream';
 
 import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
@@ -60,95 +60,69 @@ app.use((err, req, res, next) => {
 });
 
 // Helper function to convert HTTP/2 request to Express-compatible format
-async function convertH2Request(h2Req, h2Res) {
-  // Read the body from HTTP/2 stream before passing to Express
-  // Express body parser expects HTTP/1.1 IncomingMessage, so we pre-parse
-  let bodyData = null;
-  const chunks = [];
-  
-  // Read the body if Content-Length > 0
-  const contentLength = parseInt(h2Req.headers['content-length'] || '0', 10);
-  if (contentLength > 0) {
-    try {
-      for await (const chunk of h2Req) {
-        chunks.push(chunk);
-      }
-      bodyData = Buffer.concat(chunks);
-    } catch (err) {
-      // Stream might already be consumed or error occurred
-      console.error('Error reading HTTP/2 request body:', err);
-    }
+function convertH2Request(h2Req, h2Res) {
+  // Copy HTTP/2 request headers
+  const headers = {};
+  for (const [key, value] of Object.entries(h2Req.headers)) {
+    headers[key.toLowerCase()] = value;
   }
   
-  // Create a wrapper object that mimics http.IncomingMessage
-  // This avoids Express body parser trying to read from HTTP/2 stream directly
-  const req = Object.create(http.IncomingMessage.prototype);
+  // Create PassThrough stream to handle the body
+  const passThrough = new PassThrough();
   
-  // Copy essential properties
+  // Create a minimal mock socket
+  const mockSocket = {
+    encrypted: false,
+    readable: true,
+    writable: true,
+    remoteAddress: h2Req.socket?.remoteAddress || '127.0.0.1',
+    remotePort: h2Req.socket?.remotePort || 80,
+    destroy: () => {},
+    on: (event, listener) => mockSocket,
+    emit: () => {},
+    removeListener: () => {},
+    addListener: () => mockSocket,
+    once: () => mockSocket
+  };
+  
+  // Create IncomingMessage with proper initialization
+  const req = new http.IncomingMessage(mockSocket);
+  
+  // Set basic properties
   req.method = h2Req.method || 'GET';
   req.url = h2Req.path || h2Req.url || '/';
   req.httpVersion = '2.0';
   req.httpVersionMajor = 2;
   req.httpVersionMinor = 0;
-  req.headers = {};
-  for (const [key, value] of Object.entries(h2Req.headers)) {
-    req.headers[key.toLowerCase()] = value;
-  }
-  req.socket = h2Req.socket || { encrypted: false };
-  req.connection = req.socket;
+  req.headers = headers;
+  req.socket = mockSocket;
+  req.connection = mockSocket;
   
-  // Create a readable stream from the body data for Express body parser
-  if (bodyData) {
-    const bodyStream = Readable.from([bodyData]);
-    // Copy stream methods from bodyStream to req
-    req.read = bodyStream.read.bind(bodyStream);
-    req.on = bodyStream.on.bind(bodyStream);
-    req.once = bodyStream.once.bind(bodyStream);
-    req.pipe = bodyStream.pipe.bind(bodyStream);
-    req.pause = bodyStream.pause.bind(bodyStream);
-    req.resume = bodyStream.resume.bind(bodyStream);
-    req.setEncoding = bodyStream.setEncoding.bind(bodyStream);
-    
-    // Make readable property work
-    Object.defineProperty(req, 'readable', {
-      get: () => bodyStream.readable,
-      enumerable: true,
-      configurable: true
-    });
-    
-    // Forward stream events
-    bodyStream.on('data', (chunk) => req.emit('data', chunk));
-    bodyStream.on('end', () => req.emit('end'));
-    bodyStream.on('error', (err) => req.emit('error', err));
-  } else {
-    // No body - create empty readable stream
-    const emptyStream = Readable.from([]);
-    req.read = emptyStream.read.bind(emptyStream);
-    req.on = emptyStream.on.bind(emptyStream);
-    req.once = emptyStream.once.bind(emptyStream);
-    req.pipe = emptyStream.pipe.bind(emptyStream);
-    req.pause = emptyStream.pause.bind(emptyStream);
-    req.resume = emptyStream.resume.bind(emptyStream);
-    req.setEncoding = emptyStream.setEncoding.bind(emptyStream);
-    
-    Object.defineProperty(req, 'readable', {
-      get: () => false,
-      enumerable: true,
-      configurable: true
-    });
-  }
+  // Pipe HTTP/2 stream to PassThrough
+  h2Req.pipe(passThrough);
   
-  // Store writable url for Express middleware
-  let writableUrl = req.url;
-  Object.defineProperty(req, 'url', {
-    get: () => writableUrl,
-    set: (val) => { writableUrl = val; },
-    enumerable: true,
-    configurable: true
-  });
+  // Replace req's internal readable stream with passThrough
+  // This ensures that when Express reads from req, it reads from passThrough
+  const originalRead = req._read;
+  req._read = function(size) {
+    const chunk = passThrough.read(size);
+    if (chunk !== null) {
+      req.push(chunk);
+    } else {
+      passThrough.once('readable', () => {
+        const chunk = passThrough.read(size);
+        if (chunk !== null) {
+          req.push(chunk);
+        }
+      });
+    }
+  };
+  
+  // Forward passThrough events to req
+  passThrough.on('end', () => req.push(null));
+  passThrough.on('error', (err) => req.emit('error', err));
   
   // Create a response object that mimics http.ServerResponse
-  // Use a plain object wrapper to avoid read-only property issues
   const res = {};
   
   // Track response state
