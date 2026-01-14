@@ -30,6 +30,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
     const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [quoteToDelete, setQuoteToDelete] = useState<Quote | null>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -93,6 +94,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
             expirationDate: new Date().toISOString().split('T')[0],
             notes: '',
         });
+        setErrors({});
         setIsModalOpen(true);
     };
 
@@ -110,19 +112,34 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
             expirationDate: formattedDate,
             notes: quote.notes || '',
         });
+        setErrors({});
         setIsModalOpen(true);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (formData.clientId && formData.items && formData.items.length > 0) {
-            if (editingQuote) {
-                onUpdateQuote(editingQuote.id, formData);
-            } else {
-                onAddQuote(formData);
-            }
-            setIsModalOpen(false);
+
+        const newErrors: Record<string, string> = {};
+
+        if (!formData.clientId) {
+            newErrors.clientId = 'Client is required';
         }
+
+        if (!formData.items || formData.items.length === 0) {
+            newErrors.items = 'At least one product is required';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        if (editingQuote) {
+            onUpdateQuote(editingQuote.id, formData);
+        } else {
+            onAddQuote(formData);
+        }
+        setIsModalOpen(false);
     };
 
     const confirmDelete = (quote: Quote) => {
@@ -145,6 +162,13 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
             clientId,
             clientName: client?.name || '',
         });
+        if (errors.clientId) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors.clientId;
+                return newErrors;
+            });
+        }
     };
 
     const addProductRow = () => {
@@ -160,6 +184,13 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
             ...formData,
             items: [...(formData.items || []), newItem as QuoteItem],
         });
+        if (errors.items) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors.items;
+                return newErrors;
+            });
+        }
     };
 
     const removeProductRow = (index: number) => {
@@ -268,7 +299,11 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                         onChange={handleClientChange}
                                         placeholder="Select a client..."
                                         searchable={true}
+                                        className={errors.clientId ? 'border-red-300' : ''}
                                     />
+                                    {errors.clientId && (
+                                        <p className="text-red-500 text-[10px] font-bold ml-1">{errors.clientId}</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -287,6 +322,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                         <i className="fa-solid fa-plus"></i> Add Product
                                     </button>
                                 </div>
+                                {errors.items && (
+                                    <p className="text-red-500 text-[10px] font-bold ml-1 -mt-2">{errors.items}</p>
+                                )}
 
                                 {formData.items && formData.items.length > 0 && (
                                     <div className="grid grid-cols-12 gap-2 px-3 mb-1">
