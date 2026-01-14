@@ -229,11 +229,8 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-            {isSmartMode ? 'Magic Entry (AI)' : 'Log Time'}
-          </h3>
-          <div className="flex flex-col ml-1">
-            <span className="text-[10px] font-black uppercase text-slate-300 tracking-widest leading-none mb-0.5">Logging for</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">Logging for</span>
             <div className="flex items-baseline gap-1.5 leading-none">
               <span className="text-lg font-black text-praetor uppercase">
                 {new Date(date).toLocaleDateString(undefined, { weekday: 'long' })}

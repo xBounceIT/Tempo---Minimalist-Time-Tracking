@@ -113,13 +113,13 @@ const TrackerView: React.FC<{
             ></div>
             <button
               onClick={() => setTrackerMode('daily')}
-              className={`relative z-10 w-full py-2 text-xs font-bold transition-colors duration-300 ${trackerMode === 'daily' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`relative z-10 w-full py-2 text-xs font-bold transition-colors duration-300 ${trackerMode === 'daily' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
             >
               Daily
             </button>
             <button
               onClick={() => setTrackerMode('weekly')}
-              className={`relative z-10 w-full py-2 text-xs font-bold transition-colors duration-300 ${trackerMode === 'weekly' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`relative z-10 w-full py-2 text-xs font-bold transition-colors duration-300 ${trackerMode === 'weekly' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
             >
               Weekly
             </button>
@@ -198,7 +198,7 @@ const TrackerView: React.FC<{
                   {selectedDate && (
                     <div className="text-right">
                       <p className="text-[10px] font-bold text-slate-400 uppercase">Day Total</p>
-                      <p className={`text-lg font-black transition-colors ${dailyTotal > dailyGoal ? 'text-red-600' : 'text-indigo-600'}`}>{dailyTotal.toFixed(2)} h</p>
+                      <p className={`text-lg font-black transition-colors ${dailyTotal > dailyGoal ? 'text-red-600' : 'text-praetor'}`}>{dailyTotal.toFixed(2)} h</p>
                     </div>
                   )}
                 </div>
