@@ -77,7 +77,7 @@ export interface TimeEntry {
 
 export interface LdapRoleMapping {
   ldapGroup: string;
-  tempoRole: UserRole;
+  praetorRole: UserRole;
 }
 
 export interface LdapConfig {
@@ -131,8 +131,32 @@ export interface Quote {
   updatedAt: number;
 }
 
+export interface SaleItem {
+  id: string;
+  saleId: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  discount?: number;
+}
+
+export interface Sale {
+  id: string;
+  linkedQuoteId?: string; // Reference to source quote
+  clientId: string;
+  clientName: string;
+  items: SaleItem[];
+  paymentTerms: 'immediate' | '15gg' | '21gg' | '30gg' | '45gg';
+  discount: number;
+  status: 'pending' | 'completed' | 'cancelled';
+  notes?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export type View =
-  // Tempo module
+  // Timesheets module
   | 'tempo/tracker'
   | 'tempo/reports'
   | 'tempo/recurring'
@@ -145,6 +169,7 @@ export type View =
   | 'crm/clients'
   | 'crm/products'
   | 'crm/quotes'
+  | 'crm/sales'
   // HR module
   | 'hr/workforce'
   | 'hr/work-units'

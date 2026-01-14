@@ -1,7 +1,7 @@
 {
     "name": "tempo-server",
     "version": "1.0.0",
-    "description": "Tempo Time Tracking API Server",
+    "description": "Praetor API Server",
     "main": "index.js",
     "type": "module",
     "scripts": {
@@ -14,6 +14,7 @@
         "dotenv": "^16.4.5",
         "express": "^4.21.0",
         "jsonwebtoken": "^9.0.2",
+        "ldapjs": "^3.0.7",
         "pg": "^8.13.0"
     }
 }

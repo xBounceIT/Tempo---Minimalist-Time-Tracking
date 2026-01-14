@@ -1,4 +1,4 @@
--- Tempo Time Tracking Database Schema
+-- Praetor Database Schema
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
@@ -297,3 +297,56 @@ ALTER TABLE settings ALTER COLUMN enable_ai_insights SET DEFAULT FALSE;
 
 -- Migration: Add gemini_api_key to general_settings
 ALTER TABLE general_settings ADD COLUMN IF NOT EXISTS gemini_api_key VARCHAR(255);
+
+-- Sales table (safe for existing installations)
+CREATE TABLE IF NOT EXISTS sales (
+    id VARCHAR(50) PRIMARY KEY,
+    linked_quote_id VARCHAR(50) REFERENCES quotes(id) ON DELETE SET NULL,
+    client_id VARCHAR(50) NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    client_name VARCHAR(255) NOT NULL,
+    payment_terms VARCHAR(20) NOT NULL DEFAULT 'immediate',
+    discount DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'cancelled')),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_sales_client_id ON sales(client_id);
+CREATE INDEX IF NOT EXISTS idx_sales_status ON sales(status);
+CREATE INDEX IF NOT EXISTS idx_sales_linked_quote_id ON sales(linked_quote_id);
+
+-- Sale items table (safe for existing installations)
+CREATE TABLE IF NOT EXISTS sale_items (
+    id VARCHAR(50) PRIMARY KEY,
+    sale_id VARCHAR(50) NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+    product_id VARCHAR(50) NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
+    product_name VARCHAR(255) NOT NULL,
+    quantity DECIMAL(10, 2) NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    discount DECIMAL(5, 2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id ON sale_items(sale_id);
+
+-- Migration: Rename 'tempoRole' to 'praetorRole' in existing LDAP role mappings
+DO $$
+BEGIN
+    UPDATE ldap_config
+    SET role_mappings = (
+        SELECT jsonb_agg(
+            CASE 
+                WHEN elem ? 'tempoRole' 
+                THEN (elem - 'tempoRole') || jsonb_build_object('praetorRole', elem->'tempoRole')
+                ELSE elem 
+            END
+        )
+        FROM jsonb_array_elements(role_mappings) AS elem
+    )
+    WHERE role_mappings @> '[{"tempoRole": "user"}]' 
+       OR role_mappings @> '[{"tempoRole": "admin"}]'
+       OR role_mappings @> '[{"tempoRole": "manager"}]';
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Migration of role_mappings failed or not needed: %', SQLERRM;
+END $$;

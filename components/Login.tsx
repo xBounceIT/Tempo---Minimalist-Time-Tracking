@@ -37,7 +37,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <div className="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
             <i className="fa-solid fa-clock text-2xl text-white"></i>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Tempo</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Praetor</h1>
           <p className="text-slate-500 text-sm">Sign in to your workspace</p>
         </div>
 

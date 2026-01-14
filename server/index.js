@@ -14,6 +14,7 @@ import generalSettingsRoutes from './routes/general-settings.js';
 import productsRoutes from './routes/products.js';
 import quotesRoutes from './routes/quotes.js';
 import workUnitsRoutes from './routes/work-units.js';
+import salesRoutes from './routes/sales.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api/general-settings', generalSettingsRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/quotes', quotesRoutes);
 app.use('/api/work-units', workUnitsRoutes);
+app.use('/api/sales', salesRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -94,7 +96,31 @@ app.listen(PORT, async () => {
     console.error('Failed to run auto-migration:', err);
   }
 
-  console.log(`Tempo API server running on port ${PORT}`);
+  console.log(`Praetor API server running on port ${PORT}`);
+
+  // Periodic LDAP Sync Task (every hour)
+  try {
+    const ldapService = (await import('./services/ldap.js')).default;
+
+    // Run once on startup if enabled (wait a bit for DB to settle if needed, but here is fine after migration)
+    // Actually, let's just schedule it.
+
+    const SYNC_INTERVAL = 60 * 60 * 1000; // 1 hour
+    setInterval(async () => {
+      try {
+        // Reload config to check if enabled
+        await ldapService.loadConfig();
+        if (ldapService.config && ldapService.config.enabled) {
+          console.log('Running periodic LDAP sync...');
+          await ldapService.syncUsers();
+        }
+      } catch (err) {
+        console.error('Periodic LDAP Sync Error:', err.message);
+      }
+    }, SYNC_INTERVAL);
+  } catch (err) {
+    console.error('Failed to initialize LDAP sync task:', err);
+  }
 });
 
 export default app;

@@ -6,14 +6,14 @@
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 // Token management
-let authToken: string | null = localStorage.getItem('tempo_auth_token');
+let authToken: string | null = localStorage.getItem('praetor_auth_token');
 
 export const setAuthToken = (token: string | null) => {
     authToken = token;
     if (token) {
-        localStorage.setItem('tempo_auth_token', token);
+        localStorage.setItem('praetor_auth_token', token);
     } else {
-        localStorage.removeItem('tempo_auth_token');
+        localStorage.removeItem('praetor_auth_token');
     }
 };
 
@@ -54,7 +54,7 @@ const fetchApi = async <T>(
 };
 
 // Types for API responses
-import type { User, Client, Project, ProjectTask, TimeEntry, LdapConfig, GeneralSettings, Product, Quote, QuoteItem, WorkUnit } from '../types';
+import type { User, Client, Project, ProjectTask, TimeEntry, LdapConfig, GeneralSettings, Product, Quote, QuoteItem, WorkUnit, Sale, SaleItem } from '../types';
 
 // Normalization Helpers
 const normalizeUser = (u: User): User => ({
@@ -79,7 +79,21 @@ const normalizeQuoteItem = (item: QuoteItem): QuoteItem => ({
 const normalizeQuote = (q: Quote): Quote => ({
     ...q,
     discount: Number(q.discount || 0),
+    // Ensure items is an array
     items: (q.items || []).map(normalizeQuoteItem)
+});
+
+const normalizeSaleItem = (item: SaleItem): SaleItem => ({
+    ...item,
+    quantity: Number(item.quantity || 0),
+    unitPrice: Number(item.unitPrice || 0),
+    discount: Number(item.discount || 0)
+});
+
+const normalizeSale = (s: Sale): Sale => ({
+    ...s,
+    discount: Number(s.discount || 0),
+    items: (s.items || []).map(normalizeSaleItem)
 });
 
 const normalizeTimeEntry = (e: TimeEntry): TimeEntry => ({
@@ -344,6 +358,26 @@ export const quotesApi = {
         fetchApi(`/quotes/${id}`, { method: 'DELETE' }),
 };
 
+// Sales API
+export const salesApi = {
+    list: (): Promise<Sale[]> => fetchApi<Sale[]>('/sales').then(sales => sales.map(normalizeSale)),
+
+    create: (saleData: Partial<Sale>): Promise<Sale> =>
+        fetchApi<Sale>('/sales', {
+            method: 'POST',
+            body: JSON.stringify(saleData),
+        }).then(normalizeSale),
+
+    update: (id: string, updates: Partial<Sale>): Promise<Sale> =>
+        fetchApi<Sale>(`/sales/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        }).then(normalizeSale),
+
+    delete: (id: string): Promise<void> =>
+        fetchApi(`/sales/${id}`, { method: 'DELETE' }),
+};
+
 export default {
     auth: authApi,
     users: usersApi,
@@ -353,6 +387,7 @@ export default {
     entries: entriesApi,
     products: productsApi,
     quotes: quotesApi,
+    sales: salesApi,
     workUnits: workUnitsApi,
     settings: settingsApi,
     ldap: ldapApi,

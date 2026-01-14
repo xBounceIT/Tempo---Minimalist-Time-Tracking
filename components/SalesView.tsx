@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Quote, QuoteItem, Client, Product } from '../types';
+import { Sale, SaleItem, Client, Product } from '../types';
 import CustomSelect from './CustomSelect';
 
 const PAYMENT_TERMS_OPTIONS = [
@@ -11,39 +11,40 @@ const PAYMENT_TERMS_OPTIONS = [
 ];
 
 const STATUS_OPTIONS = [
-    { id: 'quoted', name: 'Quoted' },
-    { id: 'confirmed', name: 'Confirmed' },
+    { id: 'pending', name: 'Pending' },
+    { id: 'completed', name: 'Completed' },
+    { id: 'cancelled', name: 'Cancelled' },
 ];
 
-interface QuotesViewProps {
-    quotes: Quote[];
+interface SalesViewProps {
+    sales: Sale[];
     clients: Client[];
     products: Product[];
-    onAddQuote: (quoteData: Partial<Quote>) => void;
-    onUpdateQuote: (id: string, updates: Partial<Quote>) => void;
-    onDeleteQuote: (id: string) => void;
-    onCreateSale?: (quote: Quote) => void;
+    onAddSale: (saleData: Partial<Sale>) => void;
+    onUpdateSale: (id: string, updates: Partial<Sale>) => void;
+    onDeleteSale: (id: string) => void;
+    onViewQuote?: (quoteId: string) => void;
     currency: string;
 }
 
-const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAddQuote, onUpdateQuote, onDeleteQuote, onCreateSale, currency }) => {
+const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSale, onUpdateSale, onDeleteSale, onViewQuote, currency }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
+    const [editingSale, setEditingSale] = useState<Sale | null>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-    const [quoteToDelete, setQuoteToDelete] = useState<Quote | null>(null);
+    const [saleToDelete, setSaleToDelete] = useState<Sale | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(() => {
-        const saved = localStorage.getItem('tempo_quotes_rowsPerPage');
+        const saved = localStorage.getItem('tempo_sales_rowsPerPage');
         return saved ? parseInt(saved, 10) : 5;
     });
 
     const handleRowsPerPageChange = (val: string) => {
         const value = parseInt(val, 10);
         setRowsPerPage(value);
-        localStorage.setItem('tempo_quotes_rowsPerPage', value.toString());
+        localStorage.setItem('tempo_sales_rowsPerPage', value.toString());
         setCurrentPage(1); // Reset to first page
     };
 
@@ -53,18 +54,18 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
     const [filterStatus, setFilterStatus] = useState('all');
 
     // Filter Logic
-    const filteredQuotes = useMemo(() => {
-        return quotes.filter(quote => {
+    const filteredSales = useMemo(() => {
+        return sales.filter(sale => {
             const matchesSearch = searchTerm === '' ||
-                quote.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                quote.items.some(item => item.productName.toLowerCase().includes(searchTerm.toLowerCase()));
+                sale.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                sale.items.some(item => item.productName.toLowerCase().includes(searchTerm.toLowerCase()));
 
-            const matchesClient = filterClientId === 'all' || quote.clientId === filterClientId;
-            const matchesStatus = filterStatus === 'all' || quote.status === filterStatus;
+            const matchesClient = filterClientId === 'all' || sale.clientId === filterClientId;
+            const matchesStatus = filterStatus === 'all' || sale.status === filterStatus;
 
             return matchesSearch && matchesClient && matchesStatus;
         });
-    }, [quotes, searchTerm, filterClientId, filterStatus]);
+    }, [sales, searchTerm, filterClientId, filterStatus]);
 
     // Reset page on filter change
     React.useEffect(() => {
@@ -72,46 +73,42 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
     }, [searchTerm, filterClientId, filterStatus]);
 
     // Form State
-    const [formData, setFormData] = useState<Partial<Quote>>({
+    const [formData, setFormData] = useState<Partial<Sale>>({
         clientId: '',
         clientName: '',
         items: [],
         paymentTerms: 'immediate',
         discount: 0,
-        status: 'quoted',
-        expirationDate: new Date().toISOString().split('T')[0],
+        status: 'pending',
         notes: '',
     });
 
     const openAddModal = () => {
-        setEditingQuote(null);
+        setEditingSale(null);
         setFormData({
             clientId: '',
             clientName: '',
             items: [],
             paymentTerms: 'immediate',
             discount: 0,
-            status: 'quoted',
-            expirationDate: new Date().toISOString().split('T')[0],
+            status: 'pending',
             notes: '',
         });
         setErrors({});
         setIsModalOpen(true);
     };
 
-    const openEditModal = (quote: Quote) => {
-        setEditingQuote(quote);
-        // Ensure expirationDate is in YYYY-MM-DD format for the date input
-        const formattedDate = quote.expirationDate ? new Date(quote.expirationDate).toISOString().split('T')[0] : '';
+    const openEditModal = (sale: Sale) => {
+        setEditingSale(sale);
         setFormData({
-            clientId: quote.clientId,
-            clientName: quote.clientName,
-            items: quote.items,
-            paymentTerms: quote.paymentTerms,
-            discount: quote.discount,
-            status: quote.status,
-            expirationDate: formattedDate,
-            notes: quote.notes || '',
+            linkedQuoteId: sale.linkedQuoteId,
+            clientId: sale.clientId,
+            clientName: sale.clientName,
+            items: sale.items,
+            paymentTerms: sale.paymentTerms,
+            discount: sale.discount,
+            status: sale.status,
+            notes: sale.notes || '',
         });
         setErrors({});
         setIsModalOpen(true);
@@ -135,24 +132,24 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
             return;
         }
 
-        if (editingQuote) {
-            onUpdateQuote(editingQuote.id, formData);
+        if (editingSale) {
+            onUpdateSale(editingSale.id, formData);
         } else {
-            onAddQuote(formData);
+            onAddSale(formData);
         }
         setIsModalOpen(false);
     };
 
-    const confirmDelete = (quote: Quote) => {
-        setQuoteToDelete(quote);
+    const confirmDelete = (sale: Sale) => {
+        setSaleToDelete(sale);
         setIsDeleteConfirmOpen(true);
     };
 
     const handleDelete = () => {
-        if (quoteToDelete) {
-            onDeleteQuote(quoteToDelete.id);
+        if (saleToDelete) {
+            onDeleteSale(saleToDelete.id);
             setIsDeleteConfirmOpen(false);
-            setQuoteToDelete(null);
+            setSaleToDelete(null);
         }
     };
 
@@ -173,7 +170,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
     };
 
     const addProductRow = () => {
-        const newItem: Partial<QuoteItem> = {
+        const newItem: Partial<SaleItem> = {
             id: 'temp-' + Date.now(),
             productId: '',
             productName: '',
@@ -183,7 +180,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
         };
         setFormData({
             ...formData,
-            items: [...(formData.items || []), newItem as QuoteItem],
+            items: [...(formData.items || []), newItem as SaleItem],
         });
         if (errors.items) {
             setErrors(prev => {
@@ -200,7 +197,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
         setFormData({ ...formData, items: newItems });
     };
 
-    const updateProductRow = (index: number, field: keyof QuoteItem, value: any) => {
+    const updateProductRow = (index: number, field: keyof SaleItem, value: any) => {
         const newItems = [...(formData.items || [])];
         newItems[index] = { ...newItems[index], [field]: value };
 
@@ -217,7 +214,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
     };
 
     // Calculate totals
-    const calculateTotals = (items: QuoteItem[], globalDiscount: number) => {
+    const calculateTotals = (items: SaleItem[], globalDiscount: number) => {
         let subtotal = 0;
         let totalCost = 0;
         const taxGroups: Record<number, number> = {};
@@ -254,15 +251,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
     const activeProducts = products.filter(p => !p.isDisabled);
 
     // Pagination Logic
-    // Pagination Logic
-    const totalPages = Math.ceil(filteredQuotes.length / rowsPerPage);
+    const totalPages = Math.ceil(filteredSales.length / rowsPerPage);
     const startIndex = (currentPage - 1) * rowsPerPage;
-    const paginatedQuotes = filteredQuotes.slice(startIndex, startIndex + rowsPerPage);
-
-    // Check if quote is expired
-    const isExpired = (expirationDate: string) => {
-        return new Date(expirationDate) < new Date();
-    };
+    const paginatedSales = filteredSales.slice(startIndex, startIndex + rowsPerPage);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -273,9 +264,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
                                 <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
-                                    <i className={`fa-solid ${editingQuote ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
+                                    <i className={`fa-solid ${editingSale ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
                                 </div>
-                                {editingQuote ? 'Edit Quote' : 'Create New Quote'}
+                                {editingSale ? 'Edit Sale' : 'Create New Sale'}
                             </h3>
                             <button
                                 onClick={() => setIsModalOpen(false)}
@@ -286,6 +277,30 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                         </div>
 
                         <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
+                            {/* Linked Quote Info */}
+                            {formData.linkedQuoteId && (
+                                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+                                            <i className="fa-solid fa-link"></i>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-bold text-indigo-900">Linked to Quote</div>
+                                            <div className="text-xs text-indigo-600">Created from quote #{formData.linkedQuoteId}</div>
+                                        </div>
+                                    </div>
+                                    {onViewQuote && (
+                                        <button
+                                            type="button"
+                                            onClick={() => onViewQuote(formData.linkedQuoteId!)}
+                                            className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline"
+                                        >
+                                            View Quote
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Client Selection */}
                             <div className="space-y-4">
                                 <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
@@ -419,15 +434,13 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                         No products added. Click "Add Product" to start.
                                     </div>
                                 )}
-
-
                             </div>
 
-                            {/* Quote Details */}
+                            {/* Sale Details */}
                             <div className="space-y-4">
                                 <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                                    Quote Details
+                                    Sale Details
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
@@ -462,20 +475,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                         <label className="text-xs font-bold text-slate-500 ml-1">Status</label>
                                         <CustomSelect
                                             options={STATUS_OPTIONS}
-                                            value={formData.status || 'quoted'}
+                                            value={formData.status || 'pending'}
                                             onChange={(val) => setFormData({ ...formData, status: val as any })}
                                             searchable={false}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Expiration Date</label>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={formData.expirationDate}
-                                            onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
-                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                         />
                                     </div>
 
@@ -556,7 +558,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                     type="submit"
                                     className="px-10 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
                                 >
-                                    {editingQuote ? 'Update Quote' : 'Create Quote'}
+                                    {editingSale ? 'Update Sale' : 'Create Sale'}
                                 </button>
                             </div>
                         </form>
@@ -573,9 +575,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                 <i className="fa-solid fa-triangle-exclamation text-xl"></i>
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-slate-800">Delete Quote?</h3>
+                                <h3 className="text-lg font-black text-slate-800">Delete Sale?</h3>
                                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                                    Are you sure you want to delete this quote for <span className="font-bold text-slate-800">{quoteToDelete?.clientName}</span>?
+                                    Are you sure you want to delete this sale for <span className="font-bold text-slate-800">{saleToDelete?.clientName}</span>?
                                     This action cannot be undone.
                                 </p>
                             </div>
@@ -600,14 +602,14 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-800">Quotes</h2>
-                    <p className="text-slate-500 text-sm">Manage client quotes and proposals</p>
+                    <h2 className="text-2xl font-black text-slate-800">Sales</h2>
+                    <p className="text-slate-500 text-sm">Manage orders and completed sales</p>
                 </div>
                 <button
                     onClick={openAddModal}
                     className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-indigo-100 transition-all hover:bg-indigo-700 active:scale-95 flex items-center gap-2"
                 >
-                    <i className="fa-solid fa-plus"></i> Create New Quote
+                    <i className="fa-solid fa-plus"></i> Create New Sale
                 </button>
             </div>
 
@@ -617,7 +619,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                     <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input
                         type="text"
-                        placeholder="Search quotes or products..."
+                        placeholder="Search sales or products..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm placeholder:font-normal"
@@ -647,8 +649,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
 
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm">
                 <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center rounded-t-3xl">
-                    <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">All Quotes</h4>
-                    <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{filteredQuotes.length} TOTAL</span>
+                    <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">All Sales</h4>
+                    <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{filteredSales.length} TOTAL</span>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -658,92 +660,73 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                 <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                                 <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</th>
                                 <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Terms</th>
-                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiration</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Quote Ref</th>
                                 <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {paginatedQuotes.map(quote => {
-                                const { total } = calculateTotals(quote.items, quote.discount);
-                                const expired = isExpired(quote.expirationDate);
+                            {paginatedSales.map(sale => {
+                                const { total } = calculateTotals(sale.items, sale.discount);
                                 return (
                                     <tr
-                                        key={quote.id}
-                                        onClick={() => openEditModal(quote)}
-                                        className={`hover:bg-slate-50/50 transition-colors group cursor-pointer ${expired ? 'bg-red-50/30' : ''}`}
+                                        key={sale.id}
+                                        onClick={() => openEditModal(sale)}
+                                        className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
                                     >
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center text-sm">
-                                                    <i className="fa-solid fa-file-invoice"></i>
+                                                    <i className="fa-solid fa-cart-shopping"></i>
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-slate-800">{quote.clientName}</div>
-                                                    <div className="text-[10px] font-black text-slate-400 uppercase">{quote.items.length} item{quote.items.length !== 1 ? 's' : ''}</div>
+                                                    <div className="font-bold text-slate-800">{sale.clientName}</div>
+                                                    <div className="text-[10px] font-black text-slate-400 uppercase">{sale.items.length} item{sale.items.length !== 1 ? 's' : ''}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-8 py-5">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black ${quote.status === 'confirmed'
-                                                ? 'bg-emerald-100 text-emerald-700'
-                                                : 'bg-amber-100 text-amber-700'
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black ${sale.status === 'completed'
+                                                    ? 'bg-emerald-100 text-emerald-700'
+                                                    : sale.status === 'cancelled'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : 'bg-amber-100 text-amber-700'
                                                 }`}>
-                                                {quote.status.toUpperCase()}
+                                                {sale.status.toUpperCase()}
                                             </span>
                                         </td>
                                         <td className="px-8 py-5 text-sm font-bold text-slate-700">
                                             {total.toFixed(2)} {currency}
                                         </td>
                                         <td className="px-8 py-5 text-sm font-semibold text-slate-600">
-                                            {quote.paymentTerms === 'immediate' ? 'Immediate' : quote.paymentTerms}
+                                            {sale.paymentTerms === 'immediate' ? 'Immediate' : sale.paymentTerms}
                                         </td>
                                         <td className="px-8 py-5">
-                                            <div className={`text-sm ${expired ? 'text-red-600 font-bold' : 'text-slate-600'}`}>
-                                                {new Date(quote.expirationDate).toLocaleDateString()}
-                                                {expired && <span className="ml-2 text-[10px] font-black">(EXPIRED)</span>}
-                                            </div>
+                                            {sale.linkedQuoteId && (
+                                                <div className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg inline-flex items-center gap-1">
+                                                    <i className="fa-solid fa-link text-[10px]"></i>
+                                                    Quote
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-8 py-5">
                                             <div className="flex justify-end gap-2">
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        openEditModal(quote);
+                                                        openEditModal(sale);
                                                     }}
                                                     className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                                    title="Edit Quote"
+                                                    title="Edit Sale"
                                                 >
                                                     <i className="fa-solid fa-pen-to-square"></i>
                                                 </button>
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        onUpdateQuote(quote.id, { status: quote.status === 'quoted' ? 'confirmed' : 'quoted' });
-                                                    }}
-                                                    className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                                                    title={quote.status === 'quoted' ? 'Mark as Confirmed' : 'Mark as Quoted'}
-                                                >
-                                                    <i className={`fa-solid ${quote.status === 'quoted' ? 'fa-check' : 'fa-rotate-left'}`}></i>
-                                                </button>
-                                                {quote.status === 'confirmed' && onCreateSale && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onCreateSale(quote);
-                                                        }}
-                                                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                                        title="Create Sale Order"
-                                                    >
-                                                        <i className="fa-solid fa-cart-plus"></i>
-                                                    </button>
-                                                )}
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        confirmDelete(quote);
+                                                        confirmDelete(sale);
                                                     }}
                                                     className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                                    title="Delete Quote"
+                                                    title="Delete Sale"
                                                 >
                                                     <i className="fa-solid fa-trash-can"></i>
                                                 </button>
@@ -752,14 +735,14 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                     </tr>
                                 );
                             })}
-                            {filteredQuotes.length === 0 && (
+                            {filteredSales.length === 0 && (
                                 <tr>
                                     <td colSpan={6} className="p-12 text-center">
                                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
-                                            <i className="fa-solid fa-file-invoice text-2xl"></i>
+                                            <i className="fa-solid fa-cart-shopping text-2xl"></i>
                                         </div>
-                                        <p className="text-slate-400 text-sm font-bold">No quotes found.</p>
-                                        <button onClick={openAddModal} className="mt-4 text-indigo-600 text-sm font-black hover:underline">Create your first quote</button>
+                                        <p className="text-slate-400 text-sm font-bold">No sales found.</p>
+                                        <button onClick={openAddModal} className="mt-4 text-indigo-600 text-sm font-black hover:underline">Create your first sale</button>
                                     </td>
                                 </tr>
                             )}
@@ -785,7 +768,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                             searchable={false}
                         />
                         <span className="text-xs font-bold text-slate-400 ml-2">
-                            Showing {paginatedQuotes.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, filteredQuotes.length)} of {filteredQuotes.length}
+                            Showing {paginatedSales.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, filteredSales.length)} of {filteredSales.length}
                         </span>
                     </div>
 
@@ -811,13 +794,6 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                 </button>
                             ))}
                         </div>
-                        <button
-                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                            disabled={currentPage === totalPages || totalPages === 0}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-                        >
-                            <i className="fa-solid fa-chevron-right text-xs"></i>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -825,4 +801,4 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
     );
 };
 
-export default QuotesView;
+export default SalesView;

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product, Quote, WorkUnit } from './types';
+import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product, Quote, Sale, WorkUnit } from './types';
 import { COLORS } from './constants';
 import Layout from './components/Layout';
 import TimeEntryForm from './components/TimeEntryForm';
@@ -25,6 +25,7 @@ import api, { setAuthToken, getAuthToken } from './services/api';
 import NotFound from './components/NotFound';
 import ProductsView from './components/ProductsView';
 import QuotesView from './components/QuotesView';
+import SalesView from './components/SalesView';
 import WorkUnitsView from './components/WorkUnitsView';
 
 const TrackerView: React.FC<{
@@ -377,6 +378,7 @@ const App: React.FC = () => {
   const [projectTasks, setProjectTasks] = useState<ProjectTask[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [settings, setSettings] = useState({
     fullName: 'User',
@@ -408,7 +410,7 @@ const App: React.FC = () => {
   const VALID_VIEWS: View[] = useMemo(() => [
     'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
     'hr/workforce', 'hr/work-units', 'configuration/authentication', 'configuration/general',
-    'crm/clients', 'crm/products', 'crm/quotes',
+    'crm/clients', 'crm/products', 'crm/quotes', 'crm/sales',
     'projects/manage', 'projects/tasks',
     'settings'
   ], []);
@@ -421,7 +423,7 @@ const App: React.FC = () => {
     const validViews: View[] = [
       'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
       'hr/workforce', 'hr/work-units', 'configuration/authentication', 'configuration/general',
-      'crm/clients', 'crm/products', 'crm/quotes',
+      'crm/clients', 'crm/products', 'crm/quotes', 'crm/sales',
       'projects/manage', 'projects/tasks',
       'settings'
     ];
@@ -433,7 +435,7 @@ const App: React.FC = () => {
     if (activeView === '404') return false;
 
     const permissions: Record<View, UserRole[]> = {
-      // Tempo module - all users
+      // Timesheets module - all users
       'tempo/tracker': ['admin', 'manager', 'user'],
       'tempo/reports': ['admin', 'manager', 'user'],
       'tempo/recurring': ['admin', 'manager', 'user'],
@@ -448,6 +450,7 @@ const App: React.FC = () => {
       'crm/clients': ['admin', 'manager'],
       'crm/products': ['admin', 'manager'],
       'crm/quotes': ['admin', 'manager'],
+      'crm/sales': ['admin', 'manager'],
       // Projects module - admin/manager
       'projects/manage': ['admin', 'manager'],
       'projects/tasks': ['admin', 'manager'],
@@ -519,7 +522,7 @@ const App: React.FC = () => {
 
     const loadData = async () => {
       try {
-        const [usersData, clientsData, projectsData, tasksData, settingsData, entriesData, productsData, quotesData] = await Promise.all([
+        const [usersData, clientsData, projectsData, tasksData, settingsData, entriesData, productsData, quotesData, salesData] = await Promise.all([
           api.users.list(),
           api.clients.list(),
           api.projects.list(),
@@ -527,7 +530,8 @@ const App: React.FC = () => {
           api.settings.get(),
           api.entries.list(),
           api.products.list(),
-          api.quotes.list()
+          api.quotes.list(),
+          api.sales.list()
         ]);
 
         setUsers(usersData);
@@ -538,6 +542,7 @@ const App: React.FC = () => {
         setEntries(entriesData);
         setProducts(productsData);
         setQuotes(quotesData);
+        setSales(salesData);
 
         // Load global settings for all users
         const genSettings = await api.generalSettings.get();
@@ -932,6 +937,62 @@ const App: React.FC = () => {
     }
   };
 
+  const addSale = async (saleData: Partial<Sale>) => {
+    try {
+      const sale = await api.sales.create(saleData);
+      setSales([...sales, sale]);
+    } catch (err) {
+      console.error('Failed to add sale:', err);
+    }
+  };
+
+  const handleUpdateSale = async (id: string, updates: Partial<Sale>) => {
+    try {
+      const updated = await api.sales.update(id, updates);
+      setSales(sales.map(s => s.id === id ? updated : s));
+    } catch (err) {
+      console.error('Failed to update sale:', err);
+    }
+  };
+
+  const handleDeleteSale = async (id: string) => {
+    try {
+      await api.sales.delete(id);
+      setSales(sales.filter(s => s.id !== id));
+    } catch (err) {
+      console.error('Failed to delete sale:', err);
+    }
+  };
+
+  const handleCreateSaleFromQuote = async (quote: Quote) => {
+    try {
+      const saleData: Partial<Sale> = {
+        clientId: quote.clientId,
+        clientName: quote.clientName,
+        status: 'pending',
+        linkedQuoteId: quote.id,
+        items: quote.items.map(item => ({
+          productId: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          discount: item.discount,
+          id: 'temp-' + Math.random().toString(36).substr(2, 9),
+          saleId: ''
+        })),
+        discount: quote.discount,
+        notes: quote.notes
+      };
+
+      const sale = await api.sales.create(saleData);
+      setSales([...sales, sale]);
+      setActiveView('crm/sales');
+    } catch (err) {
+      console.error('Failed to create sale from quote:', err);
+      alert('Failed to create sale from quote');
+    }
+  };
+
   const addProject = async (name: string, clientId: string, description?: string) => {
     try {
       const usedColors = projects.map(p => p.color);
@@ -1183,7 +1244,26 @@ const App: React.FC = () => {
               onAddQuote={addQuote}
               onUpdateQuote={handleUpdateQuote}
               onDeleteQuote={handleDeleteQuote}
+              onCreateSale={handleCreateSaleFromQuote}
               currency={generalSettings.currency}
+            />
+          )}
+
+          {activeView === 'crm/sales' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
+            <SalesView
+              sales={sales}
+              clients={clients}
+              products={products}
+              onAddSale={addSale}
+              onUpdateSale={handleUpdateSale}
+              onDeleteSale={handleDeleteSale}
+              currency={generalSettings.currency}
+              onViewQuote={(quoteId) => {
+                // Logic to switch view to quotes? Or filtered quotes?
+                // For now maybe we just switch to quotes view
+                setActiveView('crm/quotes');
+                // Ideally we'd filter or scroll to it, but basic nav is fine for start
+              }}
             />
           )}
 

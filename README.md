@@ -1,7 +1,7 @@
 
-# Tempo - Minimalist Time Tracking
+# Praetor
 
-Tempo is a modern, AI-enhanced time tracking application inspired by the simplicity of tools like Anuko Time Tracker. It streamlines the process of logging work hours, categorizing tasks, and generating insightful reports using a clean, responsive interface and powerful AI capabilities.
+Praetor is a modern, AI-enhanced time tracking application inspired by the simplicity of tools like Anuko Time Tracker. It streamlines the process of logging work hours, categorizing tasks, and generating insightful reports using a clean, responsive interface and powerful AI capabilities.
 
 ## Features
 

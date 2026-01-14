@@ -78,7 +78,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
   const addRoleMapping = () => {
     setFormData({
       ...formData,
-      roleMappings: [...formData.roleMappings, { ldapGroup: '', tempoRole: 'user' }]
+      roleMappings: [...formData.roleMappings, { ldapGroup: '', praetorRole: 'user' }]
     });
   };
 
@@ -88,7 +88,7 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
     setFormData({ ...formData, roleMappings: newMappings });
   };
 
-  const updateRoleMapping = (index: number, field: 'ldapGroup' | 'tempoRole', value: string) => {
+  const updateRoleMapping = (index: number, field: 'ldapGroup' | 'praetorRole', value: string) => {
     const newMappings = [...formData.roleMappings];
     newMappings[index] = { ...newMappings[index], [field]: value };
     setFormData({ ...formData, roleMappings: newMappings });
@@ -252,8 +252,8 @@ const AdminAuthentication: React.FC<AdminAuthenticationProps> = ({ config, onSav
                             { id: 'manager', name: 'Manager' },
                             { id: 'user', name: 'User' }
                           ]}
-                          value={mapping.tempoRole}
-                          onChange={val => updateRoleMapping(idx, 'tempoRole', val as UserRole)}
+                          value={mapping.praetorRole}
+                          onChange={val => updateRoleMapping(idx, 'praetorRole', val as UserRole)}
                         />
                       </div>
                       <button type="button" onClick={() => removeRoleMapping(idx)} className="text-slate-400 hover:text-red-500 p-2">

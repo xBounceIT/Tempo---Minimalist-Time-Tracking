@@ -10,7 +10,7 @@ interface Module {
 }
 
 const modules: Module[] = [
-  { id: 'tempo', name: 'Tempo', icon: 'fa-clock', active: true },
+  { id: 'tempo', name: 'Timesheets', icon: 'fa-clock', active: true },
   { id: 'crm', name: 'CRM', icon: 'fa-handshake', active: false },
   { id: 'hr', name: 'HR', icon: 'fa-user-group', active: false },
   { id: 'projects', name: 'Projects', icon: 'fa-folder-tree', active: false },
@@ -109,7 +109,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
             </div>
             {!isCollapsed && (
               <h1 className="text-2xl font-black italic tracking-tighter text-white whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
-                TEMPO
+                PRAETOR
               </h1>
             )}
           </div>
@@ -197,7 +197,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
             )}
           </div>
 
-          {/* Tempo Module Nav Items */}
+          {/* Timesheets Module Nav Items */}
           {activeModule.id === 'tempo' && (
             <>
               <NavItem
@@ -265,6 +265,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
                 active={activeView === 'crm/quotes'}
                 isCollapsed={isCollapsed}
                 onClick={() => { onViewChange('crm/quotes'); setIsMobileMenuOpen(false); }}
+              />
+              <NavItem
+                icon="fa-cart-shopping"
+                label="Sales"
+                active={activeView === 'crm/sales'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('crm/sales'); setIsMobileMenuOpen(false); }}
               />
             </>
           )}
@@ -336,7 +343,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
 
         <div className={`p-6 border-t border-slate-800 transition-opacity duration-300 ${isCollapsed ? 'md:opacity-0 overflow-hidden' : 'opacity-100'}`}>
           <div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
-            Tempo v{import.meta.env.VITE_APP_VERSION}
+            Praetor v{import.meta.env.VITE_APP_VERSION}
           </div>
         </div>
       </nav>

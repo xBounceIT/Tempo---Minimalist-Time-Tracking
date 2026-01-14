@@ -83,4 +83,15 @@ router.put('/config', authenticateToken, requireRole('admin'), async (req, res, 
     }
 });
 
+// POST /api/ldap/sync - Trigger LDAP user sync (admin only)
+router.post('/sync', authenticateToken, requireRole('admin'), async (req, res, next) => {
+    try {
+        const ldapService = (await import('../services/ldap.js')).default;
+        const stats = await ldapService.syncUsers();
+        res.json({ success: true, ...stats });
+    } catch (err) {
+        next(err);
+    }
+});
+
 export default router;

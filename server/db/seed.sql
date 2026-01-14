@@ -1,4 +1,4 @@
--- Seed data for Tempo Time Tracking
+-- Seed data for Praetor
 
 -- Default users (password is 'password' for all, hashed with bcrypt cost 10)
 -- To generate: require('bcrypt').hashSync('password', 10)

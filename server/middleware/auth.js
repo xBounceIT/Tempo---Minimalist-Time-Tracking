@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { query } from '../db/index.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tempo-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'praetor-secret-key-change-in-production';
 
 export const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization'];

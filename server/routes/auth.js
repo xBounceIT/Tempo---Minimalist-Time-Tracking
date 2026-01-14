@@ -29,7 +29,25 @@ router.post('/login', async (req, res, next) => {
             return res.status(403).json({ error: 'Account is disabled. Please contact an administrator.' });
         }
 
-        const validPassword = await bcrypt.compare(password, user.password_hash);
+        // LDAP Authentication
+        let ldapAuthSuccess = false;
+        try {
+            // We need to dynamic import or ensure service is ready. 
+            // Since we use ES modules, top level import is fine.
+            // But we need to handle if LDAP is disabled in config.
+            // The service handles check internally.
+            const ldapService = (await import('../services/ldap.js')).default;
+            ldapAuthSuccess = await ldapService.authenticate(username, password);
+        } catch (err) {
+            console.error('LDAP Auth Attempt Failed:', err.message); // Log but continue to local
+        }
+
+        let validPassword = false;
+        if (ldapAuthSuccess) {
+            validPassword = true;
+        } else {
+            validPassword = await bcrypt.compare(password, user.password_hash);
+        }
 
         if (!validPassword) {
             return res.status(401).json({ error: 'Invalid username or password' });
