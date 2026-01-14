@@ -60,77 +60,69 @@ app.use((err, req, res, next) => {
 
 // Helper function to convert HTTP/2 request to Express-compatible format
 function convertH2Request(h2Req, h2Res) {
-  // Create a new object that mimics http.IncomingMessage
-  // HTTP/2 request objects have read-only properties, so we create a wrapper
-  const req = {};
+  // Use a Proxy to wrap the HTTP/2 request while preserving stream internals
+  // This allows us to override read-only properties while keeping stream functionality
+  let writableUrl = h2Req.path || h2Req.url || '/';
   
-  // Map HTTP/2 headers to HTTP/1.1 format (lowercase keys)
-  // HTTP/2 headers are already lowercase, but ensure compatibility
+  // Normalize headers to lowercase (HTTP/2 headers are already lowercase, but ensure compatibility)
   const normalizedHeaders = {};
   for (const [key, value] of Object.entries(h2Req.headers)) {
     normalizedHeaders[key.toLowerCase()] = value;
   }
   
-  // Define properties using getters/setters to access HTTP/2 request
-  Object.defineProperty(req, 'headers', {
-    get: () => normalizedHeaders,
-    enumerable: true,
-    configurable: true
-  });
-  
-  Object.defineProperty(req, 'method', {
-    get: () => h2Req.method || 'GET',
-    set: (val) => { /* Express may try to set this, ignore */ },
-    enumerable: true,
-    configurable: true
-  });
-  
-  Object.defineProperty(req, 'httpVersion', {
-    get: () => '2.0',
-    enumerable: true,
-    configurable: true
-  });
-  
-  Object.defineProperty(req, 'httpVersionMajor', {
-    get: () => 2,
-    enumerable: true,
-    configurable: true
-  });
-  
-  Object.defineProperty(req, 'httpVersionMinor', {
-    get: () => 0,
-    enumerable: true,
-    configurable: true
-  });
-  
-  Object.defineProperty(req, 'socket', {
-    get: () => h2Req.socket || { encrypted: false },
-    enumerable: true,
-    configurable: true
-  });
-  
-  Object.defineProperty(req, 'connection', {
-    get: () => req.socket,
-    enumerable: true,
-    configurable: true
-  });
-  
-  // Proxy stream methods from HTTP/2 request
-  req.read = h2Req.read.bind(h2Req);
-  req.on = h2Req.on.bind(h2Req);
-  req.once = h2Req.once.bind(h2Req);
-  req.pipe = h2Req.pipe.bind(h2Req);
-  req.pause = h2Req.pause.bind(h2Req);
-  req.resume = h2Req.resume.bind(h2Req);
-  req.setEncoding = h2Req.setEncoding?.bind(h2Req) || (() => {});
-  
-  // Store writable url for Express middleware that modifies it
-  let writableUrl = h2Req.path || h2Req.url || '/';
-  Object.defineProperty(req, 'url', {
-    get: () => writableUrl,
-    set: (val) => { writableUrl = val; },
-    enumerable: true,
-    configurable: true
+  const req = new Proxy(h2Req, {
+    get(target, prop) {
+      // Override specific properties
+      if (prop === 'url') {
+        return writableUrl;
+      }
+      if (prop === 'headers') {
+        return normalizedHeaders;
+      }
+      if (prop === 'httpVersion') {
+        return '2.0';
+      }
+      if (prop === 'httpVersionMajor') {
+        return 2;
+      }
+      if (prop === 'httpVersionMinor') {
+        return 0;
+      }
+      // Default: return property from original request
+      return target[prop];
+    },
+    set(target, prop, value) {
+      // Allow setting url
+      if (prop === 'url') {
+        writableUrl = value;
+        return true;
+      }
+      // Try to set on target, but don't fail if it's read-only
+      try {
+        target[prop] = value;
+        return true;
+      } catch (e) {
+        // Property is read-only, that's okay
+        return true;
+      }
+    },
+    has(target, prop) {
+      return prop in target || prop === 'url' || prop === 'headers';
+    },
+    ownKeys(target) {
+      return Reflect.ownKeys(target);
+    },
+    getOwnPropertyDescriptor(target, prop) {
+      if (prop === 'url') {
+        return {
+          enumerable: true,
+          configurable: true,
+          writable: true,
+          value: writableUrl
+        };
+      }
+      return Reflect.getOwnPropertyDescriptor(target, prop);
+    }
   });
   
   // Create a response object that mimics http.ServerResponse
