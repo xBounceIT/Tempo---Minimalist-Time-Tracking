@@ -232,9 +232,17 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">
             {isSmartMode ? 'Magic Entry (AI)' : 'Log Time'}
           </h3>
-          <span className="px-2 py-0.5 bg-slate-100 text-praetor text-[10px] font-bold rounded uppercase tracking-tight">
-            For {new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-          </span>
+          <div className="flex flex-col ml-1">
+            <span className="text-[10px] font-black uppercase text-slate-300 tracking-widest leading-none mb-0.5">Logging for</span>
+            <div className="flex items-baseline gap-1.5 leading-none">
+              <span className="text-lg font-black text-praetor uppercase">
+                {new Date(date).toLocaleDateString(undefined, { weekday: 'long' })}
+              </span>
+              <span className="text-lg font-medium text-slate-400">
+                {new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+              </span>
+            </div>
+          </div>
         </div>
         {enableAiInsights && (
           <button
