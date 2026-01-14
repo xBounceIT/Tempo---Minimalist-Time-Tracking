@@ -314,76 +314,95 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {users.map(user => (
-              <tr key={user.id} className="group hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
-                      {user.avatarInitials}
+            {users.map(user => {
+              const canEdit = currentUserRole === 'admin' || (currentUserRole === 'manager' && (user.role === 'user' || user.id === currentUserId));
+              return (
+                <tr
+                  key={user.id}
+                  onClick={() => canEdit && handleEdit(user)}
+                  className={`group hover:bg-slate-50 transition-colors ${canEdit ? 'cursor-pointer' : ''}`}
+                >
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                        {user.avatarInitials}
+                      </div>
+                      <span className="font-bold text-slate-800">{user.name}</span>
+                      {user.isDisabled && (
+                        <span className="text-[10px] bg-red-100 px-2 py-0.5 rounded text-red-600 font-bold uppercase border border-red-200">
+                          Disabled
+                        </span>
+                      )}
+                      {user.id === currentUserId && <span className="text-[10px] bg-indigo-600 px-2 py-0.5 rounded text-white font-bold uppercase">You</span>}
                     </div>
-                    <span className="font-bold text-slate-800">{user.name}</span>
-                    {user.isDisabled && (
-                      <span className="text-[10px] bg-red-100 px-2 py-0.5 rounded text-red-600 font-bold uppercase border border-red-200">
-                        Disabled
-                      </span>
-                    )}
-                    {user.id === currentUserId && <span className="text-[10px] bg-indigo-600 px-2 py-0.5 rounded text-white font-bold uppercase">You</span>}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-slate-600 font-mono">{user.username}</span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${user.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-100' :
-                    user.role === 'manager' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                      'bg-slate-50 text-slate-600 border-slate-100'
-                    }`}>
-                    {user.role === 'admin' && <i className="fa-solid fa-shield-halved"></i>}
-                    {user.role === 'manager' && <i className="fa-solid fa-briefcase"></i>}
-                    {user.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => openAssignments(user.id)}
-                      className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
-                      title="Manage Assignments"
-                    >
-                      <i className="fa-solid fa-link"></i>
-                    </button>
-                    {currentUserRole === 'admin' && (
-                      <>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm text-slate-600 font-mono">{user.username}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${user.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-100' :
+                      user.role === 'manager' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                        'bg-slate-50 text-slate-600 border-slate-100'
+                      }`}>
+                      {user.role === 'admin' && <i className="fa-solid fa-shield-halved"></i>}
+                      {user.role === 'manager' && <i className="fa-solid fa-briefcase"></i>}
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openAssignments(user.id);
+                        }}
+                        className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
+                        title="Manage Assignments"
+                      >
+                        <i className="fa-solid fa-link"></i>
+                      </button>
+                      {currentUserRole === 'admin' && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(user);
+                            }}
+                            className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
+                            title="Edit User"
+                          >
+                            <i className="fa-solid fa-user-pen"></i>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              confirmDelete(user);
+                            }}
+                            disabled={user.id === currentUserId}
+                            className="text-slate-400 hover:text-red-500 disabled:opacity-0 transition-colors p-2"
+                            title="Delete User"
+                          >
+                            <i className="fa-solid fa-trash-can"></i>
+                          </button>
+                        </>
+                      )}
+                      {currentUserRole === 'manager' && (user.role === 'user' || user.id === currentUserId) && (
                         <button
-                          onClick={() => handleEdit(user)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(user);
+                          }}
                           className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
                           title="Edit User"
                         >
                           <i className="fa-solid fa-user-pen"></i>
                         </button>
-                        <button
-                          onClick={() => confirmDelete(user)}
-                          disabled={user.id === currentUserId}
-                          className="text-slate-400 hover:text-red-500 disabled:opacity-0 transition-colors p-2"
-                          title="Delete User"
-                        >
-                          <i className="fa-solid fa-trash-can"></i>
-                        </button>
-                      </>
-                    )}
-                    {currentUserRole === 'manager' && (user.role === 'user' || user.id === currentUserId) && (
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="text-slate-400 hover:text-indigo-600 transition-colors p-2"
-                        title="Edit User"
-                      >
-                        <i className="fa-solid fa-user-pen"></i>
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

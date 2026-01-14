@@ -12,6 +12,7 @@ interface Module {
 const modules: Module[] = [
   { id: 'tempo', name: 'Tempo', icon: 'fa-clock', active: true },
   { id: 'crm', name: 'CRM', icon: 'fa-handshake', active: false },
+  { id: 'hr', name: 'HR', icon: 'fa-user-group', active: false },
   { id: 'projects', name: 'Projects', icon: 'fa-folder-tree', active: false },
   { id: 'employees', name: 'Employees', icon: 'fa-user-tie', active: false },
   { id: 'suppliers', name: 'Suppliers', icon: 'fa-truck', active: false },
@@ -22,14 +23,16 @@ const modules: Module[] = [
 const moduleDefaultRoutes: Record<string, View> = {
   'tempo': 'tempo/tracker',
   'crm': 'crm/clients',
+  'hr': 'hr/workforce',
   'projects': 'projects/manage',
-  'configuration': 'configuration/users',
+  'configuration': 'configuration/authentication',
 };
 
 // Get module from route
 const getModuleFromRoute = (route: View): string => {
   if (route.startsWith('tempo/')) return 'tempo';
   if (route.startsWith('crm/')) return 'crm';
+  if (route.startsWith('hr/')) return 'hr';
   if (route.startsWith('projects/')) return 'projects';
   if (route.startsWith('configuration/')) return 'configuration';
   return 'tempo'; // default
@@ -58,7 +61,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
   // Filter modules based on user role
   const accessibleModules = modules.filter(m => {
     if (m.id === 'configuration') return currentUser.role === 'admin';
-    if (m.id === 'crm' || m.id === 'projects') return currentUser.role === 'admin' || currentUser.role === 'manager';
+    if (m.id === 'crm' || m.id === 'projects' || m.id === 'hr') return currentUser.role === 'admin' || currentUser.role === 'manager';
     // employees and suppliers are placeholders for future
     if (m.id === 'employees' || m.id === 'suppliers') return false;
     return true;
@@ -266,6 +269,19 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
             </>
           )}
 
+          {/* HR Module Nav Items */}
+          {activeModule.id === 'hr' && (
+            <>
+              <NavItem
+                icon="fa-users"
+                label="Workforce"
+                active={activeView === 'hr/workforce'}
+                isCollapsed={isCollapsed}
+                onClick={() => { onViewChange('hr/workforce'); setIsMobileMenuOpen(false); }}
+              />
+            </>
+          )}
+
           {/* Projects Module Nav Items */}
           {activeModule.id === 'projects' && (
             <>
@@ -290,14 +306,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
           {/* Configuration Module Nav Items */}
           {activeModule.id === 'configuration' && (
             <>
-              <NavItem
-                icon="fa-users"
-                label="Users"
-                active={activeView === 'configuration/users'}
-                isCollapsed={isCollapsed}
-                onClick={() => { onViewChange('configuration/users'); setIsMobileMenuOpen(false); }}
-              />
-
               <NavItem
                 icon="fa-shield-halved"
                 label="Authentication"

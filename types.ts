@@ -18,6 +18,7 @@ export interface GeneralSettings {
   startOfWeek: 'Monday' | 'Sunday';
   treatSaturdayAsHoliday: boolean;
   enableAiInsights: boolean;
+  geminiApiKey?: string;
 }
 
 export interface Client {
@@ -138,13 +139,14 @@ export type View =
   | 'tempo/tasks'
   | 'tempo/projects'
   // Configuration module (admin)
-  | 'configuration/users'
   | 'configuration/authentication'
   | 'configuration/general'
   // CRM module
   | 'crm/clients'
   | 'crm/products'
   | 'crm/quotes'
+  // HR module
+  | 'hr/workforce'
   // Projects module
   | 'projects/manage'
   | 'projects/tasks'

@@ -36,6 +36,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
     const [startOfWeek, setStartOfWeek] = useState(settings.startOfWeek);
     const [treatSaturdayAsHoliday, setTreatSaturdayAsHoliday] = useState(settings.treatSaturdayAsHoliday);
     const [enableAiInsights, setEnableAiInsights] = useState(settings.enableAiInsights);
+    const [geminiApiKey, setGeminiApiKey] = useState(settings.geminiApiKey || '');
     const [activeTab, setActiveTab] = useState<'localization' | 'tracking' | 'ai'>('localization');
     const [isSaving, setIsSaving] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
@@ -46,6 +47,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
         setStartOfWeek(settings.startOfWeek);
         setTreatSaturdayAsHoliday(settings.treatSaturdayAsHoliday);
         setEnableAiInsights(settings.enableAiInsights);
+        setGeminiApiKey(settings.geminiApiKey || '');
     }, [settings]);
 
     const handleSave = async (e: React.FormEvent) => {
@@ -57,7 +59,8 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                 dailyLimit,
                 startOfWeek,
                 treatSaturdayAsHoliday,
-                enableAiInsights
+                enableAiInsights,
+                geminiApiKey
             });
             setIsSaved(true);
             setTimeout(() => setIsSaved(false), 3000);
@@ -73,7 +76,9 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
         dailyLimit !== settings.dailyLimit ||
         startOfWeek !== settings.startOfWeek ||
         treatSaturdayAsHoliday !== settings.treatSaturdayAsHoliday ||
-        enableAiInsights !== settings.enableAiInsights;
+        treatSaturdayAsHoliday !== settings.treatSaturdayAsHoliday ||
+        enableAiInsights !== settings.enableAiInsights ||
+        geminiApiKey !== (settings.geminiApiKey || '');
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -82,11 +87,6 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                     <h2 className="text-2xl font-bold text-slate-800">General Administration</h2>
                     <p className="text-sm text-slate-500 mt-1">Configure global application settings</p>
                 </div>
-                {isSaved && (
-                    <div className="bg-emerald-500 text-white px-4 py-2 rounded-lg shadow-md animate-in fade-in slide-in-from-right-4 flex items-center gap-2">
-                        <i className="fa-solid fa-check"></i> Changes Saved
-                    </div>
-                )}
             </div>
 
             {/* Tabs */}
@@ -202,7 +202,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                             <h3 className="font-bold text-slate-800">AI Capabilities</h3>
                         </div>
 
-                        <div className="p-6">
+                        <div className="p-6 space-y-6">
                             <div className="flex items-center justify-between p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
                                 <div className="max-w-md">
                                     <p className="text-sm font-bold text-slate-800">Enable AI Coach for all users</p>
@@ -218,6 +218,27 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                                     <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                 </label>
                             </div>
+
+                            {enableAiInsights && (
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 animate-in fade-in slide-in-from-top-2">
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Gemini API Key</label>
+                                    <div className="relative">
+                                        <input
+                                            type="password"
+                                            value={geminiApiKey}
+                                            onChange={e => setGeminiApiKey(e.target.value)}
+                                            placeholder="Enter your Google Gemini API Key"
+                                            className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-semibold pr-10"
+                                        />
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                            <i className="fa-brands fa-google"></i>
+                                        </div>
+                                    </div>
+                                    <p className="mt-2 text-[10px] text-slate-500 italic leading-relaxed">
+                                        Required for AI features. Your key is stored securely. Get one at <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Google AI Studio</a>.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </section>
                 )}
@@ -225,18 +246,22 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                 <div className="flex justify-end pt-4">
                     <button
                         type="submit"
-                        disabled={isSaving || !hasChanges}
-                        className={`px-8 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center gap-2 ${isSaving || !hasChanges
-                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-                            : 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700'
+                        disabled={isSaving || (!hasChanges && !isSaved)}
+                        className={`px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ease-in-out active:scale-95 flex items-center gap-2 ${isSaved
+                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100'
+                            : isSaving || !hasChanges
+                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                                : 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700'
                             }`}
                     >
                         {isSaving ? (
                             <i className="fa-solid fa-circle-notch fa-spin"></i>
-                        ) : (
+                        ) : isSaved ? (
                             <i className="fa-solid fa-check"></i>
+                        ) : (
+                            <i className="fa-solid fa-save"></i>
                         )}
-                        {isSaving ? 'Saving...' : 'Save Configuration'}
+                        {isSaving ? 'Saving...' : isSaved ? 'Changes Saved' : 'Save Configuration'}
                     </button>
                 </div>
             </form>

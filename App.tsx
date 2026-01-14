@@ -397,7 +397,7 @@ const App: React.FC = () => {
     dailyLimit: 8,
     startOfWeek: 'Monday' as 'Monday' | 'Sunday',
     treatSaturdayAsHoliday: true,
-    enableAiInsights: true
+    enableAiInsights: false
   });
 
   const [viewingUserId, setViewingUserId] = useState<string>('');
@@ -407,7 +407,7 @@ const App: React.FC = () => {
     const hash = rawHash as View;
     const validViews: View[] = [
       'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
-      'configuration/users', 'configuration/authentication', 'configuration/general',
+      'hr/workforce', 'configuration/authentication', 'configuration/general',
       'crm/clients', 'crm/products', 'crm/quotes',
       'projects/manage', 'projects/tasks',
       'settings'
@@ -427,7 +427,7 @@ const App: React.FC = () => {
       'tempo/tasks': ['admin', 'manager', 'user'],
       'tempo/projects': ['admin', 'manager', 'user'],
       // Configuration module - admin only (users is admin/manager)
-      'configuration/users': ['admin', 'manager'],
+      'hr/workforce': ['admin', 'manager'],
       'configuration/authentication': ['admin'],
       'configuration/general': ['admin'],
       // CRM module - admin/manager
@@ -466,7 +466,7 @@ const App: React.FC = () => {
       const hash = rawHash as View;
       const validViews: View[] = [
         'tempo/tracker', 'tempo/reports', 'tempo/recurring', 'tempo/tasks', 'tempo/projects',
-        'configuration/users', 'configuration/authentication', 'configuration/general',
+        'hr/workforce', 'configuration/authentication', 'configuration/general',
         'crm/clients', 'crm/products', 'crm/quotes',
         'projects/manage', 'projects/tasks',
         'settings'
@@ -1177,7 +1177,7 @@ const App: React.FC = () => {
             />
           )}
 
-          {(currentUser.role === 'admin' || currentUser.role === 'manager') && activeView === 'configuration/users' && (
+          {(currentUser.role === 'admin' || currentUser.role === 'manager') && activeView === 'hr/workforce' && (
             <UserManagement
               users={users}
               clients={clients}

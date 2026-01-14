@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS settings (
     email VARCHAR(255),
     daily_goal DECIMAL(4, 2) DEFAULT 8.00,
     start_of_week VARCHAR(10) DEFAULT 'Monday' CHECK (start_of_week IN ('Monday', 'Sunday')),
-    enable_ai_insights BOOLEAN DEFAULT TRUE,
+    enable_ai_insights BOOLEAN DEFAULT FALSE,
     compact_view BOOLEAN DEFAULT FALSE,
     treat_saturday_as_holiday BOOLEAN DEFAULT TRUE,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS general_settings (
     daily_limit DECIMAL(4, 2) DEFAULT 8.00,
     start_of_week VARCHAR(10) DEFAULT 'Monday' CHECK (start_of_week IN ('Monday', 'Sunday')),
     treat_saturday_as_holiday BOOLEAN DEFAULT TRUE,
-    enable_ai_insights BOOLEAN DEFAULT TRUE,
+    enable_ai_insights BOOLEAN DEFAULT FALSE,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS general_settings (
 ALTER TABLE general_settings ADD COLUMN IF NOT EXISTS daily_limit DECIMAL(4, 2) DEFAULT 8.00;
 ALTER TABLE general_settings ADD COLUMN IF NOT EXISTS start_of_week VARCHAR(10) DEFAULT 'Monday';
 ALTER TABLE general_settings ADD COLUMN IF NOT EXISTS treat_saturday_as_holiday BOOLEAN DEFAULT TRUE;
-ALTER TABLE general_settings ADD COLUMN IF NOT EXISTS enable_ai_insights BOOLEAN DEFAULT TRUE;
+ALTER TABLE general_settings ADD COLUMN IF NOT EXISTS enable_ai_insights BOOLEAN DEFAULT FALSE;
 
 -- Insert default general settings room
 INSERT INTO general_settings (id, currency) VALUES (1, '$') ON CONFLICT (id) DO NOTHING;
@@ -246,3 +246,11 @@ CREATE TABLE IF NOT EXISTS quote_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_quote_items_quote_id ON quote_items(quote_id);
+
+-- Migration: Ensure AI capabilities are off by default for existing installations that relied on default
+ALTER TABLE general_settings ALTER COLUMN enable_ai_insights SET DEFAULT FALSE;
+ALTER TABLE settings ALTER COLUMN enable_ai_insights SET DEFAULT FALSE;
+
+-- Migration: Add gemini_api_key to general_settings
+ALTER TABLE general_settings ADD COLUMN IF NOT EXISTS gemini_api_key VARCHAR(255);
+
