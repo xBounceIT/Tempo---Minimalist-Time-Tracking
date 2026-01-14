@@ -1,9 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import http2 from 'http2';
-import http from 'http';
-import { Readable, PassThrough } from 'stream';
 
 import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
@@ -29,14 +26,7 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
-
-// Add logging for request body parsing
 app.use(express.json());
-app.use((req, res, next) => {
-  console.log('[Express] Request:', req.method, req.url);
-  console.log('[Express] Body parsed:', Object.keys(req.body || {}));
-  next();
-});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -66,205 +56,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Helper function to convert HTTP/2 request to Express-compatible format
-function convertH2Request(h2Req, h2Res) {
-  console.log('[HTTP/2] Converting request:', h2Req.method, h2Req.path || h2Req.url);
-  
-  // Copy HTTP/2 request headers
-  const headers = {};
-  for (const [key, value] of Object.entries(h2Req.headers)) {
-    headers[key.toLowerCase()] = value;
-  }
-  
-  // Create a minimal mock socket
-  const mockSocket = {
-    encrypted: false,
-    readable: true,
-    writable: true,
-    remoteAddress: h2Req.socket?.remoteAddress || '127.0.0.1',
-    remotePort: h2Req.socket?.remotePort || 80,
-    destroy: () => {},
-    on: (event, listener) => mockSocket,
-    emit: () => {},
-    removeListener: () => {},
-    addListener: () => mockSocket,
-    once: () => mockSocket
-  };
-  
-  // Create IncomingMessage with proper initialization
-  const req = new http.IncomingMessage(mockSocket);
-  
-  // Set basic properties
-  req.method = h2Req.method || 'GET';
-  req.url = h2Req.path || h2Req.url || '/';
-  req.httpVersion = '2.0';
-  req.httpVersionMajor = 2;
-  req.httpVersionMinor = 0;
-  req.headers = headers;
-  req.socket = mockSocket;
-  req.connection = mockSocket;
-  
-  // Pipe HTTP/2 stream directly to req
-  // This is simpler and more reliable than using PassThrough
-  h2Req.on('data', (chunk) => {
-    console.log('[HTTP/2] Received chunk:', chunk.length, 'bytes');
-    req.push(chunk);
-  });
-  
-  h2Req.on('end', () => {
-    console.log('[HTTP/2] Request body ended');
-    req.push(null);
-  });
-  
-  h2Req.on('error', (err) => {
-    console.error('[HTTP/2] Request error:', err);
-    req.emit('error', err);
-  });
-  
-  // Create a response object that mimics http.ServerResponse
-  const res = {};
-  
-  // Track response state
-  let statusCode = 200;
-  let statusMessage = 'OK';
-  let headersSent = false;
-  let finished = false;
-  
-  // Define properties with getters/setters
-  Object.defineProperty(res, 'statusCode', {
-    get: () => statusCode,
-    set: (val) => { statusCode = val; },
-    enumerable: true,
-    configurable: true
-  });
-  
-  Object.defineProperty(res, 'statusMessage', {
-    get: () => statusMessage,
-    set: (val) => { statusMessage = val; },
-    enumerable: true,
-    configurable: true
-  });
-  
-  Object.defineProperty(res, 'headersSent', {
-    get: () => headersSent,
-    set: (val) => { headersSent = val; },
-    enumerable: true,
-    configurable: true
-  });
-  
-  Object.defineProperty(res, 'finished', {
-    get: () => finished,
-    set: (val) => { finished = val; },
-    enumerable: true,
-    configurable: true
-  });
-  
-  // Implement Express response methods
-  res.status = function(code) {
-    this.statusCode = code;
-    return this;
-  };
-  
-  res.setHeader = function(name, value) {
-    h2Res.setHeader(name, value);
-  };
-  
-  res.getHeader = function(name) {
-    return h2Res.getHeader(name);
-  };
-  
-  res.removeHeader = function(name) {
-    h2Res.removeHeader(name);
-  };
-  
-  res.getHeaders = function() {
-    return h2Res.getHeaders();
-  };
-  
-  res.writeHead = function(code, msg, headers) {
-    if (!headersSent) {
-      statusCode = code;
-      if (typeof msg === 'string') {
-        statusMessage = msg;
-      } else if (msg) {
-        headers = msg;
-      }
-      if (headers) {
-        Object.entries(headers).forEach(([key, value]) => {
-          h2Res.setHeader(key, value);
-        });
-      }
-      h2Res.writeHead(code, headers);
-      headersSent = true;
-    }
-  };
-  
-  res.write = function(chunk, encoding, callback) {
-    if (!headersSent) {
-      res.writeHead(statusCode);
-    }
-    return h2Res.write(chunk, encoding, callback);
-  };
-  
-  res.end = function(chunk, encoding, callback) {
-    if (!headersSent) {
-      res.writeHead(statusCode);
-    }
-    finished = true;
-    if (chunk) {
-      h2Res.end(chunk, encoding, callback);
-    } else {
-      h2Res.end(encoding, callback);
-    }
-  };
-  
-  res.json = function(obj) {
-    if (!res.getHeader('Content-Type')) {
-      res.setHeader('Content-Type', 'application/json');
-    }
-    res.end(JSON.stringify(obj));
-  };
-  
-  res.send = function(data) {
-    if (typeof data === 'object' && !Buffer.isBuffer(data) && data !== null) {
-      if (!res.getHeader('Content-Type')) {
-        res.setHeader('Content-Type', 'application/json');
-      }
-      res.end(JSON.stringify(data));
-    } else {
-      res.end(data);
-    }
-  };
-  
-  return { req, res };
-}
-
-// Create HTTP/2 server with HTTP/1.1 fallback support
-const server = http2.createServer({
-  allowHTTP1: true
-}, async (req, res) => {
-  // Check if this is an HTTP/2 request
-  if (req instanceof http2.Http2ServerRequest) {
-    console.log('[HTTP/2] Server received request');
-    try {
-      const { req: expressReq, res: expressRes } = convertH2Request(req, res);
-      console.log('[HTTP/2] Passing to Express');
-      app(expressReq, expressRes);
-      console.log('[HTTP/2] Express handler called');
-    } catch (err) {
-      console.error('[HTTP/2] Error converting HTTP/2 request:', err);
-      res.writeHead(500);
-      res.end('Internal Server Error');
-    }
-  } else {
-    // HTTP/1.1 request - use Express directly
-    console.log('[HTTP/1.1] Server received request');
-    app(req, res);
-  }
-});
-
-// Startup function
-async function startServer() {
+app.listen(PORT, async () => {
   try {
     // Run automatic migration on startup
     const fs = await import('fs');
@@ -304,10 +96,7 @@ async function startServer() {
     console.error('Failed to run auto-migration:', err);
   }
 
-  // Start the HTTP/2 server
-  server.listen(PORT, () => {
-    console.log(`Praetor API server running on port ${PORT} (HTTP/2 cleartext enabled)`);
-  });
+  console.log(`Praetor API server running on port ${PORT}`);
 
   // Periodic LDAP Sync Task (every hour)
   try {
@@ -332,8 +121,6 @@ async function startServer() {
   } catch (err) {
     console.error('Failed to initialize LDAP sync task:', err);
   }
-}
-
-startServer();
+});
 
 export default app;

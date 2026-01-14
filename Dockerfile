@@ -24,17 +24,17 @@ ENV VITE_APP_VERSION=$APP_VERSION
 RUN npm run build
 
 # STAGE 2: Production
-# Use Caddy for HTTP/2 support and better security
-FROM caddy:2-alpine
+# We keep Alpine here because we only need Nginx, not Node
+FROM nginx:alpine
 
 RUN apk add --no-cache bash
 
-COPY Caddyfile /etc/caddy/Caddyfile
-COPY --from=builder /app/dist /usr/share/caddy/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 80
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
+CMD ["nginx", "-g", "daemon off;"]

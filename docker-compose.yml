@@ -43,7 +43,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Frontend (Caddy serving static files)
+  # Frontend (Nginx serving static files)
   frontend:
     build:
       context: .
