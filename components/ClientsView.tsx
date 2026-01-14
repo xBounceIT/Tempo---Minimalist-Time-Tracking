@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Client } from '../types';
+import CustomSelect from './CustomSelect';
 
 interface ClientsViewProps {
   clients: Client[];
@@ -13,6 +14,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,8 +23,8 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
     return saved ? parseInt(saved, 10) : 5;
   });
 
-  const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = parseInt(e.target.value, 10);
+  const handleRowsPerPageChange = (val: string) => {
+    const value = parseInt(val, 10);
     setRowsPerPage(value);
     localStorage.setItem('tempo_clients_rowsPerPage', value.toString());
     setCurrentPage(1); // Reset to first page
@@ -59,6 +61,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
       billingCode: '',
       paymentTerms: '',
     });
+    setErrors({});
     setIsModalOpen(true);
   };
 
@@ -77,19 +80,38 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
       billingCode: client.billingCode || '',
       paymentTerms: client.paymentTerms || '',
     });
+    setErrors({});
     setIsModalOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name?.trim()) {
-      if (editingClient) {
-        onUpdateClient(editingClient.id, formData);
-      } else {
-        onAddClient(formData);
-      }
-      setIsModalOpen(false);
+
+    // Validation
+    const newErrors: Record<string, string> = {};
+    if (!formData.name?.trim()) {
+      newErrors.name = 'Name is required';
     }
+    if (!formData.clientCode?.trim()) {
+      newErrors.clientCode = 'Client ID is required';
+    }
+    if (!formData.vatNumber?.trim() && !formData.taxCode?.trim()) {
+      const msg = 'Either VAT Number or Fiscal Code is required';
+      newErrors.vatNumber = msg;
+      newErrors.taxCode = msg;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    if (editingClient) {
+      onUpdateClient(editingClient.id, formData);
+    } else {
+      onAddClient(formData);
+    }
+    setIsModalOpen(false);
   };
 
   const confirmDelete = (client: Client) => {
@@ -136,7 +158,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
+            <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8" noValidate>
               {/* Section 1: Identification */}
               <div className="space-y-4">
                 <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
@@ -168,10 +190,17 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                     <input
                       type="text"
                       value={formData.clientCode}
-                      onChange={(e) => setFormData({ ...formData, clientCode: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, clientCode: e.target.value });
+                        if (errors.clientCode) setErrors({ ...errors, clientCode: '' });
+                      }}
                       placeholder="es. CL-001"
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${errors.clientCode ? 'border-red-500 bg-red-50' : 'border-slate-200'
+                        }`}
                     />
+                    {errors.clientCode && (
+                      <p className="text-red-500 text-[10px] font-bold ml-1">{errors.clientCode}</p>
+                    )}
                   </div>
                   <div className="col-span-full space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 ml-1">
@@ -179,12 +208,18 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                     </label>
                     <input
                       type="text"
-                      required
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (errors.name) setErrors({ ...errors, name: '' });
+                      }}
                       placeholder={formData.type === 'company' ? 'es. Acme Corp S.r.l.' : 'es. Mario Rossi'}
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-slate-200'
+                        }`}
                     />
+                    {errors.name && (
+                      <p className="text-red-500 text-[10px] font-bold ml-1">{errors.name}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -251,19 +286,33 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                     <input
                       type="text"
                       value={formData.vatNumber}
-                      onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, vatNumber: e.target.value });
+                        if (errors.vatNumber) setErrors({ ...errors, vatNumber: '', taxCode: '' });
+                      }}
                       placeholder="IT01234567890"
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${errors.vatNumber ? 'border-red-500 bg-red-50' : 'border-slate-200'
+                        }`}
                     />
+                    {errors.vatNumber && (
+                      <p className="text-red-500 text-[10px] font-bold ml-1">{errors.vatNumber}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 ml-1">Codice Fiscale</label>
                     <input
                       type="text"
                       value={formData.taxCode}
-                      onChange={(e) => setFormData({ ...formData, taxCode: e.target.value })}
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      onChange={(e) => {
+                        setFormData({ ...formData, taxCode: e.target.value });
+                        if (errors.taxCode) setErrors({ ...errors, taxCode: '', vatNumber: '' });
+                      }}
+                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${errors.taxCode ? 'border-red-500 bg-red-50' : 'border-slate-200'
+                        }`}
                     />
+                    {errors.taxCode && (
+                      <p className="text-red-500 text-[10px] font-bold ml-1">{errors.taxCode}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 ml-1">Codice Destinatario / SDI</label>
@@ -443,16 +492,19 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
         <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-slate-500">Rows per page:</span>
-            <select
-              value={rowsPerPage}
-              onChange={handleRowsPerPageChange}
-              className="bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 px-2 py-1 outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
+            <CustomSelect
+              options={[
+                { id: '5', name: '5' },
+                { id: '10', name: '10' },
+                { id: '20', name: '20' },
+                { id: '50', name: '50' }
+              ]}
+              value={rowsPerPage.toString()}
+              onChange={(val) => handleRowsPerPageChange(val)}
+              className="w-20"
+              buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
+              searchable={false}
+            />
             <span className="text-xs font-bold text-slate-400 ml-2">
               Showing {activeClients.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, activeClientsTotal.length)} of {activeClientsTotal.length}
             </span>
@@ -472,8 +524,8 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${currentPage === page
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
-                      : 'text-slate-500 hover:bg-slate-100'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
+                    : 'text-slate-500 hover:bg-slate-100'
                     }`}
                 >
                   {page}

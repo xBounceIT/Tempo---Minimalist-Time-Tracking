@@ -38,8 +38,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
         return saved ? parseInt(saved, 10) : 5;
     });
 
-    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = parseInt(e.target.value, 10);
+    const handleRowsPerPageChange = (val: string) => {
+        const value = parseInt(val, 10);
         setRowsPerPage(value);
         localStorage.setItem('tempo_quotes_rowsPerPage', value.toString());
         setCurrentPage(1); // Reset to first page
@@ -436,7 +436,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                         return (
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
                                                 {/* Left Column: Detailed Breakdown */}
-                                                <div className="space-y-3">
+                                                <div className="flex flex-col justify-center space-y-3 h-full">
                                                     <div className="flex justify-between items-center px-2">
                                                         <span className="text-sm font-bold text-slate-500">Imponibile:</span>
                                                         <span className="text-sm font-black text-slate-800">{subtotal.toFixed(2)} {currency}</span>
@@ -661,16 +661,19 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                 <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-3">
                         <span className="text-xs font-bold text-slate-500">Rows per page:</span>
-                        <select
-                            value={rowsPerPage}
-                            onChange={handleRowsPerPageChange}
-                            className="bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 px-2 py-1 outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                        >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                        </select>
+                        <CustomSelect
+                            options={[
+                                { id: '5', name: '5' },
+                                { id: '10', name: '10' },
+                                { id: '20', name: '20' },
+                                { id: '50', name: '50' }
+                            ]}
+                            value={rowsPerPage.toString()}
+                            onChange={(val) => handleRowsPerPageChange(val)}
+                            className="w-20"
+                            buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
+                            searchable={false}
+                        />
                         <span className="text-xs font-bold text-slate-400 ml-2">
                             Showing {paginatedQuotes.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, quotes.length)} of {quotes.length}
                         </span>
@@ -690,8 +693,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
                                     className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${currentPage === page
-                                            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
-                                            : 'text-slate-500 hover:bg-slate-100'
+                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
+                                        : 'text-slate-500 hover:bg-slate-100'
                                         }`}
                                 >
                                     {page}
