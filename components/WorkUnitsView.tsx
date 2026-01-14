@@ -236,20 +236,15 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Managers</label>
-                                <div className="border border-slate-200 rounded-lg max-h-40 overflow-y-auto p-2 bg-slate-50">
-                                    {users.map(u => (
-                                        <label key={u.id} className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="rounded text-indigo-600 focus:ring-indigo-500"
-                                                checked={selectedManagerIds.includes(u.id)}
-                                                onChange={() => toggleManagerSelection(u.id)}
-                                            />
-                                            <span className="text-sm font-medium text-slate-700">{u.name}</span>
-                                        </label>
-                                    ))}
-                                </div>
+                                <CustomSelect
+                                    label="Managers"
+                                    options={managerOptions}
+                                    value={selectedManagerIds}
+                                    onChange={setSelectedManagerIds}
+                                    isMulti={true}
+                                    searchable={true}
+                                    placeholder="Select managers..."
+                                />
                                 {selectedManagerIds.length === 0 && <p className="text-xs text-red-500 mt-1">At least one manager is required.</p>}
                             </div>
                             <div>
@@ -303,20 +298,15 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Managers</label>
-                                <div className="border border-slate-200 rounded-lg max-h-40 overflow-y-auto p-2 bg-slate-50">
-                                    {users.map(u => (
-                                        <label key={u.id} className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="rounded text-indigo-600 focus:ring-indigo-500"
-                                                checked={selectedManagerIds.includes(u.id)}
-                                                onChange={() => toggleManagerSelection(u.id)}
-                                            />
-                                            <span className="text-sm font-medium text-slate-700">{u.name}</span>
-                                        </label>
-                                    ))}
-                                </div>
+                                <CustomSelect
+                                    label="Managers"
+                                    options={managerOptions}
+                                    value={selectedManagerIds}
+                                    onChange={setSelectedManagerIds}
+                                    isMulti={true}
+                                    searchable={true}
+                                    placeholder="Select managers..."
+                                />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Description</label>

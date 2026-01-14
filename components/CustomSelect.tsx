@@ -8,13 +8,14 @@ export interface Option {
 
 interface CustomSelectProps {
   options: Option[];
-  value: string;
-  onChange: (value: string) => void;
+  value: string | string[];
+  onChange: (value: any) => void;
   label?: string;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
   searchable?: boolean;
+  isMulti?: boolean;
   onOpen?: () => void;
   onClose?: () => void;
   buttonClassName?: string;
@@ -29,6 +30,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   className = "",
   disabled = false,
   searchable = false,
+  isMulti = false,
   onOpen,
   onClose,
   buttonClassName
@@ -37,7 +39,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const selectedOption = options.find(o => o.id === value);
+  const selectedOptions = isMulti
+    ? options.filter(o => (value as string[]).includes(o.id))
+    : options.find(o => o.id === value);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -54,6 +58,38 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   const filteredOptions = searchable
     ? options.filter(o => o.name.toLowerCase().includes(searchTerm.toLowerCase()))
     : options;
+
+  const handleToggle = (id: string, e?: React.MouseEvent) => {
+    if (isMulti) {
+      e?.stopPropagation(); // Prevent dropdown from closing
+      const currentValues = Array.isArray(value) ? value : [];
+      const newValues = currentValues.includes(id)
+        ? currentValues.filter(v => v !== id)
+        : [...currentValues, id];
+      onChange(newValues);
+    } else {
+      onChange(id);
+      setIsOpen(false);
+      onClose?.();
+      setSearchTerm('');
+    }
+  };
+
+  const getButtonLabel = () => {
+    if (isMulti) {
+      const selected = selectedOptions as Option[];
+      if (selected.length === 0) return placeholder || 'Select...';
+      if (selected.length === 1) return selected[0].name;
+      return `${selected.length} selected`;
+    }
+    const selected = selectedOptions as Option | undefined;
+    return selected ? selected.name : placeholder || 'Select...';
+  };
+
+  const isSelected = (id: string) => {
+    if (isMulti) return (value as string[]).includes(id);
+    return value === id;
+  };
 
   return (
     <div className={`relative ${className}`} ref={containerRef}>
@@ -72,10 +108,24 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           ${isOpen ? 'ring-2 ring-indigo-500 border-indigo-500' : ''}
           ${buttonClassName ? buttonClassName : 'px-3 py-2.5 bg-slate-50 border border-slate-200 text-sm'}`}
       >
-        <span className={`truncate ${selectedOption ? "text-slate-800 font-semibold" : "text-slate-400"}`}>
-          {selectedOption ? selectedOption.name : placeholder || 'Select...'}
+        <span className={`truncate ${((isMulti && (value as string[]).length > 0) || (!isMulti && value)) ? "text-slate-800 font-semibold" : "text-slate-400"}`}>
+          {getButtonLabel()}
         </span>
-        <i className={`fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}></i>
+        <div className="flex items-center gap-2">
+          {isMulti && (value as string[]).length > 0 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange([]);
+              }}
+              className="hover:text-red-500 text-slate-300 transition-colors"
+            >
+              <i className="fa-solid fa-circle-xmark text-xs"></i>
+            </button>
+          )}
+          <i className={`fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}></i>
+        </div>
       </button>
 
       {isOpen && !disabled && (
@@ -97,25 +147,47 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           {filteredOptions.length === 0 ? (
             <div className="px-4 py-3 text-xs text-slate-400 italic text-center">No options found</div>
           ) : (
-            filteredOptions.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => {
-                  onChange(option.id);
-                  setIsOpen(false);
-                  onClose?.();
-                  setSearchTerm('');
-                }}
-                className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between ${value === option.id
-                  ? 'bg-indigo-50 text-indigo-700 font-bold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-              >
-                <span className="truncate">{option.name}</span>
-                {value === option.id && <i className="fa-solid fa-check text-[10px]"></i>}
-              </button>
-            ))
+            <>
+              {isMulti && filteredOptions.length > 1 && (
+                <div className="px-2 py-1 border-b border-slate-50 mb-1 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const allIds = options.map(o => o.id);
+                      onChange(allIds);
+                    }}
+                    className="flex-1 text-[10px] font-bold py-1 px-2 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                  >
+                    Select All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange([]);
+                    }}
+                    className="flex-1 text-[10px] font-bold py-1 px-2 rounded bg-slate-50 text-slate-500 hover:bg-slate-100 transition-colors"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+              {filteredOptions.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={(e) => handleToggle(option.id, e)}
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between ${isSelected(option.id)
+                    ? 'bg-indigo-50 text-indigo-700 font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                >
+                  <span className="truncate">{option.name}</span>
+                  {isSelected(option.id) && <i className="fa-solid fa-check text-[10px]"></i>}
+                </button>
+              ))}
+            </>
           )}
         </div>
       )}
