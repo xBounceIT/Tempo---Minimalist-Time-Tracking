@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import http2 from 'http2';
 import http from 'http';
+import { Readable } from 'stream';
 
 import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
@@ -59,29 +60,92 @@ app.use((err, req, res, next) => {
 });
 
 // Helper function to convert HTTP/2 request to Express-compatible format
-function convertH2Request(h2Req, h2Res) {
-  // Use the HTTP/2 request directly without modification
-  // This preserves all stream internals that Express body parser needs
-  const req = h2Req;
+async function convertH2Request(h2Req, h2Res) {
+  // Read the body from HTTP/2 stream before passing to Express
+  // Express body parser expects HTTP/1.1 IncomingMessage, so we pre-parse
+  let bodyData = null;
+  const chunks = [];
   
-  // Store writable url separately for Express middleware
-  let writableUrl = h2Req.path || h2Req.url || '/';
+  // Read the body if Content-Length > 0
+  const contentLength = parseInt(h2Req.headers['content-length'] || '0', 10);
+  if (contentLength > 0) {
+    try {
+      for await (const chunk of h2Req) {
+        chunks.push(chunk);
+      }
+      bodyData = Buffer.concat(chunks);
+    } catch (err) {
+      // Stream might already be consumed or error occurred
+      console.error('Error reading HTTP/2 request body:', err);
+    }
+  }
   
-  // Try to make url writable, but don't break if it fails
-  try {
-    Object.defineProperty(req, 'url', {
-      get: () => writableUrl,
-      set: (val) => { writableUrl = val; },
+  // Create a wrapper object that mimics http.IncomingMessage
+  // This avoids Express body parser trying to read from HTTP/2 stream directly
+  const req = Object.create(http.IncomingMessage.prototype);
+  
+  // Copy essential properties
+  req.method = h2Req.method || 'GET';
+  req.url = h2Req.path || h2Req.url || '/';
+  req.httpVersion = '2.0';
+  req.httpVersionMajor = 2;
+  req.httpVersionMinor = 0;
+  req.headers = {};
+  for (const [key, value] of Object.entries(h2Req.headers)) {
+    req.headers[key.toLowerCase()] = value;
+  }
+  req.socket = h2Req.socket || { encrypted: false };
+  req.connection = req.socket;
+  
+  // Create a readable stream from the body data for Express body parser
+  if (bodyData) {
+    const bodyStream = Readable.from([bodyData]);
+    // Copy stream methods from bodyStream to req
+    req.read = bodyStream.read.bind(bodyStream);
+    req.on = bodyStream.on.bind(bodyStream);
+    req.once = bodyStream.once.bind(bodyStream);
+    req.pipe = bodyStream.pipe.bind(bodyStream);
+    req.pause = bodyStream.pause.bind(bodyStream);
+    req.resume = bodyStream.resume.bind(bodyStream);
+    req.setEncoding = bodyStream.setEncoding.bind(bodyStream);
+    
+    // Make readable property work
+    Object.defineProperty(req, 'readable', {
+      get: () => bodyStream.readable,
       enumerable: true,
       configurable: true
     });
-  } catch (e) {
-    // If url is read-only, store it separately and let Express access it via path
-    req._originalUrl = writableUrl;
+    
+    // Forward stream events
+    bodyStream.on('data', (chunk) => req.emit('data', chunk));
+    bodyStream.on('end', () => req.emit('end'));
+    bodyStream.on('error', (err) => req.emit('error', err));
+  } else {
+    // No body - create empty readable stream
+    const emptyStream = Readable.from([]);
+    req.read = emptyStream.read.bind(emptyStream);
+    req.on = emptyStream.on.bind(emptyStream);
+    req.once = emptyStream.once.bind(emptyStream);
+    req.pipe = emptyStream.pipe.bind(emptyStream);
+    req.pause = emptyStream.pause.bind(emptyStream);
+    req.resume = emptyStream.resume.bind(emptyStream);
+    req.setEncoding = emptyStream.setEncoding.bind(emptyStream);
+    
+    Object.defineProperty(req, 'readable', {
+      get: () => false,
+      enumerable: true,
+      configurable: true
+    });
   }
   
-  // Headers are already lowercase in HTTP/2, so no modification needed
-  // httpVersion properties should already exist on HTTP/2 requests
+  // Store writable url for Express middleware
+  let writableUrl = req.url;
+  Object.defineProperty(req, 'url', {
+    get: () => writableUrl,
+    set: (val) => { writableUrl = val; },
+    enumerable: true,
+    configurable: true
+  });
   
   // Create a response object that mimics http.ServerResponse
   // Use a plain object wrapper to avoid read-only property issues
@@ -205,11 +269,17 @@ function convertH2Request(h2Req, h2Res) {
 // Create HTTP/2 server with HTTP/1.1 fallback support
 const server = http2.createServer({
   allowHTTP1: true
-}, (req, res) => {
+}, async (req, res) => {
   // Check if this is an HTTP/2 request
   if (req instanceof http2.Http2ServerRequest) {
-    const { req: expressReq, res: expressRes } = convertH2Request(req, res);
-    app(expressReq, expressRes);
+    try {
+      const { req: expressReq, res: expressRes } = await convertH2Request(req, res);
+      app(expressReq, expressRes);
+    } catch (err) {
+      console.error('Error converting HTTP/2 request:', err);
+      res.writeHead(500);
+      res.end('Internal Server Error');
+    }
   } else {
     // HTTP/1.1 request - use Express directly
     app(req, res);
