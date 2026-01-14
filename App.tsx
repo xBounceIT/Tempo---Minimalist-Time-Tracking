@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useLayoutEffect } from 'react';
+import { getTheme, applyTheme } from './utils/theme';
 import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product, Quote, Sale, WorkUnit } from './types';
 import { COLORS } from './constants';
 import Layout from './components/Layout';
@@ -371,6 +372,10 @@ const TrackerView: React.FC<{
   };
 
 const App: React.FC = () => {
+  useLayoutEffect(() => {
+    applyTheme(getTheme());
+  }, []);
+
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);

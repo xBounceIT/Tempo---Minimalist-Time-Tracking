@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import CustomSelect from './CustomSelect';
 import api from '../services/api';
+import { getTheme, applyTheme, Theme } from '../utils/theme';
 
 export interface UserSettings {
   fullName: string;
@@ -25,6 +26,14 @@ const Settings: React.FC = () => {
   const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  // Theme state
+  const [currentTheme, setCurrentTheme] = useState<Theme>(getTheme());
+
+  const handleThemeChange = (theme: Theme) => {
+    setCurrentTheme(theme);
+    applyTheme(theme);
+  };
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -154,6 +163,46 @@ const Settings: React.FC = () => {
                     <i className="fa-solid fa-save"></i> Save Changes
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+            <i className="fa-solid fa-palette text-praetor"></i>
+            <h3 className="font-bold text-slate-800">Appearance</h3>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <button
+                onClick={() => handleThemeChange('default')}
+                className={`relative p-4 rounded-xl border-2 transition-all text-left flex items-start gap-4 group ${currentTheme === 'default' ? 'border-praetor bg-slate-50' : 'border-slate-100 hover:border-slate-200'}`}
+              >
+                <div className="w-10 h-10 rounded-full bg-[#20293F] shrink-0 shadow-sm flex items-center justify-center text-white">
+                  {currentTheme === 'default' && <i className="fa-solid fa-check text-xs"></i>}
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800 mb-1">Default</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    The classic Praetor experience with slate blue branding. Professional and distinct.
+                  </p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleThemeChange('tempo')}
+                className={`relative p-4 rounded-xl border-2 transition-all text-left flex items-start gap-4 group ${currentTheme === 'tempo' ? 'border-indigo-600 bg-indigo-50/10' : 'border-slate-100 hover:border-indigo-100'}`}
+              >
+                <div className="w-10 h-10 rounded-full bg-[#4F46E5] shrink-0 shadow-sm flex items-center justify-center text-white">
+                  {currentTheme === 'tempo' && <i className="fa-solid fa-check text-xs"></i>}
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800 mb-1">Tempo</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    A vibrant indigo theme. Modern, energetic, and clean.
+                  </p>
+                </div>
               </button>
             </div>
           </div>
