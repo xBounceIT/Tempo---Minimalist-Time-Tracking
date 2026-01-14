@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import http2 from 'node:http2';
 
 import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
@@ -20,6 +21,9 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Create HTTP/2 cleartext (h2c) server with HTTP/1.1 fallback
+const server = http2.createServer(app);
 
 // Middleware
 app.use(cors({
@@ -56,7 +60,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
   try {
     // Run automatic migration on startup
     const fs = await import('fs');

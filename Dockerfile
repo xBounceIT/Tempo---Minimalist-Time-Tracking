@@ -23,18 +23,15 @@ ENV VITE_APP_VERSION=$APP_VERSION
 
 RUN npm run build
 
-# STAGE 2: Production
-# We keep Alpine here because we only need Nginx, not Node
-FROM nginx:alpine
+# STAGE 2: Production with Caddy
+FROM caddy:alpine
 
-RUN apk add --no-cache bash
-
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY --from=builder /app/dist /srv
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 80
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]

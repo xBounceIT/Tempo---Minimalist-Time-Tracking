@@ -1,0 +1,31 @@
+# Caddyfile for Praetor
+# Serves static frontend files and proxies API requests to backend via h2c
+
+:80 {
+    # Serve static files from the SPA build
+    root * /srv
+    
+    # Enable gzip compression
+    encode gzip
+    
+    # API proxy with HTTP/2 cleartext (h2c) to backend
+    handle /api/* {
+        reverse_proxy backend:3001 {
+            transport http {
+                versions h2c
+            }
+        }
+    }
+    
+    # SPA routing - try files, fallback to index.html
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+    
+    # Cache static assets
+    @static {
+        path *.js *.css *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+}
