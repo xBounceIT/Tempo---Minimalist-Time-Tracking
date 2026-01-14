@@ -34,7 +34,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <img src="/praetor-logo.png" alt="Praetor Logo" className="h-32 mx-auto mb-4" />
+          <img src="/praetor-logo.png" alt="Praetor Logo" className="h-48 mx-auto mb-4 object-contain" />
           <p className="text-slate-500 text-sm">Sign in to your workspace</p>
         </div>
 
