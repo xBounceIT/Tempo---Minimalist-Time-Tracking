@@ -45,6 +45,30 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
         setCurrentPage(1); // Reset to first page
     };
 
+    // Filter State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterClientId, setFilterClientId] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
+
+    // Filter Logic
+    const filteredQuotes = useMemo(() => {
+        return quotes.filter(quote => {
+            const matchesSearch = searchTerm === '' ||
+                quote.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                quote.items.some(item => item.productName.toLowerCase().includes(searchTerm.toLowerCase()));
+
+            const matchesClient = filterClientId === 'all' || quote.clientId === filterClientId;
+            const matchesStatus = filterStatus === 'all' || quote.status === filterStatus;
+
+            return matchesSearch && matchesClient && matchesStatus;
+        });
+    }, [quotes, searchTerm, filterClientId, filterStatus]);
+
+    // Reset page on filter change
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterClientId, filterStatus]);
+
     // Form State
     const [formData, setFormData] = useState<Partial<Quote>>({
         clientId: '',
@@ -198,9 +222,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
     const activeProducts = products.filter(p => !p.isDisabled);
 
     // Pagination Logic
-    const totalPages = Math.ceil(quotes.length / rowsPerPage);
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredQuotes.length / rowsPerPage);
     const startIndex = (currentPage - 1) * rowsPerPage;
-    const paginatedQuotes = quotes.slice(startIndex, startIndex + rowsPerPage);
+    const paginatedQuotes = filteredQuotes.slice(startIndex, startIndex + rowsPerPage);
 
     // Check if quote is expired
     const isExpired = (expirationDate: string) => {
@@ -547,10 +572,44 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                 </button>
             </div>
 
+            {/* Search and Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="md:col-span-2 relative">
+                    <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input
+                        type="text"
+                        placeholder="Search quotes or products..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm placeholder:font-normal"
+                    />
+                </div>
+                <div>
+                    <CustomSelect
+                        options={[{ id: 'all', name: 'All Clients' }, ...activeClients.map(c => ({ id: c.id, name: c.name }))]}
+                        value={filterClientId}
+                        onChange={setFilterClientId}
+                        placeholder="Filter by Client"
+                        searchable={true}
+                        buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
+                    />
+                </div>
+                <div>
+                    <CustomSelect
+                        options={[{ id: 'all', name: 'All Statuses' }, ...STATUS_OPTIONS]}
+                        value={filterStatus}
+                        onChange={setFilterStatus}
+                        placeholder="Filter by Status"
+                        searchable={false}
+                        buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
+                    />
+                </div>
+            </div>
+
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                     <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">All Quotes</h4>
-                    <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{quotes.length} TOTAL</span>
+                    <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{filteredQuotes.length} TOTAL</span>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -642,7 +701,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                                     </tr>
                                 );
                             })}
-                            {quotes.length === 0 && (
+                            {filteredQuotes.length === 0 && (
                                 <tr>
                                     <td colSpan={6} className="p-12 text-center">
                                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
@@ -658,7 +717,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                 </div>
 
                 {/* Pagination UI */}
-                <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 rounded-b-3xl">
                     <div className="flex items-center gap-3">
                         <span className="text-xs font-bold text-slate-500">Rows per page:</span>
                         <CustomSelect
@@ -675,7 +734,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
                             searchable={false}
                         />
                         <span className="text-xs font-bold text-slate-400 ml-2">
-                            Showing {paginatedQuotes.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, quotes.length)} of {quotes.length}
+                            Showing {paginatedQuotes.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, filteredQuotes.length)} of {filteredQuotes.length}
                         </span>
                     </div>
 

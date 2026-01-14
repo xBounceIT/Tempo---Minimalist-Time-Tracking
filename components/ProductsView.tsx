@@ -399,8 +399,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                 </button>
             </div>
 
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm">
+                <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center rounded-t-3xl">
                     <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Active Products</h4>
                     <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{activeProducts.length} TOTAL</span>
                 </div>
@@ -496,7 +496,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                 </div>
 
                 {/* Pagination UI */}
-                <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 rounded-b-3xl">
                     <div className="flex items-center gap-3">
                         <span className="text-xs font-bold text-slate-500">Rows per page:</span>
                         <CustomSelect
