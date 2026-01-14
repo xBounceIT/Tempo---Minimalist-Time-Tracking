@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import http2 from 'http2';
+import http from 'http';
 
 import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
@@ -56,7 +58,144 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, async () => {
+// Helper function to convert HTTP/2 request to Express-compatible format
+function convertH2Request(h2Req, h2Res) {
+  // Create a request object that mimics http.IncomingMessage
+  // Use the HTTP/2 request as the base and add Express-compatible properties
+  const req = h2Req;
+  
+  // Map HTTP/2 headers to HTTP/1.1 format (lowercase keys)
+  // HTTP/2 headers are already lowercase, but ensure compatibility
+  if (!req.headers || Object.keys(req.headers).some(k => k !== k.toLowerCase())) {
+    const normalizedHeaders = {};
+    for (const [key, value] of Object.entries(h2Req.headers)) {
+      normalizedHeaders[key.toLowerCase()] = value;
+    }
+    req.headers = normalizedHeaders;
+  }
+  
+  // Ensure method and URL are set correctly
+  req.method = h2Req.method || 'GET';
+  req.url = h2Req.path || h2Req.url || '/';
+  req.httpVersion = '2.0';
+  req.httpVersionMajor = 2;
+  req.httpVersionMinor = 0;
+  
+  // Ensure socket/connection properties exist for compatibility
+  if (!req.socket) {
+    req.socket = h2Req.socket || { encrypted: false };
+  }
+  if (!req.connection) {
+    req.connection = req.socket;
+  }
+  
+  // Create a response object that mimics http.ServerResponse
+  const res = Object.create(http.ServerResponse.prototype);
+  res.statusCode = 200;
+  res.statusMessage = 'OK';
+  res.headersSent = false;
+  res.finished = false;
+  
+  // Implement Express response methods
+  res.status = function(code) {
+    this.statusCode = code;
+    return this;
+  };
+  
+  res.setHeader = function(name, value) {
+    if (Array.isArray(value)) {
+      h2Res.setHeader(name, value);
+    } else {
+      h2Res.setHeader(name, value);
+    }
+  };
+  
+  res.getHeader = function(name) {
+    return h2Res.getHeader(name);
+  };
+  
+  res.removeHeader = function(name) {
+    h2Res.removeHeader(name);
+  };
+  
+  res.getHeaders = function() {
+    return h2Res.getHeaders();
+  };
+  
+  res.writeHead = function(statusCode, statusMessage, headers) {
+    if (!this.headersSent) {
+      this.statusCode = statusCode;
+      if (typeof statusMessage === 'string') {
+        this.statusMessage = statusMessage;
+      } else if (statusMessage) {
+        headers = statusMessage;
+      }
+      if (headers) {
+        Object.entries(headers).forEach(([key, value]) => {
+          h2Res.setHeader(key, value);
+        });
+      }
+      h2Res.writeHead(statusCode, headers);
+      this.headersSent = true;
+    }
+  };
+  
+  res.write = function(chunk, encoding, callback) {
+    if (!this.headersSent) {
+      this.writeHead(this.statusCode);
+    }
+    return h2Res.write(chunk, encoding, callback);
+  };
+  
+  res.end = function(chunk, encoding, callback) {
+    if (!this.headersSent) {
+      this.writeHead(this.statusCode);
+    }
+    this.finished = true;
+    if (chunk) {
+      h2Res.end(chunk, encoding, callback);
+    } else {
+      h2Res.end(encoding, callback);
+    }
+  };
+  
+  res.json = function(obj) {
+    if (!this.getHeader('Content-Type')) {
+      this.setHeader('Content-Type', 'application/json');
+    }
+    this.end(JSON.stringify(obj));
+  };
+  
+  res.send = function(data) {
+    if (typeof data === 'object' && !Buffer.isBuffer(data) && data !== null) {
+      if (!this.getHeader('Content-Type')) {
+        this.setHeader('Content-Type', 'application/json');
+      }
+      this.end(JSON.stringify(data));
+    } else {
+      this.end(data);
+    }
+  };
+  
+  return { req, res };
+}
+
+// Create HTTP/2 server with HTTP/1.1 fallback support
+const server = http2.createServer({
+  allowHTTP1: true
+}, (req, res) => {
+  // Check if this is an HTTP/2 request
+  if (req instanceof http2.Http2ServerRequest) {
+    const { req: expressReq, res: expressRes } = convertH2Request(req, res);
+    app(expressReq, expressRes);
+  } else {
+    // HTTP/1.1 request - use Express directly
+    app(req, res);
+  }
+});
+
+// Startup function
+async function startServer() {
   try {
     // Run automatic migration on startup
     const fs = await import('fs');
@@ -96,7 +235,10 @@ app.listen(PORT, async () => {
     console.error('Failed to run auto-migration:', err);
   }
 
-  console.log(`Praetor API server running on port ${PORT}`);
+  // Start the HTTP/2 server
+  server.listen(PORT, () => {
+    console.log(`Praetor API server running on port ${PORT} (HTTP/2 cleartext enabled)`);
+  });
 
   // Periodic LDAP Sync Task (every hour)
   try {
@@ -121,6 +263,8 @@ app.listen(PORT, async () => {
   } catch (err) {
     console.error('Failed to initialize LDAP sync task:', err);
   }
-});
+}
+
+startServer();
 
 export default app;
