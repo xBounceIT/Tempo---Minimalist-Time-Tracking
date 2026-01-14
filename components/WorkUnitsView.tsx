@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { User, WorkUnit } from '../types';
-import CustomSelect from './CustomSelect';
+import CustomSelect from './CustomSelect'; // Ensure CustomSelect is compatible or use local logic
 import { workUnitsApi } from '../services/api';
 
 interface WorkUnitsViewProps {
     workUnits: WorkUnit[];
     users: User[];
-    onAddWorkUnit: (data: Partial<WorkUnit>) => Promise<void>;
-    onUpdateWorkUnit: (id: string, updates: Partial<WorkUnit>) => Promise<void>;
+    onAddWorkUnit: (data: any) => Promise<void>;
+    onUpdateWorkUnit: (id: string, updates: any) => Promise<void>;
     onDeleteWorkUnit: (id: string) => Promise<void>;
     refreshWorkUnits: () => Promise<void>;
 }
@@ -23,7 +23,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
 
     // Form states
     const [name, setName] = useState('');
-    const [managerId, setManagerId] = useState('');
+    const [selectedManagerIds, setSelectedManagerIds] = useState<string[]>([]);
     const [description, setDescription] = useState('');
 
     // Assignment state
@@ -33,7 +33,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
 
     const openCreateModal = () => {
         setName('');
-        setManagerId('');
+        setSelectedManagerIds([]);
         setDescription('');
         setIsCreateModalOpen(true);
     };
@@ -41,23 +41,24 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
     const openEditModal = (unit: WorkUnit) => {
         setEditingUnit(unit);
         setName(unit.name);
-        setManagerId(unit.managerId);
+        // Map existing managers to IDs
+        setSelectedManagerIds(unit.managers ? unit.managers.map(m => m.id) : []);
         setDescription(unit.description || '');
         setIsEditModalOpen(true);
     };
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (name && managerId) {
-            await onAddWorkUnit({ name, managerId, description });
+        if (name && selectedManagerIds.length > 0) {
+            await onAddWorkUnit({ name, managerIds: selectedManagerIds, description });
             setIsCreateModalOpen(false);
         }
     };
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (editingUnit && name && managerId) {
-            await onUpdateWorkUnit(editingUnit.id, { name, managerId, description });
+        if (editingUnit && name) {
+            await onUpdateWorkUnit(editingUnit.id, { name, managerIds: selectedManagerIds, description });
             setIsEditModalOpen(false);
             setEditingUnit(null);
         }
@@ -105,6 +106,12 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
 
     const toggleUserAssignment = (userId: string) => {
         setAssignedUserIds(prev =>
+            prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+        );
+    };
+
+    const toggleManagerSelection = (userId: string) => {
+        setSelectedManagerIds(prev =>
             prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
         );
     };
@@ -165,13 +172,23 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                         {unit.description && <p className="text-sm text-slate-500 mb-4 line-clamp-2">{unit.description}</p>}
 
                         <div className="space-y-3 pt-4 border-t border-slate-100">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xs font-bold">
+                            <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xs font-bold shrink-0">
                                     <i className="fa-solid fa-user-tie"></i>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Manager</p>
-                                    <p className="text-sm font-bold text-slate-700">{unit.managerName || 'Unknown'}</p>
+                                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Managers</p>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                        {unit.managers && unit.managers.length > 0 ? (
+                                            unit.managers.map(m => (
+                                                <span key={m.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700">
+                                                    {m.name}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-sm text-slate-400 italic">No managers assigned</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
@@ -219,13 +236,21 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 />
                             </div>
                             <div>
-                                <CustomSelect
-                                    label="Manager"
-                                    options={managerOptions}
-                                    value={managerId}
-                                    onChange={setManagerId}
-                                    placeholder="Select a manager..."
-                                />
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Managers</label>
+                                <div className="border border-slate-200 rounded-lg max-h-40 overflow-y-auto p-2 bg-slate-50">
+                                    {users.map(u => (
+                                        <label key={u.id} className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded text-indigo-600 focus:ring-indigo-500"
+                                                checked={selectedManagerIds.includes(u.id)}
+                                                onChange={() => toggleManagerSelection(u.id)}
+                                            />
+                                            <span className="text-sm font-medium text-slate-700">{u.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                                {selectedManagerIds.length === 0 && <p className="text-xs text-red-500 mt-1">At least one manager is required.</p>}
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Description</label>
@@ -245,7 +270,8 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+                                    disabled={selectedManagerIds.length === 0}
+                                    className="flex-1 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
                                 >
                                     Create Unit
                                 </button>
@@ -277,13 +303,20 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, onAddWo
                                 />
                             </div>
                             <div>
-                                <CustomSelect
-                                    label="Manager"
-                                    options={managerOptions}
-                                    value={managerId}
-                                    onChange={setManagerId}
-                                    placeholder="Select a manager..."
-                                />
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Managers</label>
+                                <div className="border border-slate-200 rounded-lg max-h-40 overflow-y-auto p-2 bg-slate-50">
+                                    {users.map(u => (
+                                        <label key={u.id} className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded text-indigo-600 focus:ring-indigo-500"
+                                                checked={selectedManagerIds.includes(u.id)}
+                                                onChange={() => toggleManagerSelection(u.id)}
+                                            />
+                                            <span className="text-sm font-medium text-slate-700">{u.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Description</label>

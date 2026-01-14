@@ -23,7 +23,6 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS is_disabled BOOLEAN DEFAULT FALSE;
 CREATE TABLE IF NOT EXISTS work_units (
     id VARCHAR(50) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    manager_id VARCHAR(50) NOT NULL REFERENCES users(id),
     description TEXT,
     is_disabled BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -31,6 +30,30 @@ CREATE TABLE IF NOT EXISTS work_units (
 
 -- Ensure is_disabled column exists for existing installations
 ALTER TABLE work_units ADD COLUMN IF NOT EXISTS is_disabled BOOLEAN DEFAULT FALSE;
+
+-- Work Unit Managers table (Many-to-Many)
+CREATE TABLE IF NOT EXISTS work_unit_managers (
+    work_unit_id VARCHAR(50) REFERENCES work_units(id) ON DELETE CASCADE,
+    user_id VARCHAR(50) REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (work_unit_id, user_id)
+);
+
+-- Migration: Move existing managers to junction table and drop column
+DO $$
+BEGIN
+    -- Check if manager_id column exists
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='work_units' AND column_name='manager_id') THEN
+        -- Migrate data
+        INSERT INTO work_unit_managers (work_unit_id, user_id)
+        SELECT id, manager_id FROM work_units WHERE manager_id IS NOT NULL
+        ON CONFLICT DO NOTHING;
+        
+        -- Drop the column constraint first if strictly needed, though dropping column usually handles it.
+        -- We just drop the column.
+        ALTER TABLE work_units DROP COLUMN manager_id;
+    END IF;
+END $$;
 
 -- User-Work Unit associations
 CREATE TABLE IF NOT EXISTS user_work_units (

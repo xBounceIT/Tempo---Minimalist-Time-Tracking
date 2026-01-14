@@ -288,13 +288,13 @@ export const productsApi = {
 export const workUnitsApi = {
     list: (): Promise<WorkUnit[]> => fetchApi('/work-units'),
 
-    create: (data: Partial<WorkUnit>): Promise<WorkUnit> =>
+    create: (data: any): Promise<WorkUnit> =>
         fetchApi('/work-units', {
             method: 'POST',
             body: JSON.stringify(data),
         }),
 
-    update: (id: string, updates: Partial<WorkUnit>): Promise<WorkUnit> =>
+    update: (id: string, updates: any): Promise<WorkUnit> =>
         fetchApi(`/work-units/${id}`, {
             method: 'PUT',
             body: JSON.stringify(updates),

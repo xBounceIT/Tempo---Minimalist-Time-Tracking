@@ -157,8 +157,7 @@ export type View =
 export interface WorkUnit {
   id: string;
   name: string;
-  managerId: string;
-  managerName?: string;
+  managers: { id: string, name: string }[];
   description?: string;
   isDisabled?: boolean;
   userCount?: number;

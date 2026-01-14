@@ -21,9 +21,9 @@ router.get('/', authenticateToken, async (req, res, next) => {
                 `SELECT DISTINCT u.id, u.name, u.username, u.role, u.avatar_initials, u.cost_per_hour, u.is_disabled
                  FROM users u
                  LEFT JOIN user_work_units uw ON u.id = uw.user_id
-                 LEFT JOIN work_units w ON uw.work_unit_id = w.id
+                 LEFT JOIN work_unit_managers wum ON uw.work_unit_id = wum.work_unit_id
                  WHERE u.id = $1  -- The manager themselves
-                    OR w.manager_id = $1 -- Users in work units managed by this user
+                    OR wum.user_id = $1 -- Users in work units managed by this user
                  ORDER BY u.name`,
                 [req.user.id]
             );
