@@ -34,10 +34,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
-            <i className="fa-solid fa-clock text-2xl text-white"></i>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900">Praetor</h1>
+          <img src="/praetor-logo.png" alt="Praetor Logo" className="h-16 mx-auto mb-4" />
           <p className="text-slate-500 text-sm">Sign in to your workspace</p>
         </div>
 
