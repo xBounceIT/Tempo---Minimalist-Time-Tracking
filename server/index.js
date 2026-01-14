@@ -60,34 +60,50 @@ app.use((err, req, res, next) => {
 
 // Helper function to convert HTTP/2 request to Express-compatible format
 function convertH2Request(h2Req, h2Res) {
-  // Create a request object that mimics http.IncomingMessage
-  // Use the HTTP/2 request as the base and add Express-compatible properties
-  const req = h2Req;
+  // Create a wrapper object that mimics http.IncomingMessage
+  // Don't modify the original HTTP/2 request object (it has read-only properties)
+  const req = Object.create(h2Req);
   
   // Map HTTP/2 headers to HTTP/1.1 format (lowercase keys)
   // HTTP/2 headers are already lowercase, but ensure compatibility
-  if (!req.headers || Object.keys(req.headers).some(k => k !== k.toLowerCase())) {
-    const normalizedHeaders = {};
-    for (const [key, value] of Object.entries(h2Req.headers)) {
-      normalizedHeaders[key.toLowerCase()] = value;
-    }
-    req.headers = normalizedHeaders;
+  const normalizedHeaders = {};
+  for (const [key, value] of Object.entries(h2Req.headers)) {
+    normalizedHeaders[key.toLowerCase()] = value;
   }
+  req.headers = normalizedHeaders;
   
-  // Ensure method and URL are set correctly
+  // Set method and URL (these should be writable)
   req.method = h2Req.method || 'GET';
   req.url = h2Req.path || h2Req.url || '/';
-  req.httpVersion = '2.0';
-  req.httpVersionMajor = 2;
-  req.httpVersionMinor = 0;
+  
+  // httpVersion properties are read-only, so we'll use getters
+  Object.defineProperty(req, 'httpVersion', {
+    get: () => '2.0',
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(req, 'httpVersionMajor', {
+    get: () => 2,
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(req, 'httpVersionMinor', {
+    get: () => 0,
+    enumerable: true,
+    configurable: true
+  });
   
   // Ensure socket/connection properties exist for compatibility
-  if (!req.socket) {
-    req.socket = h2Req.socket || { encrypted: false };
-  }
-  if (!req.connection) {
-    req.connection = req.socket;
-  }
+  req.socket = h2Req.socket || { encrypted: false };
+  req.connection = req.socket;
+  
+  // Proxy stream methods from HTTP/2 request
+  req.read = h2Req.read.bind(h2Req);
+  req.on = h2Req.on.bind(h2Req);
+  req.once = h2Req.once.bind(h2Req);
+  req.pipe = h2Req.pipe.bind(h2Req);
+  req.pause = h2Req.pause.bind(h2Req);
+  req.resume = h2Req.resume.bind(h2Req);
   
   // Create a response object that mimics http.ServerResponse
   const res = Object.create(http.ServerResponse.prototype);
