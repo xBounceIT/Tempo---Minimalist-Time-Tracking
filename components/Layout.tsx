@@ -10,7 +10,7 @@ interface Module {
 }
 
 const modules: Module[] = [
-  { id: 'tempo', name: 'Timesheets', icon: 'fa-clock', active: true },
+  { id: 'timesheets', name: 'Timesheets', icon: 'fa-clock', active: true },
   { id: 'crm', name: 'CRM', icon: 'fa-handshake', active: false },
   { id: 'hr', name: 'HR', icon: 'fa-user-group', active: false },
   { id: 'projects', name: 'Projects', icon: 'fa-folder-tree', active: false },
@@ -21,7 +21,7 @@ const modules: Module[] = [
 
 // Default route for each module
 const moduleDefaultRoutes: Record<string, View> = {
-  'tempo': 'tempo/tracker',
+  'timesheets': 'timesheets/tracker',
   'crm': 'crm/clients',
   'hr': 'hr/workforce',
   'projects': 'projects/manage',
@@ -30,12 +30,12 @@ const moduleDefaultRoutes: Record<string, View> = {
 
 // Get module from route
 const getModuleFromRoute = (route: View): string => {
-  if (route.startsWith('tempo/')) return 'tempo';
+  if (route.startsWith('timesheets/')) return 'timesheets';
   if (route.startsWith('crm/')) return 'crm';
   if (route.startsWith('hr/')) return 'hr';
   if (route.startsWith('projects/')) return 'projects';
   if (route.startsWith('configuration/')) return 'configuration';
-  return 'tempo'; // default
+  return 'timesheets'; // default
 };
 
 interface LayoutProps {
@@ -198,46 +198,46 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
           </div>
 
           {/* Timesheets Module Nav Items */}
-          {activeModule.id === 'tempo' && (
+          {activeModule.id === 'timesheets' && (
             <>
               <NavItem
                 icon="fa-list-check"
                 label="Time Tracker"
-                active={activeView === 'tempo/tracker'}
+                active={activeView === 'timesheets/tracker'}
                 isCollapsed={isCollapsed}
-                onClick={() => { onViewChange('tempo/tracker'); setIsMobileMenuOpen(false); }}
+                onClick={() => { onViewChange('timesheets/tracker'); setIsMobileMenuOpen(false); }}
               />
 
               <NavItem
                 icon="fa-chart-pie"
                 label="Reports"
-                active={activeView === 'tempo/reports'}
+                active={activeView === 'timesheets/reports'}
                 isCollapsed={isCollapsed}
-                onClick={() => { onViewChange('tempo/reports'); setIsMobileMenuOpen(false); }}
+                onClick={() => { onViewChange('timesheets/reports'); setIsMobileMenuOpen(false); }}
               />
 
               <NavItem
                 icon="fa-repeat"
                 label="Recurring Tasks"
-                active={activeView === 'tempo/recurring'}
+                active={activeView === 'timesheets/recurring'}
                 isCollapsed={isCollapsed}
-                onClick={() => { onViewChange('tempo/recurring'); setIsMobileMenuOpen(false); }}
+                onClick={() => { onViewChange('timesheets/recurring'); setIsMobileMenuOpen(false); }}
               />
 
               <NavItem
                 icon="fa-folder-tree"
                 label="Projects"
-                active={activeView === 'tempo/projects'}
+                active={activeView === 'timesheets/projects'}
                 isCollapsed={isCollapsed}
-                onClick={() => { onViewChange('tempo/projects'); setIsMobileMenuOpen(false); }}
+                onClick={() => { onViewChange('timesheets/projects'); setIsMobileMenuOpen(false); }}
               />
 
               <NavItem
                 icon="fa-tasks"
                 label="Tasks"
-                active={activeView === 'tempo/tasks'}
+                active={activeView === 'timesheets/tasks'}
                 isCollapsed={isCollapsed}
-                onClick={() => { onViewChange('tempo/tasks'); setIsMobileMenuOpen(false); }}
+                onClick={() => { onViewChange('timesheets/tasks'); setIsMobileMenuOpen(false); }}
               />
             </>
           )}

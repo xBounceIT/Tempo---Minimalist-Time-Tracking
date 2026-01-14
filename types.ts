@@ -157,11 +157,11 @@ export interface Sale {
 
 export type View =
   // Timesheets module
-  | 'tempo/tracker'
-  | 'tempo/reports'
-  | 'tempo/recurring'
-  | 'tempo/tasks'
-  | 'tempo/projects'
+  | 'timesheets/tracker'
+  | 'timesheets/reports'
+  | 'timesheets/recurring'
+  | 'timesheets/tasks'
+  | 'timesheets/projects'
   // Configuration module (admin)
   | 'configuration/authentication'
   | 'configuration/general'

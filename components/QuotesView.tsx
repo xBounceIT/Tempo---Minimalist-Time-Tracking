@@ -36,14 +36,14 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, onAd
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(() => {
-        const saved = localStorage.getItem('tempo_quotes_rowsPerPage');
+        const saved = localStorage.getItem('praetor_quotes_rowsPerPage');
         return saved ? parseInt(saved, 10) : 5;
     });
 
     const handleRowsPerPageChange = (val: string) => {
         const value = parseInt(val, 10);
         setRowsPerPage(value);
-        localStorage.setItem('tempo_quotes_rowsPerPage', value.toString());
+        localStorage.setItem('praetor_quotes_rowsPerPage', value.toString());
         setCurrentPage(1); // Reset to first page
     };
 

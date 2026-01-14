@@ -37,14 +37,14 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(() => {
-        const saved = localStorage.getItem('tempo_sales_rowsPerPage');
+        const saved = localStorage.getItem('praetor_sales_rowsPerPage');
         return saved ? parseInt(saved, 10) : 5;
     });
 
     const handleRowsPerPageChange = (val: string) => {
         const value = parseInt(val, 10);
         setRowsPerPage(value);
-        localStorage.setItem('tempo_sales_rowsPerPage', value.toString());
+        localStorage.setItem('praetor_sales_rowsPerPage', value.toString());
         setCurrentPage(1); // Reset to first page
     };
 

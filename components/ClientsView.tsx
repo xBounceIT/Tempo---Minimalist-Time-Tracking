@@ -19,14 +19,14 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(() => {
-    const saved = localStorage.getItem('tempo_clients_rowsPerPage');
+    const saved = localStorage.getItem('praetor_clients_rowsPerPage');
     return saved ? parseInt(saved, 10) : 5;
   });
 
   const handleRowsPerPageChange = (val: string) => {
     const value = parseInt(val, 10);
     setRowsPerPage(value);
-    localStorage.setItem('tempo_clients_rowsPerPage', value.toString());
+    localStorage.setItem('praetor_clients_rowsPerPage', value.toString());
     setCurrentPage(1); // Reset to first page
   };
 

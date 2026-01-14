@@ -566,7 +566,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
             <div className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
               <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-black italic tracking-tighter">TEMPO <span className="text-indigo-400 font-normal not-italic tracking-normal text-sm ml-2">DETAILED REPORT</span></h3>
+                  <h3 className="text-xl font-black italic tracking-tighter">PRAETOR <span className="text-indigo-400 font-normal not-italic tracking-normal text-sm ml-2">DETAILED REPORT</span></h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Generated: {new Date().toLocaleString()}</p>
                 </div>
                 <div className="flex items-center gap-6">
@@ -624,7 +624,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                       const url = URL.createObjectURL(blob);
                       const link = document.createElement('a');
                       link.href = url;
-                      link.setAttribute('download', `tempo_report_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`);
+                      link.setAttribute('download', `praetor_report_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`);
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
