@@ -57,26 +57,46 @@
         /* Custom Horizontal Scrollbar for Financial Reports Graphs */
         .custom-horizontal-scrollbar {
             scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f1f5f9;
+            scrollbar-color: var(--color-primary) #f1f5f9;
+            /* Force scrollbar to always show when content overflows */
+            overflow-x: auto !important;
+            overflow-y: hidden;
         }
 
+        /* WebKit browsers (Chrome, Safari, Edge) */
         .custom-horizontal-scrollbar::-webkit-scrollbar {
-            height: 8px;
+            height: 12px !important;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .custom-horizontal-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #f1f5f9 !important;
             border-radius: 10px;
+            margin: 0 4px;
         }
 
         .custom-horizontal-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: var(--color-primary) !important;
             border-radius: 10px;
             transition: background 0.2s ease;
+            border: 2px solid #f1f5f9;
+            min-width: 20px;
         }
 
         .custom-horizontal-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: var(--color-primary-hover) !important;
+        }
+
+        /* Hide scrollbar buttons/arrows */
+        .custom-horizontal-scrollbar::-webkit-scrollbar-button {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        .custom-horizontal-scrollbar::-webkit-scrollbar-corner {
+            display: none !important;
         }
     </style>
 </head>
