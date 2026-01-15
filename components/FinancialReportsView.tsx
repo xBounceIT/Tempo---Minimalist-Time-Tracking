@@ -192,7 +192,7 @@ const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, e
                 {/* Monthly Performance Chart (Visual Representation using CSS bars for simplicity) */}
                 <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                     <h3 className="text-lg font-black text-slate-800 mb-6">Cash Flow</h3>
-                    <div className="flex items-end justify-between h-64 gap-4 overflow-x-auto pb-2">
+                    <div className="flex items-end justify-between h-64 gap-4 overflow-x-auto pb-2 custom-horizontal-scrollbar">
                         {/* Added horizontal scroll for many months */}
                         {stats.monthlyData.length === 0 ? (
                             <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm italic">

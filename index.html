@@ -53,6 +53,31 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+
+        /* Custom Horizontal Scrollbar for Financial Reports Graphs */
+        .custom-horizontal-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+
+        .custom-horizontal-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .custom-horizontal-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .custom-horizontal-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .custom-horizontal-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
 
