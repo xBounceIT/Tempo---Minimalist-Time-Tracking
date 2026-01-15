@@ -1286,7 +1286,7 @@ const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
         <div className="text-center">
-          <i className="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-600 mb-4"></i>
+          <i className="fa-solid fa-circle-notch fa-spin text-4xl text-praetor mb-4"></i>
           <p className="text-slate-600 font-medium">Loading...</p>
         </div>
       </div>

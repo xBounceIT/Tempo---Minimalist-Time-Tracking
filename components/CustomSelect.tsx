@@ -19,6 +19,7 @@ interface CustomSelectProps {
   onOpen?: () => void;
   onClose?: () => void;
   buttonClassName?: string;
+  dropdownPosition?: 'top' | 'bottom';
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -33,7 +34,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   isMulti = false,
   onOpen,
   onClose,
-  buttonClassName
+  buttonClassName,
+  dropdownPosition = 'bottom'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -153,7 +155,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       </button>
 
       {isOpen && !disabled && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl py-1 max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-100 origin-top">
+        <div className={`absolute z-50 w-full bg-white border border-slate-200 rounded-xl shadow-xl py-1 max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-100 ${dropdownPosition === 'top' ? 'bottom-full mb-1 origin-bottom' : 'mt-1 origin-top'}`}>
           {searchable && (
             <div className="px-2 pt-2 pb-1 sticky top-0 bg-white border-b border-slate-50 z-10">
               <input

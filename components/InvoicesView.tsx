@@ -635,6 +635,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
                             className="w-20"
                             searchable={false}
                             buttonClassName="text-xs py-1"
+                            dropdownPosition="top"
                         />
                         <span className="text-xs font-bold text-slate-400 ml-2">
                             {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredInvoices.length)} / {filteredInvoices.length}

@@ -482,7 +482,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                             ))}
                             {activeProducts.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="p-12 text-center">
+                                    <td colSpan={6} className="p-12 text-center">
                                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                                             <i className="fa-solid fa-boxes-stacked text-2xl"></i>
                                         </div>

@@ -391,6 +391,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ payments, clients, invoices
                             className="w-20"
                             searchable={false}
                             buttonClassName="text-xs py-1"
+                            dropdownPosition="top"
                         />
                         <span className="text-xs font-bold text-slate-400 ml-2">
                             {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredPayments.length)} / {filteredPayments.length}
