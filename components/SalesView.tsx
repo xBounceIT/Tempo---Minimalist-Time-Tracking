@@ -766,7 +766,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                             className="w-20"
                             buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                             searchable={false}
-                            dropdownPosition="top"
+
                         />
                         <span className="text-xs font-bold text-slate-400 ml-2">
                             Showing {paginatedSales.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, filteredSales.length)} of {filteredSales.length}

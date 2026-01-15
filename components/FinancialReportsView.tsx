@@ -1,5 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Invoice, Expense, Payment } from '../types';
+import CustomSelect from './CustomSelect';
+import Calendar from './Calendar';
 
 interface FinancialReportsViewProps {
     invoices: Invoice[];
@@ -9,53 +11,103 @@ interface FinancialReportsViewProps {
 }
 
 const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, expenses, payments, currency }) => {
+    const [timePeriod, setTimePeriod] = useState<string>('6'); // Default to 6 months
+    const [customRange, setCustomRange] = useState<{ start: string | null; end: string | null }>({ start: null, end: null });
+    const [isRangeModalOpen, setIsRangeModalOpen] = useState(false);
+
+    const timeFrameOptions = [
+        { id: '3', name: 'Last 3 Months' },
+        { id: '6', name: 'Last 6 Months' },
+        { id: '12', name: 'Last 12 Months' },
+        { id: 'custom', name: 'Custom Range' },
+    ];
+
+    const resolveDateRange = useMemo(() => {
+        if (timePeriod === 'custom' && customRange.start && customRange.end) {
+            return {
+                start: new Date(customRange.start),
+                end: new Date(customRange.end)
+            };
+        }
+
+        const months = parseInt(timePeriod);
+        const end = new Date();
+        const start = new Date();
+        start.setMonth(start.getMonth() - months);
+        start.setDate(1); // Start from the 1st of that month
+
+        return { start, end };
+    }, [timePeriod, customRange]);
 
     const stats = useMemo(() => {
+        const { start, end } = resolveDateRange;
+
+        // Filter data based on date range
+        const filteredPayments = payments.filter(p => {
+            const d = new Date(p.paymentDate);
+            return d >= start && d <= end;
+        });
+
+        const filteredExpenses = expenses.filter(e => {
+            const d = new Date(e.expenseDate);
+            return d >= start && d <= end;
+        });
+
         // Income (from paid invoices and payments)
-        // We can use payment records for actual cash flow
-        const totalIncome = payments.reduce((sum, p) => sum + p.amount, 0);
+        const totalIncome = filteredPayments.reduce((sum, p) => sum + p.amount, 0);
 
         // Expenses
-        const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+        const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
         // Net Profit
         const netProfit = totalIncome - totalExpenses;
 
-        // Accounts Receivable (Unpaid Invoices)
+        // Accounts Receivable (Unpaid Invoices) - This is point-in-time, generally all unpaid regardless of date, OR filter created date?
+        // Usually AR is "what is owed now", so date filter might not strictly apply, but let's filter by issueDate for consistency if desired.
+        // For standard AR, you usually want ALL outstanding money. Let's keep it global for now, or filter if requested.
+        // Let's keep AR as "Global Current State" to be safe, or filter by 'issued within range'.
+        // Given 'Financial Reports' usually implies 'Performance over period', AR is a balance sheet item. 
+        // Let's leave AR global for now as it represents current asset. 
         const accountsReceivable = invoices
             .filter(i => i.status !== 'cancelled' && i.status !== 'draft')
             .reduce((sum, i) => sum + ((i.total ?? 0) - (i.amountPaid ?? 0)), 0);
 
         // Expense Categories
-        const expenseCategories = expenses.reduce((acc, e) => {
+        const expenseCategories = filteredExpenses.reduce((acc, e) => {
             acc[e.category] = (acc[e.category] || 0) + e.amount;
             return acc;
         }, {} as Record<string, number>);
 
-        // Monthly Data (Last 6 months)
-        const last6Months = Array.from({ length: 6 }, (_, i) => {
-            const d = new Date();
-            d.setMonth(d.getMonth() - i);
-            return {
-                month: d.toLocaleString('default', { month: 'short' }),
-                year: d.getFullYear(),
-                key: `${d.getFullYear()}-${d.getMonth()}`
-            };
-        }).reverse();
+        // Monthly Data Calculation
+        // Determine labels. If custom range is huge, we might need grouping. 
+        // For simplicity, let's stick to monthly grouping for now.
 
-        const monthlyData = last6Months.map(({ month, year, key }) => {
-            const income = payments.filter(p => {
+        const monthlyData: { month: string, year: number, income: number, expense: number, profit: number }[] = [];
+
+        let currentIter = new Date(start);
+        currentIter.setDate(1); // Normalize to start of month
+
+        while (currentIter <= end) {
+            const monthKey = `${currentIter.getFullYear()}-${currentIter.getMonth()}`;
+            const monthName = currentIter.toLocaleString('default', { month: 'short' });
+            const year = currentIter.getFullYear();
+
+            // Calculate for this month
+            const income = filteredPayments.filter(p => {
                 const d = new Date(p.paymentDate);
-                return `${d.getFullYear()}-${d.getMonth()}` === key;
+                return `${d.getFullYear()}-${d.getMonth()}` === monthKey;
             }).reduce((sum, p) => sum + p.amount, 0);
 
-            const expense = expenses.filter(e => {
+            const expense = filteredExpenses.filter(e => {
                 const d = new Date(e.expenseDate);
-                return `${d.getFullYear()}-${d.getMonth()}` === key;
+                return `${d.getFullYear()}-${d.getMonth()}` === monthKey;
             }).reduce((sum, e) => sum + e.amount, 0);
 
-            return { month, year, income, expense, profit: income - expense };
-        });
+            monthlyData.push({ month: monthName, year, income, expense, profit: income - expense });
+
+            // Next month
+            currentIter.setMonth(currentIter.getMonth() + 1);
+        }
 
         return {
             totalIncome,
@@ -65,13 +117,38 @@ const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, e
             expenseCategories,
             monthlyData
         };
-    }, [invoices, expenses, payments]);
+    }, [invoices, expenses, payments, resolveDateRange]);
+
+    const handlePeriodChange = (val: string) => {
+        if (val === 'custom') {
+            setIsRangeModalOpen(true);
+        } else {
+            setTimePeriod(val);
+        }
+    };
+
+    const handleRangeConfirm = () => {
+        if (customRange.start && customRange.end) {
+            setTimePeriod('custom');
+            setIsRangeModalOpen(false);
+        }
+    };
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            <div>
-                <h2 className="text-2xl font-black text-slate-800">Financial Reports</h2>
-                <p className="text-slate-500 text-sm">Overview of your business performance</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-black text-slate-800">Financial Reports</h2>
+                    <p className="text-slate-500 text-sm">Overview of your business performance</p>
+                </div>
+                <div className="w-48">
+                    <CustomSelect
+                        options={timeFrameOptions}
+                        value={timePeriod}
+                        onChange={handlePeriodChange}
+                        dropdownPosition="bottom"
+                    />
+                </div>
             </div>
 
             {/* KPI Cards */}
@@ -105,39 +182,46 @@ const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, e
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Monthly Performance Chart (Visual Representation using CSS bars for simplicity) */}
                 <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 className="text-lg font-black text-slate-800 mb-6">Cash Flow (Last 6 Months)</h3>
-                    <div className="flex items-end justify-between h-64 gap-4">
-                        {stats.monthlyData.map((data, index) => {
-                            const maxVal = Math.max(...stats.monthlyData.map(d => Math.max(d.income, d.expense, 100))); // Avoid div by zero
-                            const incomeHeight = (data.income / maxVal) * 100;
-                            const expenseHeight = (data.expense / maxVal) * 100;
+                    <h3 className="text-lg font-black text-slate-800 mb-6">Cash Flow</h3>
+                    <div className="flex items-end justify-between h-64 gap-4 overflow-x-auto pb-2">
+                        {/* Added horizontal scroll for many months */}
+                        {stats.monthlyData.length === 0 ? (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm italic">
+                                No data for this period
+                            </div>
+                        ) : (
+                            stats.monthlyData.map((data, index) => {
+                                const maxVal = Math.max(...stats.monthlyData.map(d => Math.max(d.income, d.expense, 100))); // Avoid div by zero
+                                const incomeHeight = (data.income / maxVal) * 100;
+                                const expenseHeight = (data.expense / maxVal) * 100;
 
-                            return (
-                                <div key={index} className="flex-1 flex flex-col items-center gap-2 group relative">
-                                    <div className="w-full flex justify-center gap-1 items-end h-full">
-                                        {/* Income Bar */}
-                                        <div
-                                            className="w-3 md:w-6 bg-emerald-400 rounded-t-lg transition-all hover:bg-emerald-500 relative"
-                                            style={{ height: `${Math.max(incomeHeight, 2)}%` }} // min height for visibility
-                                        >
-                                            <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap z-10 transition-opacity pointer-events-none">
-                                                +{data.income.toFixed(0)}
+                                return (
+                                    <div key={`${data.month}-${data.year}-${index}`} className="flex-1 min-w-[30px] flex flex-col items-center gap-2 group relative">
+                                        <div className="w-full flex justify-center gap-1 items-end h-full">
+                                            {/* Income Bar */}
+                                            <div
+                                                className="w-3 md:w-6 bg-emerald-400 rounded-t-lg transition-all hover:bg-emerald-500 relative"
+                                                style={{ height: `${Math.max(incomeHeight, 2)}%` }} // min height for visibility
+                                            >
+                                                <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap z-10 transition-opacity pointer-events-none">
+                                                    +{data.income.toFixed(0)}
+                                                </div>
+                                            </div>
+                                            {/* Expense Bar */}
+                                            <div
+                                                className="w-3 md:w-6 bg-red-400 rounded-t-lg transition-all hover:bg-red-500 relative"
+                                                style={{ height: `${Math.max(expenseHeight, 2)}%` }}
+                                            >
+                                                <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap z-10 transition-opacity pointer-events-none">
+                                                    -{data.expense.toFixed(0)}
+                                                </div>
                                             </div>
                                         </div>
-                                        {/* Expense Bar */}
-                                        <div
-                                            className="w-3 md:w-6 bg-red-400 rounded-t-lg transition-all hover:bg-red-500 relative"
-                                            style={{ height: `${Math.max(expenseHeight, 2)}%` }}
-                                        >
-                                            <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap z-10 transition-opacity pointer-events-none">
-                                                -{data.expense.toFixed(0)}
-                                            </div>
-                                        </div>
+                                        <div className="text-xs font-bold text-slate-400 whitespace-nowrap">{data.month}</div>
                                     </div>
-                                    <div className="text-xs font-bold text-slate-400">{data.month}</div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )}
                     </div>
                     <div className="flex justify-center gap-6 mt-6">
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
@@ -152,7 +236,7 @@ const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, e
                 {/* Expenses Breakdown */}
                 <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                     <h3 className="text-lg font-black text-slate-800 mb-6">Expenses Breakdown</h3>
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
                         {Object.entries(stats.expenseCategories).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([category, amount]) => {
                             const numAmount = amount as number;
                             const percentage = stats.totalExpenses > 0 ? (numAmount / stats.totalExpenses) * 100 : 0;
@@ -177,6 +261,54 @@ const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, e
                     </div>
                 </div>
             </div>
+
+            {/* Range Selection Modal */}
+            {isRangeModalOpen && (
+                <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+                        <div className="p-6 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
+                            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i className="fa-solid fa-calendar-range text-praetor"></i>
+                                Select Date Range
+                            </h3>
+                            <p className="text-xs text-slate-500 mt-1">Pick a start and end date</p>
+                        </div>
+                        <div className="p-6 flex flex-col items-center">
+                            <Calendar
+                                selectionMode='range'
+                                startDate={customRange.start || undefined}
+                                endDate={customRange.end || undefined}
+                                onRangeSelect={(s, e) => setCustomRange({ start: s, end: e })}
+                            />
+                            <div className="mt-4 flex gap-4 w-full text-center text-sm">
+                                <div className="flex-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                    <div className="text-xs font-bold text-slate-400 uppercase">Start</div>
+                                    <div className="font-bold text-slate-700">{customRange.start || '-'}</div>
+                                </div>
+                                <div className="flex-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                    <div className="text-xs font-bold text-slate-400 uppercase">End</div>
+                                    <div className="font-bold text-slate-700">{customRange.end || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3 rounded-b-2xl">
+                            <button
+                                onClick={() => setIsRangeModalOpen(false)}
+                                className="flex-1 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 rounded-xl transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleRangeConfirm}
+                                disabled={!customRange.start || !customRange.end}
+                                className="flex-1 py-2.5 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Apply Range
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Recent Activity Mini-Tables can go here if needed, but keeping it clean for now */}
         </div>

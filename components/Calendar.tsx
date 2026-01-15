@@ -4,16 +4,34 @@ import { TimeEntry } from '../types';
 import { isItalianHoliday } from '../utils/holidays';
 
 interface CalendarProps {
-  selectedDate: string;
-  onDateSelect: (date: string) => void;
-  entries: TimeEntry[];
-  startOfWeek: 'Monday' | 'Sunday';
-  treatSaturdayAsHoliday: boolean;
-  dailyGoal: number;
+  // Original props
+  selectedDate?: string;
+  onDateSelect?: (date: string) => void;
+  entries?: TimeEntry[];
+  startOfWeek?: 'Monday' | 'Sunday';
+  treatSaturdayAsHoliday?: boolean;
+  dailyGoal?: number;
+
+  // New props for range mode
+  selectionMode?: 'single' | 'range';
+  startDate?: string;
+  endDate?: string;
+  onRangeSelect?: (start: string, end: string | null) => void;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries, startOfWeek, treatSaturdayAsHoliday, dailyGoal }) => {
-  const [viewDate, setViewDate] = useState(new Date(selectedDate || new Date()));
+const Calendar: React.FC<CalendarProps> = ({
+  selectedDate,
+  onDateSelect,
+  entries = [],
+  startOfWeek = 'Monday',
+  treatSaturdayAsHoliday = false,
+  dailyGoal = 0,
+  selectionMode = 'single',
+  startDate,
+  endDate,
+  onRangeSelect
+}) => {
+  const [viewDate, setViewDate] = useState(new Date(selectedDate || startDate || new Date()));
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
   const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -49,7 +67,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
     offset = (offset + 6) % 7;
   }
 
-  const entryDates = new Set(entries.map(e => e.date));
+  const entryDates = useMemo(() => new Set(entries.map(e => e.date)), [entries]);
   const dailyTotals = useMemo(() => {
     const totals: Record<string, number> = {};
     entries.forEach(e => {
@@ -68,6 +86,25 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
   const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
   const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
 
+  const handleDateClick = (dateStr: string) => {
+    if (selectionMode === 'range' && onRangeSelect) {
+      if (!startDate || (startDate && endDate)) {
+        // Start a new range
+        onRangeSelect(dateStr, null);
+      } else {
+        // Complete the range
+        // Ensure start is before end
+        if (new Date(dateStr) < new Date(startDate)) {
+          onRangeSelect(dateStr, startDate);
+        } else {
+          onRangeSelect(startDate, dateStr);
+        }
+      }
+    } else if (onDateSelect) {
+      onDateSelect(dateStr);
+    }
+  };
+
   for (let i = 0; i < offset; i++) {
     days.push(<div key={`empty-${i}`} className="h-9 w-full"></div>);
   }
@@ -75,7 +112,24 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
   for (let d = 1; d <= totalDays; d++) {
     const dateObj = new Date(year, month, d);
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const isSelected = dateStr === selectedDate;
+
+    // Selection Logic
+    let isSelected = false;
+    let isInRange = false;
+    let isRangeStart = false;
+    let isRangeEnd = false;
+
+    if (selectionMode === 'single') {
+      isSelected = dateStr === selectedDate;
+    } else {
+      isRangeStart = dateStr === startDate;
+      isRangeEnd = dateStr === endDate;
+      isSelected = isRangeStart || isRangeEnd; // Highlight endpoints clearly
+      if (startDate && endDate) {
+        isInRange = dateStr >= startDate && dateStr <= endDate;
+      }
+    }
+
     const isToday = dateStr === today;
     const hasActivity = entryDates.has(dateStr);
 
@@ -83,7 +137,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
     const holidayName = isItalianHoliday(dateObj);
     const isSunday = dayOfWeek === 0;
     const isSaturday = dayOfWeek === 6;
-    const isForbidden = isSunday || (treatSaturdayAsHoliday && isSaturday) || !!holidayName;
+    const isForbidden = selectionMode === 'single' && (isSunday || (treatSaturdayAsHoliday && isSaturday) || !!holidayName); // Typically specific to work-logging, maybe relax for reporting
 
     days.push(
       <button
@@ -91,24 +145,31 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
         disabled={isForbidden}
         title={holidayName || (isSunday ? "Domenica" : (isSaturday && treatSaturdayAsHoliday ? "Sabato" : ""))}
         onClick={() => {
-          if (!isForbidden) onDateSelect(dateStr);
+          if (!isForbidden) handleDateClick(dateStr);
         }}
-        className={`relative h-9 w-full flex flex-col items-center justify-center rounded-lg transition-all border ${isSelected
-          ? 'bg-praetor text-white border-praetor shadow-md scale-105 z-10'
-          : isForbidden
-            ? 'bg-red-50 text-red-500 border-red-100 cursor-not-allowed'
-            : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0)
-              ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-              : isToday
-                ? 'bg-slate-100 text-praetor border-slate-200'
-                : 'hover:bg-slate-50 border-transparent text-slate-700'
+        className={`relative h-9 w-full flex flex-col items-center justify-center rounded-lg transition-all border 
+          ${isSelected
+            ? 'bg-praetor text-white border-praetor shadow-md scale-105 z-10'
+            : isInRange
+              ? 'bg-stone-200 text-slate-800 border-stone-200' // Changed to a more neutral/stone color
+              : isForbidden
+                ? 'bg-red-50 text-red-500 border-red-100 cursor-not-allowed'
+                : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0)
+                  ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                  : isToday
+                    ? 'bg-slate-100 text-praetor border-slate-200'
+                    : 'hover:bg-slate-50 border-transparent text-slate-700'
           }`}
       >
-        <span className={`text-sm font-bold ${isForbidden && !isSelected ? 'text-red-600' : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) && !isSelected ? 'text-emerald-700' : ''}`}>{d}</span>
-        {hasActivity && (
+        <span className={`text-sm font-bold ${isSelected || isInRange ? '' :
+            isForbidden ? 'text-red-600' :
+              (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) ? 'text-emerald-700' : ''
+          }`}>{d}</span>
+
+        {hasActivity && selectionMode === 'single' && (
           <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : isForbidden ? 'bg-red-300' : (dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0) ? 'bg-emerald-400' : 'bg-praetor'}`}></span>
         )}
-        {holidayName && (
+        {holidayName && selectionMode === 'single' && (
           <span className="absolute top-0.5 right-0.5 w-1 h-1 bg-red-400 rounded-full animate-pulse"></span>
         )}
       </button>
@@ -118,7 +179,10 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
   const handleTodayClick = () => {
     const now = new Date();
     setViewDate(now);
-    onDateSelect(now.toISOString().split('T')[0]);
+    const todayStr = now.toISOString().split('T')[0];
+    if (selectionMode === 'single' && onDateSelect) {
+      onDateSelect(todayStr);
+    }
   };
 
   return (
@@ -223,16 +287,18 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, entries
         {days}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-red-500"></div>
-        <span className="text-[10px] font-bold text-slate-400 uppercase">
-          Festivo / {treatSaturdayAsHoliday ? 'Weekend' : 'Domenica'}
-        </span>
-        <div className="flex items-center gap-2 ml-auto">
-          <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Obiettivo Raggiunto</span>
+      {selectionMode === 'single' && (
+        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-red-500"></div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase">
+            Festivo / {treatSaturdayAsHoliday ? 'Weekend' : 'Domenica'}
+          </span>
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">Obiettivo Raggiunto</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
