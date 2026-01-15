@@ -144,12 +144,12 @@ const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, e
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-end gap-4">
                 <div className="flex-1 min-w-0">
                     <h2 className="text-2xl font-black text-slate-800">Financial Reports</h2>
                     <p className="text-slate-500 text-sm">Overview of your business performance</p>
                 </div>
-                <div className="w-full md:w-auto md:min-w-[280px] md:max-w-[400px] flex-shrink-0">
+                <div className="w-full md:w-fit flex-shrink-0">
                     <CustomSelect
                         options={timeFrameOptions}
                         value={timePeriod}
