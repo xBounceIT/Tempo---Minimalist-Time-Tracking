@@ -170,6 +170,11 @@ export type View =
   | 'crm/products'
   | 'crm/quotes'
   | 'crm/sales'
+  // Finances module
+  | 'finances/invoices'
+  | 'finances/payments'
+  | 'finances/expenses'
+  | 'finances/reports'
   // HR module
   | 'hr/workforce'
   | 'hr/work-units'
@@ -186,4 +191,59 @@ export interface WorkUnit {
   description?: string;
   isDisabled?: boolean;
   userCount?: number;
+}
+
+export interface InvoiceItem {
+  id: string;
+  invoiceId: string;
+  productId?: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  taxRate: number;
+  discount?: number;
+}
+
+export interface Invoice {
+  id: string;
+  linkedSaleId?: string;
+  clientId: string;
+  clientName: string;
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  subtotal: number;
+  taxAmount: number;
+  total: number;
+  amountPaid: number;
+  notes?: string;
+  items: InvoiceItem[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Payment {
+  id: string;
+  invoiceId?: string;
+  clientId: string;
+  clientName?: string;
+  amount: number;
+  paymentDate: string;
+  paymentMethod: 'cash' | 'bank_transfer' | 'credit_card' | 'check' | 'other';
+  reference?: string;
+  notes?: string;
+  createdAt: number;
+}
+
+export interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  expenseDate: string;
+  category: 'travel' | 'office_supplies' | 'software' | 'marketing' | 'utilities' | 'other';
+  vendor?: string;
+  receiptReference?: string;
+  notes?: string;
+  createdAt: number;
 }

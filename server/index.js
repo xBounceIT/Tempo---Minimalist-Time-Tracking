@@ -15,6 +15,9 @@ import productsRoutes from './routes/products.js';
 import quotesRoutes from './routes/quotes.js';
 import workUnitsRoutes from './routes/work-units.js';
 import salesRoutes from './routes/sales.js';
+import invoicesRoutes from './routes/invoices.js';
+import paymentsRoutes from './routes/payments.js';
+import expensesRoutes from './routes/expenses.js';
 
 dotenv.config();
 
@@ -46,6 +49,9 @@ await fastify.register(productsRoutes, { prefix: '/api/products' });
 await fastify.register(quotesRoutes, { prefix: '/api/quotes' });
 await fastify.register(workUnitsRoutes, { prefix: '/api/work-units' });
 await fastify.register(salesRoutes, { prefix: '/api/sales' });
+await fastify.register(invoicesRoutes, { prefix: '/api/invoices' });
+await fastify.register(paymentsRoutes, { prefix: '/api/payments' });
+await fastify.register(expensesRoutes, { prefix: '/api/expenses' });
 
 // Health check
 fastify.get('/api/health', async (request, reply) => {

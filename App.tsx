@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useLayoutEffect } from 'react';
 import { getTheme, applyTheme } from './utils/theme';
-import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product, Quote, Sale, WorkUnit } from './types';
+import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product, Quote, Sale, WorkUnit, Invoice, Payment, Expense } from './types';
 import { COLORS } from './constants';
 import Layout from './components/Layout';
 import TimeEntryForm from './components/TimeEntryForm';
@@ -28,6 +28,10 @@ import ProductsView from './components/ProductsView';
 import QuotesView from './components/QuotesView';
 import SalesView from './components/SalesView';
 import WorkUnitsView from './components/WorkUnitsView';
+import InvoicesView from './components/InvoicesView';
+import PaymentsView from './components/PaymentsView';
+import ExpensesView from './components/ExpensesView';
+import FinancialReportsView from './components/FinancialReportsView';
 
 const TrackerView: React.FC<{
   entries: TimeEntry[];
@@ -385,6 +389,9 @@ const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [settings, setSettings] = useState({
     fullName: 'User',
@@ -417,6 +424,7 @@ const App: React.FC = () => {
     'timesheets/tracker', 'timesheets/reports', 'timesheets/recurring', 'timesheets/tasks', 'timesheets/projects',
     'hr/workforce', 'hr/work-units', 'configuration/authentication', 'configuration/general',
     'crm/clients', 'crm/products', 'crm/quotes', 'crm/sales',
+    'finances/invoices', 'finances/payments', 'finances/expenses', 'finances/reports',
     'projects/manage', 'projects/tasks',
     'settings'
   ], []);
@@ -430,6 +438,7 @@ const App: React.FC = () => {
       'timesheets/tracker', 'timesheets/reports', 'timesheets/recurring', 'timesheets/tasks', 'timesheets/projects',
       'hr/workforce', 'hr/work-units', 'configuration/authentication', 'configuration/general',
       'crm/clients', 'crm/products', 'crm/quotes', 'crm/sales',
+      'finances/invoices', 'finances/payments', 'finances/expenses', 'finances/reports',
       'projects/manage', 'projects/tasks',
       'settings'
     ];
@@ -457,6 +466,11 @@ const App: React.FC = () => {
       'crm/products': ['admin', 'manager'],
       'crm/quotes': ['admin', 'manager'],
       'crm/sales': ['admin', 'manager'],
+      // Finances module - admin/manager
+      'finances/invoices': ['admin', 'manager'],
+      'finances/payments': ['admin', 'manager'],
+      'finances/expenses': ['admin', 'manager'],
+      'finances/reports': ['admin', 'manager'],
       // Projects module - admin/manager
       'projects/manage': ['admin', 'manager'],
       'projects/tasks': ['admin', 'manager'],
@@ -528,7 +542,7 @@ const App: React.FC = () => {
 
     const loadData = async () => {
       try {
-        const [usersData, clientsData, projectsData, tasksData, settingsData, entriesData, productsData, quotesData, salesData] = await Promise.all([
+        const [usersData, clientsData, projectsData, tasksData, settingsData, entriesData, productsData, quotesData, salesData, invoicesData, paymentsData, expensesData] = await Promise.all([
           api.users.list(),
           api.clients.list(),
           api.projects.list(),
@@ -537,7 +551,11 @@ const App: React.FC = () => {
           api.entries.list(),
           api.products.list(),
           api.quotes.list(),
-          api.sales.list()
+          api.quotes.list(),
+          api.sales.list(),
+          api.invoices.list(),
+          api.payments.list(),
+          api.expenses.list()
         ]);
 
         setUsers(usersData);
@@ -549,6 +567,9 @@ const App: React.FC = () => {
         setProducts(productsData);
         setQuotes(quotesData);
         setSales(salesData);
+        setInvoices(invoicesData);
+        setPayments(paymentsData);
+        setExpenses(expensesData);
 
         // Load global settings for all users
         const genSettings = await api.generalSettings.get();
@@ -999,6 +1020,105 @@ const App: React.FC = () => {
     }
   };
 
+  // Finances Handlers
+  const addInvoice = async (invoiceData: Partial<Invoice>) => {
+    try {
+      const invoice = await api.invoices.create(invoiceData);
+      setInvoices([...invoices, invoice]);
+    } catch (err) {
+      console.error('Failed to add invoice:', err);
+    }
+  };
+
+  const handleUpdateInvoice = async (id: string, updates: Partial<Invoice>) => {
+    try {
+      const updated = await api.invoices.update(id, updates);
+      setInvoices(invoices.map(i => i.id === id ? updated : i));
+    } catch (err) {
+      console.error('Failed to update invoice:', err);
+    }
+  };
+
+  const handleDeleteInvoice = async (id: string) => {
+    try {
+      await api.invoices.delete(id);
+      setInvoices(invoices.filter(i => i.id !== id));
+    } catch (err) {
+      console.error('Failed to delete invoice:', err);
+    }
+  };
+
+  const addPayment = async (paymentData: Partial<Payment>) => {
+    try {
+      const payment = await api.payments.create(paymentData);
+      setPayments([...payments, payment]);
+
+      // Update linked invoice if necessary (locally) - API handles backend logic
+      if (payment.invoiceId) {
+        const invoice = await api.invoices.list().then(list => list.find(i => i.id === payment.invoiceId));
+        if (invoice) {
+          setInvoices(prev => prev.map(p => p.id === invoice.id ? invoice : p));
+        }
+      }
+
+    } catch (err) {
+      console.error('Failed to add payment:', err);
+    }
+  };
+
+  const handleUpdatePayment = async (id: string, updates: Partial<Payment>) => {
+    try {
+      const updated = await api.payments.update(id, updates);
+      setPayments(payments.map(p => p.id === id ? updated : p));
+
+      // Refresh invoices as balance might change
+      const invoicesList = await api.invoices.list();
+      setInvoices(invoicesList);
+    } catch (err) {
+      console.error('Failed to update payment:', err);
+    }
+  };
+
+  const handleDeletePayment = async (id: string) => {
+    try {
+      await api.payments.delete(id);
+      setPayments(payments.filter(p => p.id !== id));
+
+      // Refresh invoices as balance might change
+      const invoicesList = await api.invoices.list();
+      setInvoices(invoicesList);
+    } catch (err) {
+      console.error('Failed to delete payment:', err);
+    }
+  };
+
+  const addExpense = async (expenseData: Partial<Expense>) => {
+    try {
+      const expense = await api.expenses.create(expenseData);
+      setExpenses([...expenses, expense]);
+    } catch (err) {
+      console.error('Failed to add expense:', err);
+    }
+  };
+
+  const handleUpdateExpense = async (id: string, updates: Partial<Expense>) => {
+    try {
+      const updated = await api.expenses.update(id, updates);
+      setExpenses(expenses.map(e => e.id === id ? updated : e));
+    } catch (err) {
+      console.error('Failed to update expense:', err);
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    try {
+      await api.expenses.delete(id);
+      setExpenses(expenses.filter(e => e.id !== id));
+    } catch (err) {
+      console.error('Failed to delete expense:', err);
+    }
+  };
+
   const addProject = async (name: string, clientId: string, description?: string) => {
     try {
       const usedColors = projects.map(p => p.color);
@@ -1265,11 +1385,52 @@ const App: React.FC = () => {
               onDeleteSale={handleDeleteSale}
               currency={generalSettings.currency}
               onViewQuote={(quoteId) => {
-                // Logic to switch view to quotes? Or filtered quotes?
-                // For now maybe we just switch to quotes view
                 setActiveView('crm/quotes');
-                // Ideally we'd filter or scroll to it, but basic nav is fine for start
               }}
+            />
+          )}
+
+          {activeView === 'finances/invoices' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
+            <InvoicesView
+              invoices={invoices}
+              clients={clients}
+              products={products}
+              sales={sales}
+              onAddInvoice={addInvoice}
+              onUpdateInvoice={handleUpdateInvoice}
+              onDeleteInvoice={handleDeleteInvoice}
+              currency={generalSettings.currency}
+            />
+          )}
+
+          {activeView === 'finances/payments' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
+            <PaymentsView
+              payments={payments}
+              clients={clients}
+              invoices={invoices}
+              onAddPayment={addPayment}
+              onUpdatePayment={handleUpdatePayment}
+              onDeletePayment={handleDeletePayment}
+              currency={generalSettings.currency}
+            />
+          )}
+
+          {activeView === 'finances/expenses' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
+            <ExpensesView
+              expenses={expenses}
+              onAddExpense={addExpense}
+              onUpdateExpense={handleUpdateExpense}
+              onDeleteExpense={handleDeleteExpense}
+              currency={generalSettings.currency}
+            />
+          )}
+
+          {activeView === 'finances/reports' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
+            <FinancialReportsView
+              invoices={invoices}
+              expenses={expenses}
+              payments={payments}
+              currency={generalSettings.currency}
             />
           )}
 

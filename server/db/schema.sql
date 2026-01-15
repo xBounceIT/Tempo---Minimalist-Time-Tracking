@@ -350,3 +350,74 @@ BEGIN
 EXCEPTION WHEN OTHERS THEN
     RAISE NOTICE 'Migration of role_mappings failed or not needed: %', SQLERRM;
 END $$;
+
+-- Invoices table
+CREATE TABLE IF NOT EXISTS invoices (
+    id VARCHAR(50) PRIMARY KEY,
+    linked_sale_id VARCHAR(50) REFERENCES sales(id) ON DELETE SET NULL,
+    client_id VARCHAR(50) NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    client_name VARCHAR(255) NOT NULL,
+    invoice_number VARCHAR(50) UNIQUE NOT NULL,
+    issue_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'sent', 'paid', 'overdue', 'cancelled')),
+    subtotal DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    tax_amount DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    total DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    amount_paid DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_client_id ON invoices(client_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
+CREATE INDEX IF NOT EXISTS idx_invoices_issue_date ON invoices(issue_date);
+
+-- Invoice items table
+CREATE TABLE IF NOT EXISTS invoice_items (
+    id VARCHAR(50) PRIMARY KEY,
+    invoice_id VARCHAR(50) NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+    product_id VARCHAR(50) REFERENCES products(id) ON DELETE SET NULL,
+    description VARCHAR(255) NOT NULL,
+    quantity DECIMAL(10, 2) NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    tax_rate DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    discount DECIMAL(5, 2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice_id ON invoice_items(invoice_id);
+
+-- Payments table (tracks payments for invoices)
+CREATE TABLE IF NOT EXISTS payments (
+    id VARCHAR(50) PRIMARY KEY,
+    invoice_id VARCHAR(50) REFERENCES invoices(id) ON DELETE CASCADE,
+    client_id VARCHAR(50) NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    amount DECIMAL(12, 2) NOT NULL,
+    payment_date DATE NOT NULL,
+    payment_method VARCHAR(50) NOT NULL DEFAULT 'bank_transfer',
+    reference VARCHAR(255),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_payments_invoice_id ON payments(invoice_id);
+CREATE INDEX IF NOT EXISTS idx_payments_client_id ON payments(client_id);
+CREATE INDEX IF NOT EXISTS idx_payments_date ON payments(payment_date);
+
+-- Expenses table
+CREATE TABLE IF NOT EXISTS expenses (
+    id VARCHAR(50) PRIMARY KEY,
+    description VARCHAR(255) NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    expense_date DATE NOT NULL,
+    category VARCHAR(50) NOT NULL DEFAULT 'other',
+    vendor VARCHAR(255),
+    receipt_reference VARCHAR(255),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(expense_date);
+CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category);

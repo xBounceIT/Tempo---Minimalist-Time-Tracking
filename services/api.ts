@@ -54,7 +54,7 @@ const fetchApi = async <T>(
 };
 
 // Types for API responses
-import type { User, Client, Project, ProjectTask, TimeEntry, LdapConfig, GeneralSettings, Product, Quote, QuoteItem, WorkUnit, Sale, SaleItem } from '../types';
+import type { User, Client, Project, ProjectTask, TimeEntry, LdapConfig, GeneralSettings, Product, Quote, QuoteItem, WorkUnit, Sale, SaleItem, Invoice, InvoiceItem, Payment, Expense } from '../types';
 
 // Normalization Helpers
 const normalizeUser = (u: User): User => ({
@@ -110,6 +110,33 @@ const normalizeTask = (t: ProjectTask): ProjectTask => ({
 const normalizeGeneralSettings = (s: GeneralSettings): GeneralSettings => ({
     ...s,
     dailyLimit: Number(s.dailyLimit || 0)
+});
+
+const normalizeInvoiceItem = (item: InvoiceItem): InvoiceItem => ({
+    ...item,
+    quantity: Number(item.quantity || 0),
+    unitPrice: Number(item.unitPrice || 0),
+    taxRate: Number(item.taxRate || 0),
+    discount: Number(item.discount || 0)
+});
+
+const normalizeInvoice = (i: Invoice): Invoice => ({
+    ...i,
+    subtotal: Number(i.subtotal || 0),
+    taxAmount: Number(i.taxAmount || 0),
+    total: Number(i.total || 0),
+    amountPaid: Number(i.amountPaid || 0),
+    items: (i.items || []).map(normalizeInvoiceItem)
+});
+
+const normalizePayment = (p: Payment): Payment => ({
+    ...p,
+    amount: Number(p.amount || 0)
+});
+
+const normalizeExpense = (e: Expense): Expense => ({
+    ...e,
+    amount: Number(e.amount || 0)
 });
 
 export interface LoginResponse {
@@ -378,6 +405,66 @@ export const salesApi = {
         fetchApi(`/sales/${id}`, { method: 'DELETE' }),
 };
 
+// Invoices API
+export const invoicesApi = {
+    list: (): Promise<Invoice[]> => fetchApi<Invoice[]>('/invoices').then(invoices => invoices.map(normalizeInvoice)),
+
+    create: (invoiceData: Partial<Invoice>): Promise<Invoice> =>
+        fetchApi<Invoice>('/invoices', {
+            method: 'POST',
+            body: JSON.stringify(invoiceData),
+        }).then(normalizeInvoice),
+
+    update: (id: string, updates: Partial<Invoice>): Promise<Invoice> =>
+        fetchApi<Invoice>(`/invoices/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        }).then(normalizeInvoice),
+
+    delete: (id: string): Promise<void> =>
+        fetchApi(`/invoices/${id}`, { method: 'DELETE' }),
+};
+
+// Payments API
+export const paymentsApi = {
+    list: (): Promise<Payment[]> => fetchApi<Payment[]>('/payments').then(payments => payments.map(normalizePayment)),
+
+    create: (paymentData: Partial<Payment>): Promise<Payment> =>
+        fetchApi<Payment>('/payments', {
+            method: 'POST',
+            body: JSON.stringify(paymentData),
+        }).then(normalizePayment),
+
+    update: (id: string, updates: Partial<Payment>): Promise<Payment> =>
+        fetchApi<Payment>(`/payments/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        }).then(normalizePayment),
+
+    delete: (id: string): Promise<void> =>
+        fetchApi(`/payments/${id}`, { method: 'DELETE' }),
+};
+
+// Expenses API
+export const expensesApi = {
+    list: (): Promise<Expense[]> => fetchApi<Expense[]>('/expenses').then(expenses => expenses.map(normalizeExpense)),
+
+    create: (expenseData: Partial<Expense>): Promise<Expense> =>
+        fetchApi<Expense>('/expenses', {
+            method: 'POST',
+            body: JSON.stringify(expenseData),
+        }).then(normalizeExpense),
+
+    update: (id: string, updates: Partial<Expense>): Promise<Expense> =>
+        fetchApi<Expense>(`/expenses/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        }).then(normalizeExpense),
+
+    delete: (id: string): Promise<void> =>
+        fetchApi(`/expenses/${id}`, { method: 'DELETE' }),
+};
+
 export default {
     auth: authApi,
     users: usersApi,
@@ -388,6 +475,9 @@ export default {
     products: productsApi,
     quotes: quotesApi,
     sales: salesApi,
+    invoices: invoicesApi,
+    payments: paymentsApi,
+    expenses: expensesApi,
     workUnits: workUnitsApi,
     settings: settingsApi,
     ldap: ldapApi,

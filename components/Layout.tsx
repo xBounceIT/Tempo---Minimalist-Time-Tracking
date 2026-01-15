@@ -14,6 +14,7 @@ const modules: Module[] = [
   { id: 'crm', name: 'CRM', icon: 'fa-handshake', active: false },
   { id: 'hr', name: 'HR', icon: 'fa-user-group', active: false },
   { id: 'projects', name: 'Projects', icon: 'fa-folder-tree', active: false },
+  { id: 'finances', name: 'Finances', icon: 'fa-coins', active: false },
   { id: 'employees', name: 'Employees', icon: 'fa-user-tie', active: false },
   { id: 'suppliers', name: 'Suppliers', icon: 'fa-truck', active: false },
   { id: 'configuration', name: 'Configuration', icon: 'fa-gears', active: false },
@@ -25,6 +26,7 @@ const moduleDefaultRoutes: Record<string, View> = {
   'crm': 'crm/clients',
   'hr': 'hr/workforce',
   'projects': 'projects/manage',
+  'finances': 'finances/invoices',
   'configuration': 'configuration/authentication',
 };
 
@@ -34,6 +36,7 @@ const getModuleFromRoute = (route: View): string => {
   if (route.startsWith('crm/')) return 'crm';
   if (route.startsWith('hr/')) return 'hr';
   if (route.startsWith('projects/')) return 'projects';
+  if (route.startsWith('finances/')) return 'finances';
   if (route.startsWith('configuration/')) return 'configuration';
   return 'timesheets'; // default
 };
@@ -61,7 +64,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
   // Filter modules based on user role
   const accessibleModules = modules.filter(m => {
     if (m.id === 'configuration') return currentUser.role === 'admin';
-    if (m.id === 'crm' || m.id === 'projects' || m.id === 'hr') return currentUser.role === 'admin' || currentUser.role === 'manager';
+    if (m.id === 'crm' || m.id === 'projects' || m.id === 'hr' || m.id === 'finances') return currentUser.role === 'admin' || currentUser.role === 'manager';
     // employees and suppliers are placeholders for future
     if (m.id === 'employees' || m.id === 'suppliers') return false;
     return true;
@@ -316,6 +319,16 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
                 isCollapsed={isCollapsed}
                 onClick={() => { onViewChange('projects/tasks'); setIsMobileMenuOpen(false); }}
               />
+            </>
+          )}
+
+          {/* Finances Module */}
+          {activeModule.id === 'finances' && (
+            <>
+              <NavItem icon="fa-file-invoice-dollar" label="Invoices" active={activeView === 'finances/invoices'} isCollapsed={isCollapsed} onClick={() => { onViewChange('finances/invoices'); setIsMobileMenuOpen(false); }} />
+              <NavItem icon="fa-money-bill-wave" label="Payments" active={activeView === 'finances/payments'} isCollapsed={isCollapsed} onClick={() => { onViewChange('finances/payments'); setIsMobileMenuOpen(false); }} />
+              <NavItem icon="fa-receipt" label="Expenses" active={activeView === 'finances/expenses'} isCollapsed={isCollapsed} onClick={() => { onViewChange('finances/expenses'); setIsMobileMenuOpen(false); }} />
+              <NavItem icon="fa-chart-line text-amber-500" label="Reports" active={activeView === 'finances/reports'} isCollapsed={isCollapsed} onClick={() => { onViewChange('finances/reports'); setIsMobileMenuOpen(false); }} />
             </>
           )}
 
