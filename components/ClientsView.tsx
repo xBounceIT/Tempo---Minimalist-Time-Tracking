@@ -7,9 +7,10 @@ interface ClientsViewProps {
   onAddClient: (clientData: Partial<Client>) => void;
   onUpdateClient: (id: string, updates: Partial<Client>) => void;
   onDeleteClient: (id: string) => void;
+  userRole: 'admin' | 'manager' | 'user';
 }
 
-const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdateClient, onDeleteClient }) => {
+const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdateClient, onDeleteClient, userRole }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -467,16 +468,18 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                   >
                     <i className="fa-solid fa-ban"></i>
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      confirmDelete(c);
-                    }}
-                    className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                    title="Delete Client"
-                  >
-                    <i className="fa-solid fa-trash-can"></i>
-                  </button>
+                  {userRole === 'admin' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmDelete(c);
+                      }}
+                      className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                      title="Delete Client"
+                    >
+                      <i className="fa-solid fa-trash-can"></i>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -575,15 +578,17 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                   >
                     <i className="fa-solid fa-rotate-left"></i>
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      confirmDelete(c);
-                    }}
-                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <i className="fa-solid fa-trash-can"></i>
-                  </button>
+                  {userRole === 'admin' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmDelete(c);
+                      }}
+                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <i className="fa-solid fa-trash-can"></i>
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

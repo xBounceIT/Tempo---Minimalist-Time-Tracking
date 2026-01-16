@@ -1460,6 +1460,7 @@ const App: React.FC = () => {
                 onAddClient={addClient}
                 onUpdateClient={handleUpdateClient}
                 onDeleteClient={handleDeleteClient}
+                userRole={currentUser.role}
               />
             )}
 
