@@ -216,8 +216,20 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
             const product = products.find(p => p.id === value);
             if (product) {
                 newItems[index].productName = product.name;
-                newItems[index].unitPrice = calcProductSalePrice(Number(product.costo), Number(product.molPercentage));
-                newItems[index].specialBidId = '';
+
+                // Check for applicable special bid
+                const applicableBid = activeSpecialBids.find(b =>
+                    b.clientId === formData.clientId &&
+                    b.productId === value
+                );
+
+                if (applicableBid) {
+                    newItems[index].specialBidId = applicableBid.id;
+                    newItems[index].unitPrice = Number(applicableBid.unitPrice);
+                } else {
+                    newItems[index].unitPrice = calcProductSalePrice(Number(product.costo), Number(product.molPercentage));
+                    newItems[index].specialBidId = '';
+                }
             }
         }
 
@@ -258,7 +270,12 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                 const lineNetAfterGlobal = lineNet * (1 - globalDiscount / 100);
                 const taxAmount = lineNetAfterGlobal * (taxRate / 100);
                 taxGroups[taxRate] = (taxGroups[taxRate] || 0) + taxAmount;
-                totalCost += item.quantity * product.costo;
+
+                // Determine cost: if special bid, use bid price, else use product cost
+                const bid = specialBids.find(b => b.id === item.specialBidId);
+                const cost = bid ? Number(bid.unitPrice) : product.costo;
+
+                totalCost += item.quantity * cost;
             }
         });
 
@@ -382,7 +399,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                         {formData.items.map((item, index) => {
                                             const selectedProduct = activeProducts.find(p => p.id === item.productId);
                                             const selectedBid = item.specialBidId ? specialBids.find(b => b.id === item.specialBidId) : undefined;
-                                            const cost = selectedProduct ? Number(selectedProduct.costo) : 0;
+
+                                            // Cost is the bid price if selected, otherwise product cost
+                                            const cost = selectedBid ? Number(selectedBid.unitPrice) : (selectedProduct ? Number(selectedProduct.costo) : 0);
+
                                             const molPercentage = selectedProduct ? Number(selectedProduct.molPercentage) : 0;
                                             const margin = Number(item.unitPrice || 0) - cost;
                                             return (
