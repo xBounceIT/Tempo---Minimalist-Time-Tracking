@@ -11,6 +11,10 @@
     # API proxy with HTTP/2 cleartext (h2c) to backend
     handle /api/* {
         reverse_proxy backend:3001 {
+            header_up -Connection
+            header_up -Upgrade
+            header_up -Keep-Alive
+            header_up -Proxy-Connection
             transport http {
                 versions h2c
             }

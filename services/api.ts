@@ -25,7 +25,7 @@ const fetchApi = async <T>(
     options: RequestInit = {}
 ): Promise<T> => {
     const headers: HeadersInit = {
-        'Content-Type': 'application/json',
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
         ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         ...options.headers,
     };
