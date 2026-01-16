@@ -33,3 +33,4 @@ todo.md
 .agent/*/*
 opencode.json
 .gitignore
+AGENTS.md
