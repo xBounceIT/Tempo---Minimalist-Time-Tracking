@@ -213,7 +213,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
         newItems[index] = { ...newItems[index], [field]: value };
 
         if (field === 'productId') {
-            const product = products.find(p => p.id === value);
+            const product = activeProducts.find(p => p.id === value);
             if (product) {
                 newItems[index].productName = product.name;
 
@@ -225,25 +225,37 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
 
                 if (applicableBid) {
                     newItems[index].specialBidId = applicableBid.id;
-                    newItems[index].unitPrice = Number(applicableBid.unitPrice);
+                    // Bid price is the new COST. Calculate sale price based on this cost and margin.
+                    const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+                    console.log(`[SpecialBid] Bid: ${applicableBid.unitPrice}, Mol: ${mol}`);
+                    newItems[index].unitPrice = calcProductSalePrice(Number(applicableBid.unitPrice), mol);
                 } else {
-                    newItems[index].unitPrice = calcProductSalePrice(Number(product.costo), Number(product.molPercentage));
+                    const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+                    newItems[index].unitPrice = calcProductSalePrice(Number(product.costo), mol);
                     newItems[index].specialBidId = '';
                 }
             }
         }
 
         if (field === 'specialBidId') {
+            const product = activeProducts.find(p => p.id === newItems[index].productId);
+
             if (!value) {
                 newItems[index].specialBidId = '';
+                // Revert to standard product cost
+                if (product) {
+                    const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+                    newItems[index].unitPrice = calcProductSalePrice(Number(product.costo), mol);
+                }
                 setFormData({ ...formData, items: newItems });
                 return;
             }
+
             const bid = specialBids.find(b => b.id === value);
-            if (bid) {
-                newItems[index].productId = bid.productId;
-                newItems[index].productName = bid.productName;
-                newItems[index].unitPrice = Number(bid.unitPrice);
+            if (bid && product) {
+                // Bid selected: Use bid price as COST
+                const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+                newItems[index].unitPrice = calcProductSalePrice(Number(bid.unitPrice), mol);
             }
         }
 
