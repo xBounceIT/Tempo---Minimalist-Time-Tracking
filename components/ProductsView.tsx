@@ -32,7 +32,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
     // Category Management State
     const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
-    const [customCategories, setCustomCategories] = useState<string[]>([]);
+    const defaultCategories = ['Electronics', 'Software', 'Services', 'Hardware', 'Accessories', 'Subscription', 'Consulting', 'Maintenance', 'Supplies', 'Other'];
+    const [customCategories, setCustomCategories] = useState<string[]>(defaultCategories);
 
     // Form State
     const [formData, setFormData] = useState<Partial<Product>>({
