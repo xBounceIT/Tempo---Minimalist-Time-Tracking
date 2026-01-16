@@ -315,7 +315,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ payments, clients, invoices
 
             {/* Table */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-visible">
-                <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center rounded-t-3xl">
                     <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">All Payments</h4>
                     <span className="bg-slate-100 text-praetor px-3 py-1 rounded-full text-[10px] font-black">{filteredPayments.length} TOTAL</span>
                 </div>
@@ -381,7 +381,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ payments, clients, invoices
                 </div>
 
                 {/* Pagination */}
-                <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+                <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center rounded-b-3xl">
                     <div className="flex items-center gap-3">
                         <span className="text-xs font-bold text-slate-500">Rows:</span>
                         <CustomSelect
