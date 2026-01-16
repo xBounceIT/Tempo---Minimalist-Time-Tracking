@@ -257,6 +257,9 @@ CREATE TABLE IF NOT EXISTS products (
 -- Ensure type column exists for existing installations
 ALTER TABLE products ADD COLUMN IF NOT EXISTS type VARCHAR(20) DEFAULT 'item';
 
+-- Ensure supplier_id column exists for existing installations
+ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_id VARCHAR(50) REFERENCES suppliers(id) ON DELETE SET NULL;
+
 -- Migration: Add mol_percentage column and migrate from sale_price/cost
 ALTER TABLE products ADD COLUMN IF NOT EXISTS mol_percentage DECIMAL(5, 2) DEFAULT 0;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS costo DECIMAL(10, 2) DEFAULT 0;

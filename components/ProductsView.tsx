@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { Product } from '../types';
+import { Product, Supplier } from '../types';
 import CustomSelect, { Option } from './CustomSelect';
 
 interface ProductsViewProps {
     products: Product[];
+    suppliers: Supplier[];
     onAddProduct: (productData: Partial<Product>) => void;
     onUpdateProduct: (id: string, updates: Partial<Product>) => void;
     onDeleteProduct: (id: string) => void;
 }
 
-const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onUpdateProduct, onDeleteProduct }) => {
+const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddProduct, onUpdateProduct, onDeleteProduct }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -43,7 +44,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
         costUnit: 'unit',
         category: '',
         taxRate: 0,
-        type: 'item'
+        type: 'item',
+        supplierId: ''
     });
 
     // Calculated values
@@ -64,7 +66,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
             costUnit: 'unit',
             category: '',
             taxRate: 0,
-            type: 'item'
+            type: 'item',
+            supplierId: ''
         });
         setIsModalOpen(true);
     };
@@ -78,7 +81,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
             costUnit: product.costUnit || 'unit',
             category: product.category || '',
             taxRate: product.taxRate || 0,
-            type: product.type || 'item'
+            type: product.type || 'item',
+            supplierId: product.supplierId || ''
         });
         setIsModalOpen(true);
     };
@@ -142,6 +146,12 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
     const typeOptions: Option[] = [
         { id: 'item', name: 'Item' },
         { id: 'service', name: 'Service' }
+    ];
+
+    const activeSuppliers = suppliers.filter(s => !s.isDisabled);
+    const supplierOptions: Option[] = [
+        { id: '', name: 'No Supplier' },
+        ...activeSuppliers.map(s => ({ id: s.id, name: s.name }))
     ];
 
     const handleTypeChange = (val: string) => {
@@ -299,6 +309,19 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                         </div>
                                         <p className="text-[10px] text-slate-400 ml-1">Automatically set based on Type</p>
                                     </div>
+
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center ml-1 min-h-[16px]">
+                                            <label className="text-xs font-bold text-slate-500">Supplier</label>
+                                        </div>
+                                        <CustomSelect
+                                            options={supplierOptions}
+                                            value={formData.supplierId || ''}
+                                            onChange={(val) => setFormData({ ...formData, supplierId: val })}
+                                            placeholder="Select supplier"
+                                            searchable={true}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -432,6 +455,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                             <tr>
                                 <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Name / Category</th>
                                 <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Supplier</th>
                                 <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Costo</th>
                                 <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">MOL %</th>
                                 <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sale Price</th>
@@ -458,6 +482,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                                         <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${p.type === 'service' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
                                             {p.type || 'item'}
                                         </span>
+                                    </td>
+                                    <td className="px-8 py-5 text-sm font-semibold text-slate-500">
+                                        {p.supplierName || '-'}
                                     </td>
                                     <td className="px-8 py-5 text-sm font-semibold text-slate-500">
                                         {Number(p.costo).toFixed(2)} / {p.costUnit}
@@ -512,7 +539,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, onAddProduct, onU
                             ))}
                             {activeProducts.length === 0 && (
                                 <tr>
-                                    <td colSpan={8} className="p-12 text-center">
+                                    <td colSpan={9} className="p-12 text-center">
                                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                                             <i className="fa-solid fa-boxes-stacked text-2xl"></i>
                                         </div>

@@ -1466,6 +1466,7 @@ const App: React.FC = () => {
             {activeView === 'crm/products' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
               <ProductsView
                 products={products}
+                suppliers={suppliers}
                 onAddProduct={addProduct}
                 onUpdateProduct={handleUpdateProduct}
                 onDeleteProduct={handleDeleteProduct}

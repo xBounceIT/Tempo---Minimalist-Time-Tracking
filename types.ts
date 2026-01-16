@@ -103,6 +103,8 @@ export interface Product {
   category?: string;
   taxRate: number;
   type: 'item' | 'service';
+  supplierId?: string;
+  supplierName?: string;
   isDisabled?: boolean;
 }
 
