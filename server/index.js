@@ -105,6 +105,14 @@ try {
       console.error('CRITICAL: user_clients table was not created!');
     }
 
+    // Run seed.sql for initial data (uses ON CONFLICT DO NOTHING, safe to run repeatedly)
+    const seedPath = path.join(__dirname, 'db', 'seed.sql');
+    if (fs.existsSync(seedPath)) {
+      const seedSql = fs.readFileSync(seedPath, 'utf8');
+      await query(seedSql);
+      console.log('Seed data applied.');
+    }
+
     // Run data migration for default clients
     try {
       const { migrate: updateClients } = await import('./db/update_default_clients.js');
