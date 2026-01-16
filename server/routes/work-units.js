@@ -100,6 +100,11 @@ export default async function (fastify, opts) {
                     'INSERT INTO work_unit_managers (work_unit_id, user_id) VALUES ($1, $2)',
                     [id, managerId]
                 );
+                // Also add as member
+                await query(
+                    'INSERT INTO user_work_units (user_id, work_unit_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                    [managerId, id]
+                );
             }
 
             await query('COMMIT');
@@ -168,14 +173,19 @@ export default async function (fastify, opts) {
                     return reply.code(400).send({ error: 'managerIds must be an array' });
                 }
 
-                // Delete existing
+                // Delete existing managers
                 await query('DELETE FROM work_unit_managers WHERE work_unit_id = $1', [id]);
 
-                // Insert new
+                // Insert new managers
                 for (const managerId of managerIds) {
                     await query(
                         'INSERT INTO work_unit_managers (work_unit_id, user_id) VALUES ($1, $2)',
                         [id, managerId]
+                    );
+                    // Also add as member
+                    await query(
+                        'INSERT INTO user_work_units (user_id, work_unit_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                        [managerId, id]
                     );
                 }
             }
