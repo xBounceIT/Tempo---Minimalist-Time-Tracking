@@ -355,7 +355,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                             <div className="hidden md:block md:col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-wider">Qty</div>
                                             <div className="hidden md:block md:col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-wider">Unit Price</div>
                                             <div className="hidden md:block md:col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-wider">Discount</div>
-                                            <div className="hidden md:block md:col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-right pr-2">Subtotal</div>
+                                            <div className="hidden md:block md:col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Subtotal</div>
                                         </div>
                                         <div className="w-10 flex-shrink-0"></div>
                                     </div>
@@ -366,7 +366,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                         {formData.items.map((item, index) => (
                                             <div key={item.id} className="flex gap-2 items-start bg-slate-50 p-3 rounded-xl">
                                                 <div className="flex-1 grid grid-cols-12 gap-2">
-                                                    <div className="col-span-5">
+                                                    <div className="col-span-12 md:col-span-5">
                                                         <CustomSelect
                                                             options={activeProducts.map(p => ({ id: p.id, name: p.name }))}
                                                             value={item.productId}
@@ -376,7 +376,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                             buttonClassName="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm"
                                                         />
                                                     </div>
-                                                    <div className="col-span-2">
+                                                    <div className="col-span-6 md:col-span-2">
                                                         <input
                                                             type="number"
                                                             step="0.01"
@@ -388,7 +388,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                             className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none"
                                                         />
                                                     </div>
-                                                    <div className="col-span-2">
+                                                    <div className="col-span-6 md:col-span-2">
                                                         <div className="flex items-center bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-praetor transition-all overflow-hidden">
                                                             <div className="w-10 self-stretch flex items-center justify-center text-slate-400 text-xs font-black border-r border-slate-100 bg-slate-50/50">
                                                                 {currency}
@@ -405,7 +405,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="col-span-2">
+                                                    <div className="col-span-6 md:col-span-2">
                                                         <div className="flex items-center bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-praetor transition-all overflow-hidden">
                                                             <div className="w-10 self-stretch flex items-center justify-center text-slate-400 text-xs font-black border-r border-slate-100 bg-slate-50/50">
                                                                 %
@@ -422,7 +422,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="col-span-1 flex items-center justify-center">
+                                                    <div className="col-span-6 md:col-span-1 flex items-center justify-center">
                                                         <span className="text-xs font-bold text-slate-600">
                                                             {((item.quantity * item.unitPrice) * (1 - (item.discount || 0) / 100)).toFixed(2)}
                                                         </span>
@@ -431,7 +431,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                 <button
                                                     type="button"
                                                     onClick={() => removeProductRow(index)}
-                                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                    className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all flex-shrink-0"
                                                 >
                                                     <i className="fa-solid fa-trash-can"></i>
                                                 </button>

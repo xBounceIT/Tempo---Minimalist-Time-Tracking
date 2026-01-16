@@ -356,7 +356,7 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                     {formData.items.map((item, index) => (
                       <div key={item.id} className="flex gap-2 items-start bg-slate-50 p-3 rounded-xl">
                         <div className="flex-1 grid grid-cols-12 gap-2">
-                          <div className="col-span-4">
+                          <div className="col-span-12 md:col-span-4">
                             <CustomSelect
                               options={activeProducts.map(p => ({ id: p.id, name: p.name }))}
                               value={item.productId}
@@ -366,7 +366,7 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                               buttonClassName="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm"
                             />
                           </div>
-                          <div className="col-span-2">
+                          <div className="col-span-6 md:col-span-2">
                             <input
                               type="number"
                               step="0.01"
@@ -378,7 +378,7 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                               className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none"
                             />
                           </div>
-                          <div className="col-span-2">
+                          <div className="col-span-6 md:col-span-2">
                             <input
                               type="number"
                               step="0.01"
@@ -390,7 +390,7 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                               className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-semibold"
                             />
                           </div>
-                          <div className="col-span-2">
+                          <div className="col-span-6 md:col-span-2">
                             <input
                               type="number"
                               step="0.01"
@@ -402,7 +402,7 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                               className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none"
                             />
                           </div>
-                          <div className="col-span-2">
+                          <div className="col-span-12 md:col-span-2">
                             <input
                               type="text"
                               placeholder="Note"
@@ -415,7 +415,7 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                         <button
                           type="button"
                           onClick={() => removeProductRow(index)}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all flex-shrink-0"
                         >
                           <i className="fa-solid fa-trash-can"></i>
                         </button>
