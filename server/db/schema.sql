@@ -240,6 +240,36 @@ CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id);
 -- Insert default LDAP config row
 INSERT INTO ldap_config (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
 
+-- Suppliers table (must be created before products due to FK reference)
+CREATE TABLE IF NOT EXISTS suppliers (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    supplier_code VARCHAR(50),
+    contact_name VARCHAR(255),
+    email VARCHAR(255),
+    phone VARCHAR(50),
+    address TEXT,
+    vat_number VARCHAR(50),
+    tax_code VARCHAR(50),
+    payment_terms TEXT,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_disabled BOOLEAN DEFAULT FALSE;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS supplier_code VARCHAR(50);
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS contact_name VARCHAR(255);
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS vat_number VARCHAR(50);
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS tax_code VARCHAR(50);
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS payment_terms TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS notes TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_suppliers_name ON suppliers(name);
+
 -- Products table
 CREATE TABLE IF NOT EXISTS products (
     id VARCHAR(50) PRIMARY KEY,
@@ -402,36 +432,6 @@ CREATE TABLE IF NOT EXISTS sale_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id ON sale_items(sale_id);
-
--- Suppliers table
-CREATE TABLE IF NOT EXISTS suppliers (
-    id VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    is_disabled BOOLEAN DEFAULT FALSE,
-    supplier_code VARCHAR(50),
-    contact_name VARCHAR(255),
-    email VARCHAR(255),
-    phone VARCHAR(50),
-    address TEXT,
-    vat_number VARCHAR(50),
-    tax_code VARCHAR(50),
-    payment_terms TEXT,
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_disabled BOOLEAN DEFAULT FALSE;
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS supplier_code VARCHAR(50);
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS contact_name VARCHAR(255);
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS email VARCHAR(255);
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS address TEXT;
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS vat_number VARCHAR(50);
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS tax_code VARCHAR(50);
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS payment_terms TEXT;
-ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS notes TEXT;
-
-CREATE INDEX IF NOT EXISTS idx_suppliers_name ON suppliers(name);
 
 -- Supplier Quotes table
 CREATE TABLE IF NOT EXISTS supplier_quotes (
