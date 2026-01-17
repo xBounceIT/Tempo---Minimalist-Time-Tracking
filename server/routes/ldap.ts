@@ -1,5 +1,5 @@
 import { query } from '../db/index.ts';
-import { authenticateToken, requireRole } from '../middleware/auth.js';
+import { authenticateToken, requireRole } from '../middleware/auth.ts';
 
 export default async function (fastify, opts) {
     // GET /config - Get LDAP configuration (admin only)
@@ -81,7 +81,7 @@ export default async function (fastify, opts) {
     fastify.post('/sync', {
         onRequest: [authenticateToken, requireRole('admin')]
     }, async (request, reply) => {
-        const ldapService = (await import('../services/ldap.js')).default;
+        const ldapService = (await import('../services/ldap.ts')).default;
         const stats = await ldapService.syncUsers();
         return { success: true, ...stats };
     });

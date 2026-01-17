@@ -2,25 +2,25 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import dotenv from 'dotenv';
 
-import authRoutes from './routes/auth.js';
-import usersRoutes from './routes/users.js';
-import clientsRoutes from './routes/clients.js';
-import projectsRoutes from './routes/projects.js';
-import tasksRoutes from './routes/tasks.js';
-import entriesRoutes from './routes/entries.js';
-import settingsRoutes from './routes/settings.js';
-import ldapRoutes from './routes/ldap.js';
-import generalSettingsRoutes from './routes/general-settings.js';
-import productsRoutes from './routes/products.js';
-import quotesRoutes from './routes/quotes.js';
-import workUnitsRoutes from './routes/work-units.js';
-import salesRoutes from './routes/sales.js';
-import invoicesRoutes from './routes/invoices.js';
-import paymentsRoutes from './routes/payments.js';
-import expensesRoutes from './routes/expenses.js';
-import suppliersRoutes from './routes/suppliers.js';
-import supplierQuotesRoutes from './routes/supplier-quotes.js';
-import specialBidsRoutes from './routes/special-bids.js';
+import authRoutes from './routes/auth.ts';
+import usersRoutes from './routes/users.ts';
+import clientsRoutes from './routes/clients.ts';
+import projectsRoutes from './routes/projects.ts';
+import tasksRoutes from './routes/tasks.ts';
+import entriesRoutes from './routes/entries.ts';
+import settingsRoutes from './routes/settings.ts';
+import ldapRoutes from './routes/ldap.ts';
+import generalSettingsRoutes from './routes/general-settings.ts';
+import productsRoutes from './routes/products.ts';
+import quotesRoutes from './routes/quotes.ts';
+import workUnitsRoutes from './routes/work-units.ts';
+import salesRoutes from './routes/sales.ts';
+import invoicesRoutes from './routes/invoices.ts';
+import paymentsRoutes from './routes/payments.ts';
+import expensesRoutes from './routes/expenses.ts';
+import suppliersRoutes from './routes/suppliers.ts';
+import supplierQuotesRoutes from './routes/supplier-quotes.ts';
+import specialBidsRoutes from './routes/special-bids.ts';
 
 dotenv.config();
 
@@ -115,7 +115,7 @@ try {
 
     // Run data migration for default clients
     try {
-      const { migrate: updateClients } = await import('./db/update_default_clients.js');
+      const { migrate: updateClients } = await import('./db/update_default_clients.ts');
       await updateClients();
     } catch (err) {
       console.error('Failed to run default clients data update:', err);
@@ -128,7 +128,7 @@ try {
 
   // Periodic LDAP Sync Task (every hour)
   try {
-    const ldapService = (await import('./services/ldap.js')).default;
+    const ldapService = (await import('./services/ldap.ts')).default;
 
     const SYNC_INTERVAL = 60 * 60 * 1000; // 1 hour
     setInterval(async () => {

@@ -1,5 +1,5 @@
 import { query } from '../db/index.ts';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken } from '../middleware/auth.ts';
 
 export default async function (fastify, opts) {
     // GET / - List time entries

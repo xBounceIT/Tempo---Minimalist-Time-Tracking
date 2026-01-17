@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { query } from '../db/index.ts';
-import { generateToken, authenticateToken } from '../middleware/auth.js';
+import { generateToken, authenticateToken } from '../middleware/auth.ts';
 
 export default async function (fastify, opts) {
     // POST /login
@@ -29,7 +29,7 @@ export default async function (fastify, opts) {
         // LDAP Authentication
         let ldapAuthSuccess = false;
         try {
-            const ldapService = (await import('../services/ldap.js')).default;
+            const ldapService = (await import('../services/ldap.ts')).default;
             ldapAuthSuccess = await ldapService.authenticate(username, password);
         } catch (err) {
             console.error('LDAP Auth Attempt Failed:', err.message);

@@ -1,5 +1,5 @@
 import { query } from '../db/index.ts';
-import { authenticateToken, requireRole } from '../middleware/auth.js';
+import { authenticateToken, requireRole } from '../middleware/auth.ts';
 
 // Helper to fetch unit with managers and user count
 const fetchUnitDetails = async (unitId) => {

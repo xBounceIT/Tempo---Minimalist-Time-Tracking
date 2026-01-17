@@ -1,5 +1,5 @@
 import { query } from '../db/index.ts';
-import { authenticateToken, requireRole } from '../middleware/auth.js';
+import { authenticateToken, requireRole } from '../middleware/auth.ts';
 
 export default async function (fastify, opts) {
     // All quote routes require at least manager role
