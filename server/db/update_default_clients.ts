@@ -1,4 +1,4 @@
-import { query } from './index.js';
+import { query } from './index.ts';
 
 export async function migrate() {
     console.log('Starting migration: Update default clients with fake info...');

@@ -1,4 +1,4 @@
-import { query } from '../db/index.js';
+import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 // Helper to fetch unit with managers and user count

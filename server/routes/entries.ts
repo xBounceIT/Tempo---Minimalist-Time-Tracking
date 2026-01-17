@@ -1,4 +1,4 @@
-import { query } from '../db/index.js';
+import { query } from '../db/index.ts';
 import { authenticateToken } from '../middleware/auth.js';
 
 export default async function (fastify, opts) {

@@ -1,5 +1,5 @@
 
-import pool from './db/index.js';
+import pool from './db/index.ts';
 import bcrypt from 'bcryptjs';
 
 async function fixPassword() {

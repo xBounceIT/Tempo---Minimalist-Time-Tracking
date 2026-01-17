@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { query } from '../db/index.js';
+import { query } from '../db/index.ts';
 import { generateToken, authenticateToken } from '../middleware/auth.js';
 
 export default async function (fastify, opts) {

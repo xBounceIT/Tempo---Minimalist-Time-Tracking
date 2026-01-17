@@ -87,7 +87,7 @@ try {
 
   if (fs.existsSync(schemaPath)) {
     const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-    const { query } = await import('./db/index.js');
+    const { query } = await import('./db/index.ts');
     await query(schemaSql);
 
     // Explicitly verify that the new tables exist

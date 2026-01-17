@@ -1,5 +1,5 @@
 
-import { query } from './index.js';
+import { query } from './index.ts';
 
 const migration = `
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS recurrence_duration NUMERIC DEFAULT 0;

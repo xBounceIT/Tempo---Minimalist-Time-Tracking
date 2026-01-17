@@ -1,5 +1,5 @@
 import jwt, { type JwtPayload } from 'jsonwebtoken';
-import { query } from '../db/index.js';
+import { query } from '../db/index.ts';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'praetor-secret-key-change-in-production';
 

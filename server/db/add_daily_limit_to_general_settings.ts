@@ -1,5 +1,5 @@
 
-import { query } from './index.js';
+import { query } from './index.ts';
 
 const migration = `
 ALTER TABLE general_settings ADD COLUMN IF NOT EXISTS daily_limit DECIMAL(4, 2) DEFAULT 8.00;

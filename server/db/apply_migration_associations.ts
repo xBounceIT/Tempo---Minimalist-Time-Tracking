@@ -1,5 +1,5 @@
 
-import { query } from './index.js';
+import { query } from './index.ts';
 
 const migration = `
 -- User-Client associations

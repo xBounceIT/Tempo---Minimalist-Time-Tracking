@@ -1,4 +1,4 @@
-import { query } from './index.js';
+import { query } from './index.ts';
 
 async function migrate() {
     console.log('Starting migration: Add client details...');

@@ -1,5 +1,5 @@
 
-import { query } from './index.js';
+import { query } from './index.ts';
 
 const migration = `
 ALTER TABLE clients ADD COLUMN IF NOT EXISTS is_disabled BOOLEAN DEFAULT FALSE;

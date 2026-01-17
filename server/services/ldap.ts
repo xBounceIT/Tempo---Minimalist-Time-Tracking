@@ -1,6 +1,6 @@
 import ldap from 'ldapjs';
 import fs from 'fs';
-import { query } from '../db/index.js';
+import { query } from '../db/index.ts';
 import { v4 as uuidv4 } from 'uuid';
 
 type LdapConfig = {
