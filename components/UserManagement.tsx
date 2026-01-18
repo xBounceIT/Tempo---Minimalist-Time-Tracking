@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, UserRole, Client, Project, ProjectTask } from '../types';
 import CustomSelect from './CustomSelect';
+import StandardTable from './StandardTable';
 import { usersApi } from '../services/api';
 
 interface UserManagementProps {
@@ -48,6 +49,18 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
   const [editName, setEditName] = useState('');
   const [editCostPerHour, setEditCostPerHour] = useState<string>('0');
   const [editIsDisabled, setEditIsDisabled] = useState(false);
+  const [activeSearch, setActiveSearch] = useState('');
+  const [disabledSearch, setDisabledSearch] = useState('');
+  const [activeCurrentPage, setActiveCurrentPage] = useState(1);
+  const [activeRowsPerPage, setActiveRowsPerPage] = useState(() => {
+    const saved = localStorage.getItem('praetor_workforce_active_rowsPerPage');
+    return saved ? parseInt(saved, 10) : 5;
+  });
+  const [disabledCurrentPage, setDisabledCurrentPage] = useState(1);
+  const [disabledRowsPerPage, setDisabledRowsPerPage] = useState(() => {
+    const saved = localStorage.getItem('praetor_workforce_disabled_rowsPerPage');
+    return saved ? parseInt(saved, 10) : 5;
+  });
 
   const canManageAssignments = currentUserRole === 'manager';
 
@@ -80,6 +93,28 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
     setNewPassword('password');
     setNewRole('user');
   };
+
+  const handleActiveRowsPerPageChange = (val: string) => {
+    const value = parseInt(val, 10);
+    setActiveRowsPerPage(value);
+    localStorage.setItem('praetor_workforce_active_rowsPerPage', value.toString());
+    setActiveCurrentPage(1);
+  };
+
+  const handleDisabledRowsPerPageChange = (val: string) => {
+    const value = parseInt(val, 10);
+    setDisabledRowsPerPage(value);
+    localStorage.setItem('praetor_workforce_disabled_rowsPerPage', value.toString());
+    setDisabledCurrentPage(1);
+  };
+
+  React.useEffect(() => {
+    setActiveCurrentPage(1);
+  }, [activeSearch]);
+
+  React.useEffect(() => {
+    setDisabledCurrentPage(1);
+  }, [disabledSearch]);
 
   const openAssignments = async (userId: string) => {
     if (!canManageAssignments) return;
@@ -313,6 +348,25 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
 
   const { visibleClients, visibleProjects, visibleTasks } = getFilteredData();
 
+  const activeUsersTotal = users.filter(user => !user.isDisabled);
+  const disabledUsersTotal = users.filter(user => user.isDisabled);
+  const activeSearchValue = activeSearch.trim().toLowerCase();
+  const disabledSearchValue = disabledSearch.trim().toLowerCase();
+  const matchesUserSearch = (user: User, term: string) => {
+    if (!term) return true;
+    return user.name.toLowerCase().includes(term) || user.username.toLowerCase().includes(term);
+  };
+  const activeUsersFiltered = activeUsersTotal.filter(user => matchesUserSearch(user, activeSearchValue));
+  const disabledUsersFiltered = disabledUsersTotal.filter(user => matchesUserSearch(user, disabledSearchValue));
+
+  const activeTotalPages = Math.ceil(activeUsersFiltered.length / activeRowsPerPage);
+  const activeStartIndex = (activeCurrentPage - 1) * activeRowsPerPage;
+  const activeUsers = activeUsersFiltered.slice(activeStartIndex, activeStartIndex + activeRowsPerPage);
+
+  const disabledTotalPages = Math.ceil(disabledUsersFiltered.length / disabledRowsPerPage);
+  const disabledStartIndex = (disabledCurrentPage - 1) * disabledRowsPerPage;
+  const disabledUsers = disabledUsersFiltered.slice(disabledStartIndex, disabledStartIndex + disabledRowsPerPage);
+
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
       {/* Delete Confirmation Modal */}
@@ -515,10 +569,77 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
-          <h3 className="font-bold text-slate-800">Team Members ({users.length})</h3>
-        </div>
+      <StandardTable
+        title="Active Users"
+        totalCount={activeUsersFiltered.length}
+        headerExtras={
+          <div className="relative">
+            <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+            <input
+              type="text"
+              placeholder="Search active users..."
+              value={activeSearch}
+              onChange={(e) => setActiveSearch(e.target.value)}
+              className="w-56 pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-praetor outline-none"
+            />
+          </div>
+        }
+        footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
+        footer={
+          <>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+              <CustomSelect
+                options={[
+                  { id: '5', name: '5' },
+                  { id: '10', name: '10' },
+                  { id: '20', name: '20' },
+                  { id: '50', name: '50' }
+                ]}
+                value={activeRowsPerPage.toString()}
+                onChange={(val) => handleActiveRowsPerPageChange(val)}
+                className="w-20"
+                buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
+                searchable={false}
+              />
+              <span className="text-xs font-bold text-slate-400 ml-2">
+                Showing {activeUsers.length > 0 ? activeStartIndex + 1 : 0}-{Math.min(activeStartIndex + activeRowsPerPage, activeUsersFiltered.length)} of {activeUsersFiltered.length}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={activeCurrentPage === 1}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+              >
+                <i className="fa-solid fa-chevron-left text-xs"></i>
+              </button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: activeTotalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setActiveCurrentPage(page)}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${activeCurrentPage === page
+                      ? 'bg-praetor text-white shadow-md shadow-slate-200'
+                      : 'text-slate-500 hover:bg-slate-100'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setActiveCurrentPage(prev => Math.min(activeTotalPages, prev + 1))}
+                disabled={activeCurrentPage === activeTotalPages || activeTotalPages === 0}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+              >
+                <i className="fa-solid fa-chevron-right text-xs"></i>
+              </button>
+            </div>
+          </>
+        }
+      >
         <table className="w-full text-left">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
@@ -529,7 +650,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {users.map(user => {
+            {activeUsers.map(user => {
               const canEdit = currentUserRole === 'admin' || (currentUserRole === 'manager' && (user.role === 'user' || user.id === currentUserId));
               return (
                 <tr
@@ -620,9 +741,203 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                 </tr>
               );
             })}
+            {activeUsers.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-6 py-10 text-center text-sm font-bold text-slate-400">
+                  No active users found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
-      </div>
+      </StandardTable>
+
+      {disabledUsersTotal.length > 0 && (
+        <StandardTable
+          title="Disabled Users"
+          totalCount={disabledUsersFiltered.length}
+          totalLabel="DISABLED"
+          containerClassName="border-dashed bg-slate-50"
+          headerExtras={
+            <div className="relative">
+              <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+              <input
+                type="text"
+                placeholder="Search disabled users..."
+                value={disabledSearch}
+                onChange={(e) => setDisabledSearch(e.target.value)}
+                className="w-56 pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-praetor outline-none"
+              />
+            </div>
+          }
+          footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
+          footer={
+            <>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+                <CustomSelect
+                  options={[
+                    { id: '5', name: '5' },
+                    { id: '10', name: '10' },
+                    { id: '20', name: '20' },
+                    { id: '50', name: '50' }
+                  ]}
+                  value={disabledRowsPerPage.toString()}
+                  onChange={(val) => handleDisabledRowsPerPageChange(val)}
+                  className="w-20"
+                  buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
+                  searchable={false}
+                />
+                <span className="text-xs font-bold text-slate-400 ml-2">
+                  Showing {disabledUsers.length > 0 ? disabledStartIndex + 1 : 0}-{Math.min(disabledStartIndex + disabledRowsPerPage, disabledUsersFiltered.length)} of {disabledUsersFiltered.length}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setDisabledCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={disabledCurrentPage === 1}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                >
+                  <i className="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: disabledTotalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setDisabledCurrentPage(page)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${disabledCurrentPage === page
+                        ? 'bg-praetor text-white shadow-md shadow-slate-200'
+                        : 'text-slate-500 hover:bg-slate-100'
+                        }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setDisabledCurrentPage(prev => Math.min(disabledTotalPages, prev + 1))}
+                  disabled={disabledCurrentPage === disabledTotalPages || disabledTotalPages === 0}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                >
+                  <i className="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+              </div>
+            </>
+          }
+        >
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">User</th>
+                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Username</th>
+                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Role</th>
+                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {disabledUsers.map(user => {
+                const canEdit = currentUserRole === 'admin' || (currentUserRole === 'manager' && (user.role === 'user' || user.id === currentUserId));
+                return (
+                  <tr
+                    key={user.id}
+                    onClick={() => canEdit && handleEdit(user)}
+                    className={`group hover:bg-slate-50 transition-colors opacity-60 grayscale hover:opacity-100 hover:grayscale-0 ${canEdit ? 'cursor-pointer' : ''}`}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 text-praetor flex items-center justify-center text-xs font-bold">
+                          {user.avatarInitials}
+                        </div>
+                        <span className="font-bold text-slate-800">{user.name}</span>
+                        {user.isDisabled && (
+                          <span className="text-[10px] bg-red-100 px-2 py-0.5 rounded text-red-600 font-bold uppercase border border-red-200">
+                            Disabled
+                          </span>
+                        )}
+                        {user.id === currentUserId && <span className="text-[10px] bg-praetor px-2 py-0.5 rounded text-white font-bold uppercase">You</span>}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-slate-600 font-mono">{user.username}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${user.role === 'admin' ? 'bg-slate-800 text-white border-slate-700' :
+                        user.role === 'manager' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        }`}>
+                        {user.role === 'admin' && <i className="fa-solid fa-shield-halved"></i>}
+                        {user.role === 'manager' && <i className="fa-solid fa-briefcase"></i>}
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {canManageAssignments && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAssignments(user.id);
+                            }}
+                            className="text-slate-400 hover:text-praetor transition-colors p-2"
+                            title="Manage Assignments"
+                          >
+                            <i className="fa-solid fa-link"></i>
+                          </button>
+                        )}
+                        {currentUserRole === 'admin' && (
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(user);
+                              }}
+                              className="text-slate-400 hover:text-praetor transition-colors p-2"
+                              title="Edit User"
+                            >
+                              <i className="fa-solid fa-user-pen"></i>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                confirmDelete(user);
+                              }}
+                              disabled={user.id === currentUserId}
+                              className="text-slate-400 hover:text-red-500 disabled:opacity-0 transition-colors p-2"
+                              title="Delete User"
+                            >
+                              <i className="fa-solid fa-trash-can"></i>
+                            </button>
+                          </>
+                        )}
+                        {currentUserRole === 'manager' && (user.role === 'user' || user.id === currentUserId) && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(user);
+                            }}
+                            className="text-slate-400 hover:text-praetor transition-colors p-2"
+                            title="Edit User"
+                          >
+                            <i className="fa-solid fa-user-pen"></i>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {disabledUsers.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-6 py-10 text-center text-sm font-bold text-slate-400">
+                    No disabled users found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </StandardTable>
+      )}
 
       {/* Assignment Modal */}
       {managingUserId && (
