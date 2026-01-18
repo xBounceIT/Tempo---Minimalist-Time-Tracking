@@ -226,18 +226,14 @@ export default async function (fastify, opts) {
         };
     });
 
-    // POST /:id/assignments - Update user assignments (admin/manager only)
+    // POST /:id/assignments - Update user assignments (manager only)
     fastify.post('/:id/assignments', {
-        onRequest: [authenticateToken, requireRole('admin', 'manager')]
+        onRequest: [authenticateToken, requireRole('manager')]
     }, async (request, reply) => {
         const { id } = request.params;
         const { clientIds, projectIds, taskIds } = request.body;
         const idResult = requireNonEmptyString(id, 'id');
         if (!idResult.ok) return badRequest(reply, idResult.message);
-
-        if (request.user.role === 'admin' && taskIds !== undefined) {
-            return reply.code(403).send({ error: 'Admins cannot assign tasks' });
-        }
 
         const clientIdsResult = optionalArrayOfStrings(clientIds, 'clientIds');
         if (!clientIdsResult.ok) return badRequest(reply, clientIdsResult.message);

@@ -49,7 +49,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
   const [editCostPerHour, setEditCostPerHour] = useState<string>('0');
   const [editIsDisabled, setEditIsDisabled] = useState(false);
 
-  const canAssignTaskAssignments = currentUserRole === 'manager';
+  const canManageAssignments = currentUserRole === 'manager';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +73,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
   };
 
   const openAssignments = async (userId: string) => {
+    if (!canManageAssignments) return;
     setManagingUserId(userId);
     setIsLoadingAssignments(true);
     try {
@@ -95,13 +96,13 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
   };
 
   const saveAssignments = async () => {
-    if (!managingUserId) return;
+    if (!managingUserId || !canManageAssignments) return;
     try {
       await usersApi.updateAssignments(
         managingUserId,
         assignments.clientIds,
         assignments.projectIds,
-        canAssignTaskAssignments ? assignments.taskIds : undefined
+        assignments.taskIds
       );
       closeAssignments();
     } catch (err) {
@@ -111,6 +112,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
   };
 
   const toggleAssignment = (type: 'client' | 'project' | 'task', id: string) => {
+    if (!canManageAssignments) return;
     setAssignments(prev => {
       const list = type === 'client' ? prev.clientIds : type === 'project' ? prev.projectIds : prev.taskIds;
       const isAdding = !list.includes(id);
@@ -538,16 +540,18 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openAssignments(user.id);
-                        }}
-                        className="text-slate-400 hover:text-praetor transition-colors p-2"
-                        title="Manage Assignments"
-                      >
-                        <i className="fa-solid fa-link"></i>
-                      </button>
+                      {canManageAssignments && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openAssignments(user.id);
+                          }}
+                          className="text-slate-400 hover:text-praetor transition-colors p-2"
+                          title="Manage Assignments"
+                        >
+                          <i className="fa-solid fa-link"></i>
+                        </button>
+                      )}
                       {currentUserRole === 'admin' && (
                         <>
                           <button
@@ -613,7 +617,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                   <i className="fa-solid fa-circle-notch fa-spin text-3xl text-praetor"></i>
                 </div>
               ) : (
-                <div className={`grid grid-cols-1 ${canAssignTaskAssignments ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6`}>
+                <div className={`grid grid-cols-1 ${canManageAssignments ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6`}>
                   {/* Clients Column */}
                   <div className="space-y-3">
                     <div className="sticky top-0 bg-white z-10 pb-2 border-b border-slate-100 mb-2">
@@ -691,7 +695,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                     </div>
                   </div>
 
-                  {canAssignTaskAssignments && (
+                  {canManageAssignments && (
                     <div className="space-y-3">
                       <div className="sticky top-0 bg-white z-10 pb-2 border-b border-slate-100 mb-2">
                         <div className="flex items-center justify-between py-2">
