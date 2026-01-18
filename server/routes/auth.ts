@@ -30,7 +30,7 @@ export default async function (fastify, opts) {
         const user = result.rows[0];
 
         if (user.is_disabled) {
-            return reply.code(403).send({ error: 'Account is disabled. Please contact an administrator.' });
+            return reply.code(401).send({ error: 'Invalid username or password' });
         }
 
         // LDAP Authentication
