@@ -60,11 +60,12 @@ const TrackerView: React.FC<{
   onAddBulkEntries: (entries: Omit<TimeEntry, 'id' | 'createdAt' | 'userId'>[]) => Promise<void>;
   enableAiInsights: boolean;
   onRecurringAction: (taskId: string, action: 'stop' | 'delete_future' | 'delete_all') => void;
+  geminiApiKey?: string;
 }> = ({
   entries, clients, projects, projectTasks, onAddEntry, onDeleteEntry, insights, isInsightLoading,
   onRefreshInsights, onUpdateEntry, startOfWeek, treatSaturdayAsHoliday, onMakeRecurring, userRole,
   viewingUserId, onViewUserChange, availableUsers, currentUser, dailyGoal, onAddBulkEntries,
-  enableAiInsights, onRecurringAction
+  enableAiInsights, onRecurringAction, geminiApiKey
 }) => {
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [trackerMode, setTrackerMode] = useState<'daily' | 'weekly'>(() => {
@@ -194,6 +195,7 @@ const TrackerView: React.FC<{
                 dailyGoal={dailyGoal}
                 currentDayTotal={dailyTotal}
                 enableAiInsights={enableAiInsights}
+                geminiApiKey={geminiApiKey}
               />
 
               <div className="space-y-4">
@@ -421,7 +423,8 @@ const App: React.FC = () => {
     dailyLimit: 8,
     startOfWeek: 'Monday' as 'Monday' | 'Sunday',
     treatSaturdayAsHoliday: true,
-    enableAiInsights: false
+    enableAiInsights: false,
+    geminiApiKey: ''
   });
 
   const [workUnits, setWorkUnits] = useState<WorkUnit[]>([]);
@@ -1312,7 +1315,7 @@ const App: React.FC = () => {
     if (entries.length < 3) return;
     setIsInsightLoading(true);
     const userEntries = entries.filter(e => e.userId === viewingUserId);
-    const result = await getInsights(userEntries.slice(0, 10));
+    const result = await getInsights(userEntries.slice(0, 10), generalSettings.geminiApiKey);
     setInsights(result);
     setIsInsightLoading(false);
   };
@@ -1434,6 +1437,7 @@ const App: React.FC = () => {
                 onAddBulkEntries={handleAddBulkEntries}
                 enableAiInsights={generalSettings.enableAiInsights}
                 onRecurringAction={handleRecurringAction}
+                geminiApiKey={generalSettings.geminiApiKey}
               />
             )}
             {activeView === 'timesheets/reports' && (

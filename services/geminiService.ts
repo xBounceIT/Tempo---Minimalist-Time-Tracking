@@ -1,8 +1,10 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Standardized initialization per coding guidelines
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getClient = (apiKey?: string) => {
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+};
 
 export interface ParsedTimeEntry {
   project: string;
@@ -11,8 +13,12 @@ export interface ParsedTimeEntry {
   notes?: string;
 }
 
-export const parseSmartEntry = async (input: string): Promise<ParsedTimeEntry | null> => {
+export const parseSmartEntry = async (input: string, apiKey?: string): Promise<ParsedTimeEntry | null> => {
   try {
+    const ai = getClient(apiKey);
+    if (!ai) {
+      return null;
+    }
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Parse this time tracking input: "${input}". 
@@ -43,8 +49,12 @@ export const parseSmartEntry = async (input: string): Promise<ParsedTimeEntry | 
   }
 };
 
-export const getInsights = async (entries: any[]): Promise<string> => {
+export const getInsights = async (entries: any[], apiKey?: string): Promise<string> => {
   try {
+    const ai = getClient(apiKey);
+    if (!ai) {
+      return "Keep up the great work! Consistent tracking is the first step to optimization.";
+    }
     const context = JSON.stringify(entries);
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",

@@ -16,6 +16,7 @@ interface TimeEntryFormProps {
   dailyGoal: number;
   currentDayTotal: number;
   enableAiInsights: boolean;
+  geminiApiKey?: string;
 }
 
 // Helper to format custom pattern
@@ -48,7 +49,8 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
   userRole,
   dailyGoal,
   currentDayTotal,
-  enableAiInsights
+  enableAiInsights,
+  geminiApiKey
 }) => {
   const [isSmartMode, setIsSmartMode] = useState(false);
   const [smartInput, setSmartInput] = useState('');
@@ -169,7 +171,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
     if (!smartInput.trim()) return;
 
     setIsLoading(true);
-    const parsed = await parseSmartEntry(smartInput);
+    const parsed = await parseSmartEntry(smartInput, geminiApiKey);
     setIsLoading(false);
 
     if (parsed) {
