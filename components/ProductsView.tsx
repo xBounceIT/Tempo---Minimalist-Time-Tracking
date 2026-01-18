@@ -507,14 +507,13 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Name / Category</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Supplier</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Costo</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">MOL %</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sale Price</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Margine</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tax Rate</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Supplier / Name / Category</th>
+                            <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Costo</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">MOL %</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sale Price</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Margine</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tax Rate</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
@@ -529,30 +528,28 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                         <div className="min-w-0">
                                             <div className="font-bold text-slate-800 truncate">{p.name}</div>
                                             <div className="text-[10px] font-black text-slate-400 uppercase truncate">{p.category || 'No Category'}</div>
+                                            <div className="text-[10px] font-semibold text-slate-500 truncate">{p.supplierName || 'No Supplier'}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="px-8 py-5">
+                                <td className="px-4 py-5">
                                     <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${p.type === 'service' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
                                         {p.type || 'item'}
                                     </span>
                                 </td>
-                                <td className="px-8 py-5 text-sm font-semibold text-slate-500">
-                                    {p.supplierName || '-'}
-                                </td>
-                                <td className="px-8 py-5 text-sm font-semibold text-slate-500">
+                                <td className="px-6 py-5 text-sm font-semibold text-slate-500">
                                     {Number(p.costo).toFixed(2)} / {p.costUnit}
                                 </td>
-                                <td className="px-8 py-5 text-sm font-semibold text-slate-500">
+                                <td className="px-6 py-5 text-sm font-semibold text-slate-500">
                                     {Number(p.molPercentage).toFixed(2)}%
                                 </td>
-                                <td className="px-8 py-5 text-sm font-semibold text-slate-700">
+                                <td className="px-6 py-5 text-sm font-semibold text-slate-700">
                                     {calcSalePrice(Number(p.costo), Number(p.molPercentage)).toFixed(2)} / {p.costUnit}
                                 </td>
-                                <td className="px-8 py-5 text-sm font-semibold text-emerald-600">
+                                <td className="px-6 py-5 text-sm font-semibold text-emerald-600">
                                     {calcMargine(Number(p.costo), Number(p.molPercentage)).toFixed(2)}
                                 </td>
-                                <td className="px-8 py-5 text-sm font-bold text-praetor">
+                                <td className="px-6 py-5 text-sm font-bold text-praetor">
                                     {p.taxRate}%
                                 </td>
                                 <td className="px-8 py-5">
@@ -593,7 +590,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                         ))}
                         {activeProducts.length === 0 && (
                             <tr>
-                                <td colSpan={9} className="p-12 text-center">
+                                <td colSpan={8} className="p-12 text-center">
                                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                                         <i className="fa-solid fa-boxes-stacked text-2xl"></i>
                                     </div>
