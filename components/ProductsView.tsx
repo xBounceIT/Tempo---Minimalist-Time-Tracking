@@ -507,7 +507,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Supplier / Name / Category</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Name / Category / Supplier</th>
                             <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Costo</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">MOL %</th>
