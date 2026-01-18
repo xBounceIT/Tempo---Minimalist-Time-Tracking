@@ -450,7 +450,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                 placeholder="e.g. Alice Smith"
                 className={`w-full px-4 py-2 bg-slate-50 border rounded-lg focus:ring-2 outline-none text-sm font-semibold ${formErrors.name ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
               />
-              <p className="text-red-500 text-[10px] font-bold mt-1 min-h-[12px]">{formErrors.name || ''}</p>
+              <p className="text-red-500 text-[10px] font-bold mt-1 h-4 leading-4">{formErrors.name || ''}</p>
             </div>
             <div className="lg:col-span-1">
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
@@ -466,7 +466,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                 placeholder="e.g. alice"
                 className={`w-full px-4 py-2 bg-slate-50 border rounded-lg focus:ring-2 outline-none text-sm font-semibold ${formErrors.username ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
               />
-              <p className="text-red-500 text-[10px] font-bold mt-1 min-h-[12px]">{formErrors.username || ''}</p>
+              <p className="text-red-500 text-[10px] font-bold mt-1 h-4 leading-4">{formErrors.username || ''}</p>
             </div>
             <div className="lg:col-span-1">
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Password</label>
@@ -482,7 +482,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                 placeholder="Password"
                 className={`w-full px-4 py-2 bg-slate-50 border rounded-lg focus:ring-2 outline-none text-sm font-semibold ${formErrors.password ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
               />
-              <p className="text-red-500 text-[10px] font-bold mt-1 min-h-[12px]">{formErrors.password || ''}</p>
+              <p className="text-red-500 text-[10px] font-bold mt-1 h-4 leading-4">{formErrors.password || ''}</p>
             </div>
             <div className="lg:col-span-1">
               <CustomSelect
@@ -492,7 +492,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                 onChange={val => setNewRole(val as UserRole)}
                 buttonClassName="py-2 text-sm"
               />
-              <p className="text-red-500 text-[10px] font-bold mt-1 min-h-[12px]"></p>
+              <p className="text-red-500 text-[10px] font-bold mt-1 h-4 leading-4"></p>
             </div>
             <div className="lg:col-span-1">
               <button
@@ -501,7 +501,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
               >
                 <i className="fa-solid fa-plus"></i> Add
               </button>
-              <p className="text-red-500 text-[10px] font-bold mt-1 min-h-[12px]"></p>
+              <p className="text-red-500 text-[10px] font-bold mt-1 h-4 leading-4"></p>
             </div>
           </form>
           {formErrors.general && (
