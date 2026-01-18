@@ -1331,12 +1331,26 @@ const App: React.FC = () => {
     setIsInsightLoading(false);
   };
 
+  const getDefaultViewForRole = (role: UserRole): View =>
+    role === 'admin' ? 'hr/workforce' : 'timesheets/tracker';
+
   const handleLogin = async (user: User, token?: string) => {
     if (token) {
       setAuthToken(token);
     }
     setCurrentUser(user);
     setViewingUserId(user.id);
+
+    if (user.role === 'admin') {
+      const adminAllowed = new Set<View>([
+        'hr/workforce', 'hr/work-units',
+        'configuration/authentication', 'configuration/general',
+        'settings'
+      ]);
+      if (activeView === '404' || !adminAllowed.has(activeView as View)) {
+        setActiveView(getDefaultViewForRole(user.role));
+      }
+    }
   };
 
   const handleLogout = (reason?: 'inactivity') => {
