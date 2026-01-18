@@ -1,6 +1,6 @@
 import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
-import { requireNonEmptyString, parseDateString, parseNonNegativeNumber, optionalNonEmptyString, badRequest } from '../utils/validation.ts';
+import { requireNonEmptyString, optionalNonEmptyString, parseDateString, optionalDateString, parseNonNegativeNumber, optionalNonNegativeNumber, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
     fastify.addHook('onRequest', authenticateToken);
@@ -28,13 +28,34 @@ export default async function (fastify, opts) {
     fastify.post('/', async (request, reply) => {
         const { clientId, clientName, productId, productName, unitPrice, startDate, endDate } = request.body;
 
-        if (!clientId || !clientName || !productId || !productName || !startDate || !endDate) {
-            return reply.code(400).send({ error: 'Client, product, start date, and end date are required' });
+        const clientIdResult = requireNonEmptyString(clientId, 'clientId');
+        if (!clientIdResult.ok) return badRequest(reply, clientIdResult.message);
+
+        const clientNameResult = requireNonEmptyString(clientName, 'clientName');
+        if (!clientNameResult.ok) return badRequest(reply, clientNameResult.message);
+
+        const productIdResult = requireNonEmptyString(productId, 'productId');
+        if (!productIdResult.ok) return badRequest(reply, productIdResult.message);
+
+        const productNameResult = requireNonEmptyString(productName, 'productName');
+        if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
+
+        const unitPriceResult = optionalNonNegativeNumber(unitPrice, 'unitPrice');
+        if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+
+        const startDateResult = parseDateString(startDate, 'startDate');
+        if (!startDateResult.ok) return badRequest(reply, startDateResult.message);
+
+        const endDateResult = parseDateString(endDate, 'endDate');
+        if (!endDateResult.ok) return badRequest(reply, endDateResult.message);
+
+        if (new Date(endDateResult.value) < new Date(startDateResult.value)) {
+            return badRequest(reply, 'endDate must be on or after startDate');
         }
 
         const existing = await query(
             'SELECT id FROM special_bids WHERE client_id = $1 AND product_id = $2',
-            [clientId, productId]
+            [clientIdResult.value, productIdResult.value]
         );
         if (existing.rows.length > 0) {
             return reply.code(409).send({ error: 'Special bid already exists for this client and product' });
@@ -55,7 +76,7 @@ export default async function (fastify, opts) {
                 end_date as "endDate",
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
-            [id, clientId, clientName, productId, productName, unitPrice || 0, startDate, endDate]
+            [id, clientIdResult.value, clientNameResult.value, productIdResult.value, productNameResult.value, unitPriceResult.value || 0, startDateResult.value, endDateResult.value]
         );
 
         return reply.code(201).send(result.rows[0]);
@@ -64,11 +85,68 @@ export default async function (fastify, opts) {
     fastify.put('/:id', async (request, reply) => {
         const { id } = request.params;
         const { clientId, clientName, productId, productName, unitPrice, startDate, endDate } = request.body;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+
+        let clientIdValue = clientId;
+        if (clientId !== undefined) {
+            const clientIdResult = optionalNonEmptyString(clientId, 'clientId');
+            if (!clientIdResult.ok) return badRequest(reply, clientIdResult.message);
+            clientIdValue = clientIdResult.value;
+        }
+
+        let clientNameValue = clientName;
+        if (clientName !== undefined) {
+            const clientNameResult = optionalNonEmptyString(clientName, 'clientName');
+            if (!clientNameResult.ok) return badRequest(reply, clientNameResult.message);
+            clientNameValue = clientNameResult.value;
+        }
+
+        let productIdValue = productId;
+        if (productId !== undefined) {
+            const productIdResult = optionalNonEmptyString(productId, 'productId');
+            if (!productIdResult.ok) return badRequest(reply, productIdResult.message);
+            productIdValue = productIdResult.value;
+        }
+
+        let productNameValue = productName;
+        if (productName !== undefined) {
+            const productNameResult = optionalNonEmptyString(productName, 'productName');
+            if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
+            productNameValue = productNameResult.value;
+        }
+
+        let unitPriceValue = unitPrice;
+        if (unitPrice !== undefined) {
+            const unitPriceResult = optionalNonNegativeNumber(unitPrice, 'unitPrice');
+            if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+            unitPriceValue = unitPriceResult.value;
+        }
+
+        let startDateValue = startDate;
+        if (startDate !== undefined) {
+            const startDateResult = optionalDateString(startDate, 'startDate');
+            if (!startDateResult.ok) return badRequest(reply, startDateResult.message);
+            startDateValue = startDateResult.value;
+        }
+
+        let endDateValue = endDate;
+        if (endDate !== undefined) {
+            const endDateResult = optionalDateString(endDate, 'endDate');
+            if (!endDateResult.ok) return badRequest(reply, endDateResult.message);
+            endDateValue = endDateResult.value;
+        }
+
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            if (end < start) return badRequest(reply, 'endDate must be on or after startDate');
+        }
 
         if (clientId && productId) {
             const existing = await query(
                 'SELECT id FROM special_bids WHERE client_id = $1 AND product_id = $2 AND id <> $3',
-                [clientId, productId, id]
+                [clientId, productId, idResult.value]
             );
             if (existing.rows.length > 0) {
                 return reply.code(409).send({ error: 'Special bid already exists for this client and product' });
@@ -97,7 +175,7 @@ export default async function (fastify, opts) {
                 end_date as "endDate",
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
-            [clientId, clientName, productId, productName, unitPrice, startDate, endDate, id]
+            [clientIdValue, clientNameValue, productIdValue, productNameValue, unitPriceValue, startDateValue, endDateValue, idResult.value]
         );
 
         if (result.rows.length === 0) {
@@ -109,7 +187,9 @@ export default async function (fastify, opts) {
 
     fastify.delete('/:id', async (request, reply) => {
         const { id } = request.params;
-        const result = await query('DELETE FROM special_bids WHERE id = $1 RETURNING id', [id]);
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+        const result = await query('DELETE FROM special_bids WHERE id = $1 RETURNING id', [idResult.value]);
 
         if (result.rows.length === 0) {
             return reply.code(404).send({ error: 'Special bid not found' });

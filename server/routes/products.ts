@@ -1,6 +1,6 @@
 import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
-import { requireNonEmptyString, optionalNonEmptyString, parseNonNegativeNumber, parseBoolean, badRequest } from '../utils/validation.ts';
+import { requireNonEmptyString, optionalNonEmptyString, parseNonNegativeNumber, optionalNonNegativeNumber, parseBoolean, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
     // All product routes require at least manager role
@@ -25,13 +25,13 @@ export default async function (fastify, opts) {
         const nameResult = requireNonEmptyString(name, 'name');
         if (!nameResult.ok) return badRequest(reply, nameResult.message);
 
-        const costoResult = parseNonNegativeNumber(costo, 'costo');
+        const costoResult = optionalNonNegativeNumber(costo, 'costo');
         if (!costoResult.ok) return badRequest(reply, costoResult.message);
 
-        const molPercentageResult = parseNonNegativeNumber(molPercentage, 'molPercentage');
+        const molPercentageResult = optionalNonNegativeNumber(molPercentage, 'molPercentage');
         if (!molPercentageResult.ok) return badRequest(reply, molPercentageResult.message);
 
-        const taxRateResult = parseNonNegativeNumber(taxRate, 'taxRate');
+        const taxRateResult = optionalNonNegativeNumber(taxRate, 'taxRate');
         if (!taxRateResult.ok) return badRequest(reply, taxRateResult.message);
 
         const id = 'p-' + Date.now();
@@ -39,8 +39,7 @@ export default async function (fastify, opts) {
             `INSERT INTO products (id, name, costo, mol_percentage, cost_unit, category, tax_rate, type, supplier_id) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
              RETURNING id, name, costo, mol_percentage as "molPercentage", cost_unit as "costUnit", category, tax_rate as "taxRate", type, supplier_id as "supplierId"`,
-            [id, nameResult.value, costoResult.value, molPercentageResult.value, costUnit || 'unit', category, taxRateResult.value, type || 'item', supplierId || null]
-            [id, name, costo || 0, molPercentage || 0, costUnit || 'unit', category, taxRate || 0, type || 'item', supplierId || null]
+            [id, nameResult.value, costoResult.value || 0, molPercentageResult.value || 0, costUnit || 'unit', category, taxRateResult.value || 0, type || 'item', supplierId || null]
         );
         
         // If supplier was assigned, fetch supplier name
@@ -66,24 +65,28 @@ export default async function (fastify, opts) {
             if (!nameResult.ok) return badRequest(reply, nameResult.message);
         }
 
+        let costoValue = costo;
         if (costo !== undefined) {
             const costoResult = parseNonNegativeNumber(costo, 'costo');
             if (!costoResult.ok) return badRequest(reply, costoResult.message);
+            costoValue = costoResult.value;
         }
 
+        let molPercentageValue = molPercentage;
         if (molPercentage !== undefined) {
             const molPercentageResult = parseNonNegativeNumber(molPercentage, 'molPercentage');
             if (!molPercentageResult.ok) return badRequest(reply, molPercentageResult.message);
+            molPercentageValue = molPercentageResult.value;
         }
 
+        let taxRateValue = taxRate;
         if (taxRate !== undefined) {
             const taxRateResult = parseNonNegativeNumber(taxRate, 'taxRate');
             if (!taxRateResult.ok) return badRequest(reply, taxRateResult.message);
+            taxRateValue = taxRateResult.value;
         }
 
-        if (isDisabled !== undefined) {
-            const isDisabledValue = parseBoolean(isDisabled);
-        }
+        const isDisabledValue = isDisabled !== undefined ? parseBoolean(isDisabled) : undefined;
 
         const result = await query(
             `UPDATE products 
@@ -93,11 +96,12 @@ export default async function (fastify, opts) {
                  cost_unit = COALESCE($4, cost_unit), 
                  category = COALESCE($5, category), 
                  tax_rate = COALESCE($6, tax_rate),
-                 is_disabled = COALESCE($7, is_disabled),
-                 supplier_id = $8
-             WHERE id = $9 
+                 type = COALESCE($7, type),
+                 is_disabled = COALESCE($8, is_disabled),
+                 supplier_id = COALESCE($9, supplier_id)
+             WHERE id = $10 
              RETURNING id, name, costo, mol_percentage as "molPercentage", cost_unit as "costUnit", category, tax_rate as "taxRate", type, is_disabled as "isDisabled", supplier_id as "supplierId"`,
-            [name, costo, molPercentage, costUnit, category, taxRate, isDisabled || false, supplierId !== undefined ? supplierId : null, idResult.value]
+            [name, costoValue, molPercentageValue, costUnit, category, taxRateValue, type, isDisabledValue, supplierId !== undefined ? supplierId : null, idResult.value]
         );
 
         if (result.rows.length === 0) {
@@ -121,7 +125,6 @@ export default async function (fastify, opts) {
         const idResult = requireNonEmptyString(id, 'id');
         if (!idResult.ok) return badRequest(reply, idResult.message);
 
-        const result = await query('DELETE FROM products WHERE id = $1 RETURNING id', [idResult.value]);
         const result = await query('DELETE FROM products WHERE id = $1 RETURNING id', [idResult.value]);
 
         if (result.rows.length === 0) {

@@ -1,5 +1,6 @@
 import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
+import { requireNonEmptyString, optionalNonEmptyString, parseDateString, optionalDateString, parsePositiveNumber, parseNonNegativeNumber, optionalNonNegativeNumber, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
   fastify.addHook('onRequest', authenticateToken);
@@ -64,9 +65,41 @@ export default async function (fastify, opts) {
       notes
     } = request.body;
 
-    if (!supplierId || !supplierName || !purchaseOrderNumber || !items || items.length === 0 || !expirationDate) {
-      return reply.code(400).send({ error: 'Supplier, PO number, items, and expiration date are required' });
+    const supplierIdResult = requireNonEmptyString(supplierId, 'supplierId');
+    if (!supplierIdResult.ok) return badRequest(reply, supplierIdResult.message);
+
+    const supplierNameResult = requireNonEmptyString(supplierName, 'supplierName');
+    if (!supplierNameResult.ok) return badRequest(reply, supplierNameResult.message);
+
+    const purchaseOrderNumberResult = requireNonEmptyString(purchaseOrderNumber, 'purchaseOrderNumber');
+    if (!purchaseOrderNumberResult.ok) return badRequest(reply, purchaseOrderNumberResult.message);
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return badRequest(reply, 'Items must be a non-empty array');
     }
+
+    const normalizedItems = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
+      if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
+      const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
+      if (!quantityResult.ok) return badRequest(reply, quantityResult.message);
+      const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
+      if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+      normalizedItems.push({
+        ...item,
+        productName: productNameResult.value,
+        quantity: quantityResult.value,
+        unitPrice: unitPriceResult.value
+      });
+    }
+
+    const expirationDateResult = parseDateString(expirationDate, 'expirationDate');
+    if (!expirationDateResult.ok) return badRequest(reply, expirationDateResult.message);
+
+    const discountResult = optionalNonNegativeNumber(discount, 'discount');
+    if (!discountResult.ok) return badRequest(reply, discountResult.message);
 
     const quoteId = 'sq-' + Date.now();
     const quoteResult = await query(
@@ -87,19 +120,19 @@ export default async function (fastify, opts) {
         EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
       [
         quoteId,
-        supplierId,
-        supplierName,
-        purchaseOrderNumber,
+        supplierIdResult.value,
+        supplierNameResult.value,
+        purchaseOrderNumberResult.value,
         paymentTerms || 'immediate',
-        discount || 0,
+        discountResult.value || 0,
         status || 'received',
-        expirationDate,
+        expirationDateResult.value,
         notes
       ]
     );
 
     const createdItems = [];
-    for (const item of items) {
+    for (const item of normalizedItems) {
       const itemId = 'sqi-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
       const itemResult = await query(
         `INSERT INTO supplier_quote_items (
@@ -148,6 +181,44 @@ export default async function (fastify, opts) {
       notes
     } = request.body;
 
+    const idResult = requireNonEmptyString(id, 'id');
+    if (!idResult.ok) return badRequest(reply, idResult.message);
+
+    let supplierIdValue = supplierId;
+    if (supplierId !== undefined) {
+      const supplierIdResult = optionalNonEmptyString(supplierId, 'supplierId');
+      if (!supplierIdResult.ok) return badRequest(reply, supplierIdResult.message);
+      supplierIdValue = supplierIdResult.value;
+    }
+
+    let supplierNameValue = supplierName;
+    if (supplierName !== undefined) {
+      const supplierNameResult = optionalNonEmptyString(supplierName, 'supplierName');
+      if (!supplierNameResult.ok) return badRequest(reply, supplierNameResult.message);
+      supplierNameValue = supplierNameResult.value;
+    }
+
+    let purchaseOrderNumberValue = purchaseOrderNumber;
+    if (purchaseOrderNumber !== undefined) {
+      const purchaseOrderNumberResult = optionalNonEmptyString(purchaseOrderNumber, 'purchaseOrderNumber');
+      if (!purchaseOrderNumberResult.ok) return badRequest(reply, purchaseOrderNumberResult.message);
+      purchaseOrderNumberValue = purchaseOrderNumberResult.value;
+    }
+
+    let expirationDateValue = expirationDate;
+    if (expirationDate !== undefined) {
+      const expirationDateResult = optionalDateString(expirationDate, 'expirationDate');
+      if (!expirationDateResult.ok) return badRequest(reply, expirationDateResult.message);
+      expirationDateValue = expirationDateResult.value;
+    }
+
+    let discountValue = discount;
+    if (discount !== undefined) {
+      const discountResult = optionalNonNegativeNumber(discount, 'discount');
+      if (!discountResult.ok) return badRequest(reply, discountResult.message);
+      discountValue = discountResult.value;
+    }
+
     const quoteResult = await query(
       `UPDATE supplier_quotes
        SET supplier_id = COALESCE($1, supplier_id),
@@ -173,15 +244,15 @@ export default async function (fastify, opts) {
         EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
         EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
       [
-        supplierId,
-        supplierName,
-        purchaseOrderNumber,
+        supplierIdValue,
+        supplierNameValue,
+        purchaseOrderNumberValue,
         paymentTerms,
-        discount,
+        discountValue,
         status,
-        expirationDate,
+        expirationDateValue,
         notes,
-        id
+        idResult.value
       ]
     );
 
@@ -191,9 +262,29 @@ export default async function (fastify, opts) {
 
     let updatedItems = [];
     if (items) {
-      await query('DELETE FROM supplier_quote_items WHERE quote_id = $1', [id]);
+      if (!Array.isArray(items) || items.length === 0) {
+        return badRequest(reply, 'Items must be a non-empty array');
+      }
+      const normalizedItems = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
+        if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
+        const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
+        if (!quantityResult.ok) return badRequest(reply, quantityResult.message);
+        const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
+        if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+        normalizedItems.push({
+          ...item,
+          productName: productNameResult.value,
+          quantity: quantityResult.value,
+          unitPrice: unitPriceResult.value
+        });
+      }
 
-      for (const item of items) {
+      await query('DELETE FROM supplier_quote_items WHERE quote_id = $1', [idResult.value]);
+
+      for (const item of normalizedItems) {
         const itemId = 'sqi-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         const itemResult = await query(
           `INSERT INTO supplier_quote_items (
@@ -210,7 +301,7 @@ export default async function (fastify, opts) {
             note`,
           [
             itemId,
-            id,
+            idResult.value,
             item.productId,
             item.productName,
             item.quantity,
@@ -234,7 +325,7 @@ export default async function (fastify, opts) {
           note
          FROM supplier_quote_items
          WHERE quote_id = $1`,
-        [id]
+        [idResult.value]
       );
       updatedItems = itemsResult.rows;
     }
@@ -247,7 +338,9 @@ export default async function (fastify, opts) {
 
   fastify.delete('/:id', async (request, reply) => {
     const { id } = request.params;
-    const result = await query('DELETE FROM supplier_quotes WHERE id = $1 RETURNING id', [id]);
+    const idResult = requireNonEmptyString(id, 'id');
+    if (!idResult.ok) return badRequest(reply, idResult.message);
+    const result = await query('DELETE FROM supplier_quotes WHERE id = $1 RETURNING id', [idResult.value]);
 
     if (result.rows.length === 0) {
       return reply.code(404).send({ error: 'Supplier quote not found' });

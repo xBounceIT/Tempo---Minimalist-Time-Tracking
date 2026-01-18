@@ -1,5 +1,6 @@
 import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
+import { requireNonEmptyString, optionalNonEmptyString, optionalEmail, parseBoolean, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
   fastify.addHook('onRequest', authenticateToken);
@@ -29,9 +30,35 @@ export default async function (fastify, opts) {
       address, vatNumber, taxCode, paymentTerms, notes
     } = request.body;
 
-    if (!name) {
-      return reply.code(400).send({ error: 'Supplier name is required' });
-    }
+    const nameResult = requireNonEmptyString(name, 'name');
+    if (!nameResult.ok) return badRequest(reply, nameResult.message);
+
+    const emailResult = optionalEmail(email, 'email');
+    if (!emailResult.ok) return badRequest(reply, emailResult.message);
+
+    const supplierCodeResult = optionalNonEmptyString(supplierCode, 'supplierCode');
+    if (!supplierCodeResult.ok) return badRequest(reply, supplierCodeResult.message);
+
+    const contactNameResult = optionalNonEmptyString(contactName, 'contactName');
+    if (!contactNameResult.ok) return badRequest(reply, contactNameResult.message);
+
+    const phoneResult = optionalNonEmptyString(phone, 'phone');
+    if (!phoneResult.ok) return badRequest(reply, phoneResult.message);
+
+    const addressResult = optionalNonEmptyString(address, 'address');
+    if (!addressResult.ok) return badRequest(reply, addressResult.message);
+
+    const vatNumberResult = optionalNonEmptyString(vatNumber, 'vatNumber');
+    if (!vatNumberResult.ok) return badRequest(reply, vatNumberResult.message);
+
+    const taxCodeResult = optionalNonEmptyString(taxCode, 'taxCode');
+    if (!taxCodeResult.ok) return badRequest(reply, taxCodeResult.message);
+
+    const paymentTermsResult = optionalNonEmptyString(paymentTerms, 'paymentTerms');
+    if (!paymentTermsResult.ok) return badRequest(reply, paymentTermsResult.message);
+
+    const notesResult = optionalNonEmptyString(notes, 'notes');
+    if (!notesResult.ok) return badRequest(reply, notesResult.message);
 
     const id = 's-' + Date.now();
     await query(
@@ -40,24 +67,24 @@ export default async function (fastify, opts) {
         address, vat_number, tax_code, payment_terms, notes
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
-        id, name, false, supplierCode, contactName, email, phone,
-        address, vatNumber, taxCode, paymentTerms, notes
+        id, nameResult.value, false, supplierCodeResult.value, contactNameResult.value, emailResult.value, phoneResult.value,
+        addressResult.value, vatNumberResult.value, taxCodeResult.value, paymentTermsResult.value, notesResult.value
       ]
     );
 
     return reply.code(201).send({
       id,
-      name,
+      name: nameResult.value,
       isDisabled: false,
-      supplierCode,
-      contactName,
-      email,
-      phone,
-      address,
-      vatNumber,
-      taxCode,
-      paymentTerms,
-      notes
+      supplierCode: supplierCodeResult.value,
+      contactName: contactNameResult.value,
+      email: emailResult.value,
+      phone: phoneResult.value,
+      address: addressResult.value,
+      vatNumber: vatNumberResult.value,
+      taxCode: taxCodeResult.value,
+      paymentTerms: paymentTermsResult.value,
+      notes: notesResult.value
     });
   });
 
@@ -67,6 +94,41 @@ export default async function (fastify, opts) {
       name, isDisabled, supplierCode, contactName, email, phone,
       address, vatNumber, taxCode, paymentTerms, notes
     } = request.body;
+
+    const idResult = requireNonEmptyString(id, 'id');
+    if (!idResult.ok) return badRequest(reply, idResult.message);
+
+    const emailResult = optionalEmail(email, 'email');
+    if (!emailResult.ok) return badRequest(reply, emailResult.message);
+
+    const nameResult = optionalNonEmptyString(name, 'name');
+    if (!nameResult.ok) return badRequest(reply, nameResult.message);
+
+    const supplierCodeResult = optionalNonEmptyString(supplierCode, 'supplierCode');
+    if (!supplierCodeResult.ok) return badRequest(reply, supplierCodeResult.message);
+
+    const contactNameResult = optionalNonEmptyString(contactName, 'contactName');
+    if (!contactNameResult.ok) return badRequest(reply, contactNameResult.message);
+
+    const phoneResult = optionalNonEmptyString(phone, 'phone');
+    if (!phoneResult.ok) return badRequest(reply, phoneResult.message);
+
+    const addressResult = optionalNonEmptyString(address, 'address');
+    if (!addressResult.ok) return badRequest(reply, addressResult.message);
+
+    const vatNumberResult = optionalNonEmptyString(vatNumber, 'vatNumber');
+    if (!vatNumberResult.ok) return badRequest(reply, vatNumberResult.message);
+
+    const taxCodeResult = optionalNonEmptyString(taxCode, 'taxCode');
+    if (!taxCodeResult.ok) return badRequest(reply, taxCodeResult.message);
+
+    const paymentTermsResult = optionalNonEmptyString(paymentTerms, 'paymentTerms');
+    if (!paymentTermsResult.ok) return badRequest(reply, paymentTermsResult.message);
+
+    const notesResult = optionalNonEmptyString(notes, 'notes');
+    if (!notesResult.ok) return badRequest(reply, notesResult.message);
+
+    const isDisabledValue = isDisabled !== undefined ? parseBoolean(isDisabled) : undefined;
 
     const result = await query(
       `UPDATE suppliers SET
@@ -84,8 +146,8 @@ export default async function (fastify, opts) {
        WHERE id = $12
        RETURNING *`,
       [
-        name || null, isDisabled, supplierCode, contactName, email, phone,
-        address, vatNumber, taxCode, paymentTerms, notes, id
+        nameResult.value, isDisabledValue, supplierCodeResult.value, contactNameResult.value, emailResult.value, phoneResult.value,
+        addressResult.value, vatNumberResult.value, taxCodeResult.value, paymentTermsResult.value, notesResult.value, idResult.value
       ]
     );
 
@@ -112,7 +174,9 @@ export default async function (fastify, opts) {
 
   fastify.delete('/:id', async (request, reply) => {
     const { id } = request.params;
-    const result = await query('DELETE FROM suppliers WHERE id = $1 RETURNING id', [id]);
+    const idResult = requireNonEmptyString(id, 'id');
+    if (!idResult.ok) return badRequest(reply, idResult.message);
+    const result = await query('DELETE FROM suppliers WHERE id = $1 RETURNING id', [idResult.value]);
 
     if (result.rows.length === 0) {
       return reply.code(404).send({ error: 'Supplier not found' });

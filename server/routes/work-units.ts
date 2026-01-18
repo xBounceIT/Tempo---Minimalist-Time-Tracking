@@ -1,6 +1,6 @@
-import { query } from '../db/index.ts';
+﻿import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
-import { requireNonEmptyString, requireNonEmptyArrayOfStrings, optionalNonEmptyString, optionalArrayOfStrings, badRequest } from '../utils/validation.ts';
+import { requireNonEmptyString, requireNonEmptyArrayOfStrings, optionalNonEmptyString, optionalArrayOfStrings, ensureArrayOfStrings, badRequest } from '../utils/validation.ts';
 
 // Helper to fetch unit with managers and user count
 const fetchUnitDetails = async (unitId) => {
@@ -60,18 +60,7 @@ export default async function (fastify, opts) {
         }
 
         const workUnits = result.rows.map(w => ({
-        const idResult = requireNonEmptyString(id, 'id');
-        if (!idResult.ok) return badRequest(reply, idResult.message);
             id: w.id,
-        if (name !== undefined) {
-            const nameResult = optionalNonEmptyString(name, 'name');
-            if (!nameResult.ok) return badRequest(reply, nameResult.message);
-        }
-
-        if (managerIds !== undefined) {
-            const managerIdsResult = optionalArrayOfStrings(managerIds, 'managerIds');
-            if (!managerIdsResult.ok) return badRequest(reply, managerIdsResult.message);
-        }
             name: w.name,
             managers: w.managers,
             description: w.description,
@@ -84,14 +73,12 @@ export default async function (fastify, opts) {
 
     // POST / - Create work unit (Admin only)
     fastify.post('/', {
-                    values.push(optionalNonEmptyString(name, 'name').value);
+        onRequest: [authenticateToken, requireRole('admin')]
     }, async (request, reply) => {
         const { name, managerIds, description } = request.body;
 
-        if (!name) {
-            const nameResult = requireNonEmptyString(name, 'name');
-            if (!nameResult.ok) return badRequest(reply, nameResult.message);
-        }
+        const nameResult = requireNonEmptyString(name, 'name');
+        if (!nameResult.ok) return badRequest(reply, nameResult.message);
 
         const managerIdsResult = requireNonEmptyArrayOfStrings(managerIds, 'managerIds');
         if (!managerIdsResult.ok) return badRequest(reply, managerIdsResult.message);
@@ -140,6 +127,18 @@ export default async function (fastify, opts) {
     }, async (request, reply) => {
         const { id } = request.params;
         const { name, managerIds, description, isDisabled } = request.body;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+
+        if (name !== undefined) {
+            const nameResult = optionalNonEmptyString(name, 'name');
+            if (!nameResult.ok) return badRequest(reply, nameResult.message);
+        }
+
+        if (managerIds !== undefined) {
+            const managerIdsResult = optionalArrayOfStrings(managerIds, 'managerIds');
+            if (!managerIdsResult.ok) return badRequest(reply, managerIdsResult.message);
+        }
 
         try {
             await query('BEGIN');
@@ -152,7 +151,7 @@ export default async function (fastify, opts) {
 
                 if (name !== undefined) {
                     updates.push(`name = $${paramIdx++}`);
-                    values.push(name);
+                    values.push(optionalNonEmptyString(name, 'name').value);
                 }
                 if (description !== undefined) {
                     updates.push(`description = $${paramIdx++}`);
@@ -178,27 +177,32 @@ export default async function (fastify, opts) {
 
             // Update managers if provided
             if (managerIds !== undefined) {
+                const managerIdsResult = ensureArrayOfStrings(managerIds, 'managerIds');
+                if (!managerIdsResult.ok) {
+                    await query('ROLLBACK');
+                    return badRequest(reply, managerIdsResult.message);
+                }
 
                 // Delete existing managers
                 await query('DELETE FROM work_unit_managers WHERE work_unit_id = $1', [idResult.value]);
 
                 // Insert new managers
-                for (const managerId of optionalArrayOfStrings(managerIds, 'managerIds').value) {
+                for (const managerId of managerIdsResult.value) {
                     await query(
                         'INSERT INTO work_unit_managers (work_unit_id, user_id) VALUES ($1, $2)',
-                        [id, managerId]
+                        [idResult.value, managerId]
                     );
                     // Also add as member
                     await query(
                         'INSERT INTO user_work_units (user_id, work_unit_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-                        [managerId, id]
+                        [managerId, idResult.value]
                     );
                 }
             }
 
             await query('COMMIT');
 
-            const w = await fetchUnitDetails(id);
+            const w = await fetchUnitDetails(idResult.value);
             if (!w) return reply.code(404).send({ error: 'Work unit not found' });
 
             return {
@@ -220,7 +224,10 @@ export default async function (fastify, opts) {
         onRequest: [authenticateToken, requireRole('admin')]
     }, async (request, reply) => {
         const { id } = request.params;
-        const result = await query('DELETE FROM work_units WHERE id = $1 RETURNING id', [id]);
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+
+        const result = await query('DELETE FROM work_units WHERE id = $1 RETURNING id', [idResult.value]);
 
         if (result.rows.length === 0) {
             return reply.code(404).send({ error: 'Work unit not found' });
@@ -234,13 +241,15 @@ export default async function (fastify, opts) {
         onRequest: [authenticateToken]
     }, async (request, reply) => {
         const { id } = request.params;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
 
         // Check permissions
         if (request.user.role !== 'admin') {
             // Check if user is a manager of this unit
             const check = await query(
                 'SELECT 1 FROM work_unit_managers WHERE work_unit_id = $1 AND user_id = $2',
-                [id, request.user.id]
+                [idResult.value, request.user.id]
             );
             if (check.rows.length === 0) {
                 return reply.code(403).send({ error: 'Access denied' });
@@ -252,7 +261,7 @@ export default async function (fastify, opts) {
             FROM user_work_units uw
             JOIN users u ON uw.user_id = u.id
             WHERE uw.work_unit_id = $1
-        `, [id]);
+        `, [idResult.value]);
 
         return result.rows.map(r => r.id);
     });
@@ -266,14 +275,14 @@ export default async function (fastify, opts) {
         const idResult = requireNonEmptyString(id, 'id');
         if (!idResult.ok) return badRequest(reply, idResult.message);
 
-        const userIdsResult = optionalArrayOfStrings(userIds, 'userIds');
+        const userIdsResult = ensureArrayOfStrings(userIds, 'userIds');
         if (!userIdsResult.ok) return badRequest(reply, userIdsResult.message);
 
         try {
             await query('BEGIN');
             await query('DELETE FROM user_work_units WHERE work_unit_id = $1', [idResult.value]);
 
-            for (const userId of userIdsResult.value || []) {
+            for (const userId of userIdsResult.value) {
                 await query(
                     'INSERT INTO user_work_units (user_id, work_unit_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
                     [userId, idResult.value]

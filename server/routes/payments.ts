@@ -1,5 +1,6 @@
 import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
+import { requireNonEmptyString, optionalNonEmptyString, parseDateString, optionalDateString, parsePositiveNumber, optionalPositiveNumber, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
     // All payments routes require at least manager role
@@ -41,9 +42,26 @@ export default async function (fastify, opts) {
     fastify.post('/', async (request, reply) => {
         const { invoiceId, clientId, amount, paymentDate, paymentMethod, reference, notes } = request.body;
 
-        if (!clientId || !amount || !paymentDate) {
-            return reply.code(400).send({ error: 'Required fields missing: clientId, amount, paymentDate' });
-        }
+        const clientIdResult = requireNonEmptyString(clientId, 'clientId');
+        if (!clientIdResult.ok) return badRequest(reply, clientIdResult.message);
+
+        const invoiceIdResult = optionalNonEmptyString(invoiceId, 'invoiceId');
+        if (!invoiceIdResult.ok) return badRequest(reply, invoiceIdResult.message);
+
+        const amountResult = parsePositiveNumber(amount, 'amount');
+        if (!amountResult.ok) return badRequest(reply, amountResult.message);
+
+        const paymentDateResult = parseDateString(paymentDate, 'paymentDate');
+        if (!paymentDateResult.ok) return badRequest(reply, paymentDateResult.message);
+
+        const paymentMethodResult = optionalNonEmptyString(paymentMethod, 'paymentMethod');
+        if (!paymentMethodResult.ok) return badRequest(reply, paymentMethodResult.message);
+
+        const referenceResult = optionalNonEmptyString(reference, 'reference');
+        if (!referenceResult.ok) return badRequest(reply, referenceResult.message);
+
+        const notesResult = optionalNonEmptyString(notes, 'notes');
+        if (!notesResult.ok) return badRequest(reply, notesResult.message);
 
         const paymentId = 'pay-' + Date.now();
 
@@ -66,8 +84,8 @@ export default async function (fastify, opts) {
                     notes,
                     EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt"`,
                 [
-                    paymentId, invoiceId || null, clientId, amount, paymentDate,
-                    paymentMethod || 'bank_transfer', reference, notes
+                    paymentId, invoiceIdResult.value, clientIdResult.value, amountResult.value, paymentDateResult.value,
+                    paymentMethodResult.value || 'bank_transfer', referenceResult.value, notesResult.value
                 ]
             );
 
@@ -119,6 +137,23 @@ export default async function (fastify, opts) {
     fastify.put('/:id', async (request, reply) => {
         const { id } = request.params;
         const { amount, paymentDate, paymentMethod, reference, notes } = request.body;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+
+        const amountResult = optionalPositiveNumber(amount, 'amount');
+        if (!amountResult.ok) return badRequest(reply, amountResult.message);
+
+        const paymentDateResult = optionalDateString(paymentDate, 'paymentDate');
+        if (!paymentDateResult.ok) return badRequest(reply, paymentDateResult.message);
+
+        const paymentMethodResult = optionalNonEmptyString(paymentMethod, 'paymentMethod');
+        if (!paymentMethodResult.ok) return badRequest(reply, paymentMethodResult.message);
+
+        const referenceResult = optionalNonEmptyString(reference, 'reference');
+        if (!referenceResult.ok) return badRequest(reply, referenceResult.message);
+
+        const notesResult = optionalNonEmptyString(notes, 'notes');
+        if (!notesResult.ok) return badRequest(reply, notesResult.message);
         // Note: We generally don't allow changing the linked invoice or client easily because of the math. 
         // For simplicity, let's allow updating metadata but if amount changes, we need to adjust invoice.
 
@@ -129,7 +164,7 @@ export default async function (fastify, opts) {
         try {
             await query('BEGIN');
 
-            const oldPaymentRes = await query('SELECT invoice_id, amount FROM payments WHERE id = $1', [id]);
+            const oldPaymentRes = await query('SELECT invoice_id, amount FROM payments WHERE id = $1', [idResult.value]);
             if (oldPaymentRes.rows.length === 0) {
                 await query('ROLLBACK');
                 return reply.code(404).send({ error: 'Payment not found' });
@@ -155,7 +190,7 @@ export default async function (fastify, opts) {
                     reference,
                     notes,
                     EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt"`,
-                [amount, paymentDate, paymentMethod, reference, notes, id]
+                [amountResult.value, paymentDateResult.value, paymentMethodResult.value, referenceResult.value, notesResult.value, idResult.value]
             );
 
             const updatedPayment = result.rows[0];
@@ -205,11 +240,13 @@ export default async function (fastify, opts) {
     // DELETE /:id - Delete payment
     fastify.delete('/:id', async (request, reply) => {
         const { id } = request.params;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
 
         try {
             await query('BEGIN');
 
-            const paymentRes = await query('SELECT invoice_id, amount FROM payments WHERE id = $1 FOR UPDATE', [id]);
+            const paymentRes = await query('SELECT invoice_id, amount FROM payments WHERE id = $1 FOR UPDATE', [idResult.value]);
             if (paymentRes.rows.length === 0) {
                 await query('ROLLBACK');
                 return reply.code(404).send({ error: 'Payment not found' });
@@ -217,7 +254,7 @@ export default async function (fastify, opts) {
 
             const { invoice_id, amount } = paymentRes.rows[0];
 
-            await query('DELETE FROM payments WHERE id = $1', [id]);
+            await query('DELETE FROM payments WHERE id = $1', [idResult.value]);
 
             // Reverse invoice balance
             if (invoice_id) {

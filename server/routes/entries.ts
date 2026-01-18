@@ -1,6 +1,6 @@
 import { query } from '../db/index.ts';
 import { authenticateToken } from '../middleware/auth.ts';
-import { requireNonEmptyString, parseDateString, parseNonNegativeNumber, parseBoolean, optionalNonEmptyString, badRequest, parseQueryBoolean } from '../utils/validation.ts';
+import { requireNonEmptyString, parseDateString, parseNonNegativeNumber, optionalNonNegativeNumber, parseBoolean, optionalNonEmptyString, badRequest, parseQueryBoolean } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
     // GET / - List time entries
@@ -79,7 +79,7 @@ export default async function (fastify, opts) {
         const taskResult = requireNonEmptyString(task, 'task');
         if (!taskResult.ok) return badRequest(reply, taskResult.message);
 
-        const durationResult = parseNonNegativeNumber(duration, 'duration');
+        const durationResult = optionalNonNegativeNumber(duration, 'duration');
         if (!durationResult.ok) return badRequest(reply, durationResult.message);
 
         const isPlaceholderValue = parseBoolean(isPlaceholder);
@@ -102,7 +102,7 @@ export default async function (fastify, opts) {
         await query(
             `INSERT INTO time_entries (id, user_id, date, client_id, client_name, project_id, project_name, task, notes, duration, hourly_cost, is_placeholder)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-            [id, targetUserId, dateResult.value, clientIdResult.value, clientNameResult.value, projectIdResult.value, projectNameResult.value, taskResult.value, notes || null, durationResult.value, hourlyCost, isPlaceholderValue]
+            [id, targetUserId, dateResult.value, clientIdResult.value, clientNameResult.value, projectIdResult.value, projectNameResult.value, taskResult.value, notes || null, durationResult.value || 0, hourlyCost, isPlaceholderValue]
         );
 
         return reply.code(201).send({
@@ -115,7 +115,7 @@ export default async function (fastify, opts) {
             projectName: projectNameResult.value,
             task: taskResult.value,
             notes,
-            duration: durationResult.value,
+            duration: durationResult.value || 0,
             hourlyCost: parseFloat(hourlyCost),
             isPlaceholder: isPlaceholderValue,
             createdAt: Date.now()

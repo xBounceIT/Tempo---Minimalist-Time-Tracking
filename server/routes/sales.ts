@@ -1,5 +1,6 @@
 import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
+import { requireNonEmptyString, optionalNonEmptyString, parsePositiveNumber, parseNonNegativeNumber, optionalNonNegativeNumber, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
     // All sales routes require at least manager role
@@ -61,9 +62,35 @@ export default async function (fastify, opts) {
     fastify.post('/', async (request, reply) => {
         const { linkedQuoteId, clientId, clientName, items, paymentTerms, discount, status, notes } = request.body;
 
-        if (!clientId || !clientName || !items || items.length === 0) {
-            return reply.code(400).send({ error: 'Client and items are required' });
+        const clientIdResult = requireNonEmptyString(clientId, 'clientId');
+        if (!clientIdResult.ok) return badRequest(reply, clientIdResult.message);
+
+        const clientNameResult = requireNonEmptyString(clientName, 'clientName');
+        if (!clientNameResult.ok) return badRequest(reply, clientNameResult.message);
+
+        if (!Array.isArray(items) || items.length === 0) {
+            return badRequest(reply, 'Items must be a non-empty array');
         }
+
+        const normalizedItems = [];
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
+            if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
+            const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
+            if (!quantityResult.ok) return badRequest(reply, quantityResult.message);
+            const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
+            if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+            normalizedItems.push({
+                ...item,
+                productName: productNameResult.value,
+                quantity: quantityResult.value,
+                unitPrice: unitPriceResult.value
+            });
+        }
+
+        const discountResult = optionalNonNegativeNumber(discount, 'discount');
+        if (!discountResult.ok) return badRequest(reply, discountResult.message);
 
         const saleId = 's-' + Date.now();
 
@@ -83,12 +110,12 @@ export default async function (fastify, opts) {
                 notes,
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
-                [saleId, linkedQuoteId || null, clientId, clientName, paymentTerms || 'immediate', discount || 0, status || 'pending', notes]
+                [saleId, linkedQuoteId || null, clientIdResult.value, clientNameResult.value, paymentTerms || 'immediate', discountResult.value || 0, status || 'pending', notes]
             );
 
             // Insert sale items
             const createdItems = [];
-            for (const item of items) {
+            for (const item of normalizedItems) {
                 const itemId = 'si-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 const itemResult = await query(
                     `INSERT INTO sale_items (id, sale_id, product_id, product_name, quantity, unit_price, discount) 
@@ -119,6 +146,29 @@ export default async function (fastify, opts) {
     fastify.put('/:id', async (request, reply) => {
         const { id } = request.params;
         const { clientId, clientName, items, paymentTerms, discount, status, notes } = request.body;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+
+        let clientIdValue = clientId;
+        if (clientId !== undefined) {
+            const clientIdResult = optionalNonEmptyString(clientId, 'clientId');
+            if (!clientIdResult.ok) return badRequest(reply, clientIdResult.message);
+            clientIdValue = clientIdResult.value;
+        }
+
+        let clientNameValue = clientName;
+        if (clientName !== undefined) {
+            const clientNameResult = optionalNonEmptyString(clientName, 'clientName');
+            if (!clientNameResult.ok) return badRequest(reply, clientNameResult.message);
+            clientNameValue = clientNameResult.value;
+        }
+
+        let discountValue = discount;
+        if (discount !== undefined) {
+            const discountResult = optionalNonNegativeNumber(discount, 'discount');
+            if (!discountResult.ok) return badRequest(reply, discountResult.message);
+            discountValue = discountResult.value;
+        }
 
         try {
             // Update sale
@@ -143,7 +193,7 @@ export default async function (fastify, opts) {
                 notes,
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
-                [clientId, clientName, paymentTerms, discount, status, notes, id]
+                [clientIdValue, clientNameValue, paymentTerms, discountValue, status, notes, idResult.value]
             );
 
             if (saleResult.rows.length === 0) {
@@ -153,11 +203,30 @@ export default async function (fastify, opts) {
             // If items are provided, update them
             let updatedItems = [];
             if (items) {
+                if (!Array.isArray(items) || items.length === 0) {
+                    return badRequest(reply, 'Items must be a non-empty array');
+                }
+                const normalizedItems = [];
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
+                    if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
+                    const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
+                    if (!quantityResult.ok) return badRequest(reply, quantityResult.message);
+                    const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
+                    if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+                    normalizedItems.push({
+                        ...item,
+                        productName: productNameResult.value,
+                        quantity: quantityResult.value,
+                        unitPrice: unitPriceResult.value
+                    });
+                }
                 // Delete existing items
-                await query('DELETE FROM sale_items WHERE sale_id = $1', [id]);
+                await query('DELETE FROM sale_items WHERE sale_id = $1', [idResult.value]);
 
                 // Insert new items
-                for (const item of items) {
+                for (const item of normalizedItems) {
                     const itemId = 'si-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                     const itemResult = await query(
                         `INSERT INTO sale_items (id, sale_id, product_id, product_name, quantity, unit_price, discount) 
@@ -170,7 +239,7 @@ export default async function (fastify, opts) {
                         quantity,
                         unit_price as "unitPrice",
                         discount`,
-                        [itemId, id, item.productId, item.productName, item.quantity, item.unitPrice, item.discount || 0]
+                        [itemId, idResult.value, item.productId, item.productName, item.quantity, item.unitPrice, item.discount || 0]
                     );
                     updatedItems.push(itemResult.rows[0]);
                 }
@@ -187,7 +256,7 @@ export default async function (fastify, opts) {
                     discount
                 FROM sale_items
                 WHERE sale_id = $1`,
-                    [id]
+                    [idResult.value]
                 );
                 updatedItems = itemsResult.rows;
             }
@@ -204,9 +273,11 @@ export default async function (fastify, opts) {
     // DELETE /:id - Delete sale
     fastify.delete('/:id', async (request, reply) => {
         const { id } = request.params;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
 
         // Items will be deleted automatically via CASCADE
-        const result = await query('DELETE FROM sales WHERE id = $1 RETURNING id', [id]);
+        const result = await query('DELETE FROM sales WHERE id = $1 RETURNING id', [idResult.value]);
 
         if (result.rows.length === 0) {
             return reply.code(404).send({ error: 'Sale not found' });

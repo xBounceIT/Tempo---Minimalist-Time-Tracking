@@ -62,6 +62,8 @@ export default async function (fastify, opts) {
         const isRecurringValue = parseBoolean(isRecurring);
         let start = null;
         if (isRecurringValue) {
+            const patternResult = requireNonEmptyString(recurrencePattern, 'recurrencePattern');
+            if (!patternResult.ok) return badRequest(reply, patternResult.message);
             const recurrenceStartResult = optionalDateString(recurrenceStart, 'recurrenceStart');
             if (!recurrenceStartResult.ok) return badRequest(reply, recurrenceStartResult.message);
             start = recurrenceStartResult.value || new Date().toISOString().split('T')[0];
@@ -168,8 +170,6 @@ export default async function (fastify, opts) {
         const { id } = request.params;
         const idResult = requireNonEmptyString(id, 'id');
         if (!idResult.ok) return badRequest(reply, idResult.message);
-        const result = await query('DELETE FROM tasks WHERE id = $1 RETURNING id', [id]);
-
         const result = await query('DELETE FROM tasks WHERE id = $1 RETURNING id', [idResult.value]);
         if (result.rows.length === 0) {
             return reply.code(404).send({ error: 'Task not found' });
@@ -183,7 +183,9 @@ export default async function (fastify, opts) {
         onRequest: [authenticateToken]
     }, async (request, reply) => {
         const { id } = request.params;
-        const result = await query('SELECT user_id FROM user_tasks WHERE task_id = $1', [id]);
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+        const result = await query('SELECT user_id FROM user_tasks WHERE task_id = $1', [idResult.value]);
         return result.rows.map(r => r.user_id);
     });
 
@@ -193,6 +195,11 @@ export default async function (fastify, opts) {
     }, async (request, reply) => {
         const { id } = request.params;
         const { userIds } = request.body;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+
+        const userIdsResult = requireNonEmptyArrayOfStrings(userIds, 'userIds');
+        if (!userIdsResult.ok) return badRequest(reply, userIdsResult.message);
 
         // Only admin/manager can assign users
         if (request.user.role !== 'admin' && request.user.role !== 'manager') {
@@ -203,12 +210,12 @@ export default async function (fastify, opts) {
             await query('BEGIN');
 
             // Delete existing assignments
-            await query('DELETE FROM user_tasks WHERE task_id = $1', [id]);
+        await query('DELETE FROM user_tasks WHERE task_id = $1', [idResult.value]);
 
-            // Insert new ones
+        for (const userId of userIdsResult.value) {
             for (const userId of userIds) {
                 await query(
-                    'INSERT INTO user_tasks (user_id, task_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                [idResult.value, userId]
                     [userId, id]
                 );
             }

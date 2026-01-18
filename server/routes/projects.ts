@@ -51,10 +51,11 @@ export default async function (fastify, opts) {
         if (!clientIdResult.ok) return badRequest(reply, clientIdResult.message);
 
         const id = 'p-' + Date.now();
-        const projectColor = color ? validateHexColor(color, 'color').ok ? validateHexColor(color, 'color').value : '#3b82f6' : '#3b82f6';
-        if (color && !validateHexColor(color, 'color').ok) {
-            return badRequest(reply, validateHexColor(color, 'color').message);
+        const colorResult = color ? validateHexColor(color, 'color') : null;
+        if (color && !colorResult.ok) {
+            return badRequest(reply, colorResult.message);
         }
+        const projectColor = colorResult?.value || '#3b82f6';
 
         try {
             await query(

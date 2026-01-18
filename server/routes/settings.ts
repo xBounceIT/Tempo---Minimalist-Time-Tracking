@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { query } from '../db/index.ts';
 import { authenticateToken } from '../middleware/auth.ts';
-import { requireNonEmptyString, optionalNonEmptyString, parseNonNegativeNumber, parseBoolean, optionalEmail, badRequest } from '../utils/validation.ts';
+import { requireNonEmptyString, optionalNonEmptyString, optionalNonNegativeNumber, parseBoolean, optionalEmail, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
     // GET / - Get current user's settings
@@ -75,7 +75,6 @@ export default async function (fastify, opts) {
          updated_at = CURRENT_TIMESTAMP
        RETURNING *`,
             [request.user.id, fullNameResult.value, emailResult.value, dailyGoalResult.value, startOfWeek, treatSaturdayAsHolidayValue, enableAiInsightsValue]
-            [request.user.id, fullName, email, dailyGoal, startOfWeek, treatSaturdayAsHoliday, enableAiInsights]
         );
 
         const s = result.rows[0];

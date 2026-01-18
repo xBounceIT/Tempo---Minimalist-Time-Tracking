@@ -1,6 +1,6 @@
 import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
-import { requireNonEmptyString, parseDateString, parsePositiveNumber, parseNonNegativeNumber, badRequest } from '../utils/validation.ts';
+import { requireNonEmptyString, optionalNonEmptyString, parseDateString, optionalDateString, parsePositiveNumber, parseNonNegativeNumber, optionalNonNegativeNumber, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
     // All quote routes require at least manager role
@@ -74,6 +74,7 @@ export default async function (fastify, opts) {
             return badRequest(reply, 'Items must be a non-empty array');
         }
 
+        const normalizedItems = [];
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
@@ -82,12 +83,18 @@ export default async function (fastify, opts) {
             if (!quantityResult.ok) return badRequest(reply, quantityResult.message);
             const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
             if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+            normalizedItems.push({
+                ...item,
+                productName: productNameResult.value,
+                quantity: quantityResult.value,
+                unitPrice: unitPriceResult.value
+            });
         }
 
         const expirationDateResult = parseDateString(expirationDate, 'expirationDate');
         if (!expirationDateResult.ok) return badRequest(reply, expirationDateResult.message);
 
-        const discountResult = parseNonNegativeNumber(discount, 'discount');
+        const discountResult = optionalNonNegativeNumber(discount, 'discount');
         if (!discountResult.ok) return badRequest(reply, discountResult.message);
 
         const quoteId = 'q-' + Date.now();
@@ -107,12 +114,12 @@ export default async function (fastify, opts) {
                 notes,
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
-            [quoteId, clientId, clientName, paymentTerms || 'immediate', discount || 0, status || 'quoted', expirationDate, notes]
+            [quoteId, clientIdResult.value, clientNameResult.value, paymentTerms || 'immediate', discountResult.value || 0, status || 'quoted', expirationDateResult.value, notes]
         );
 
         // Insert quote items
         const createdItems = [];
-        for (const item of items) {
+        for (const item of normalizedItems) {
             const itemId = 'qi-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
             const itemResult = await query(
                 `INSERT INTO quote_items (id, quote_id, product_id, product_name, special_bid_id, quantity, unit_price, discount, note) 
@@ -142,6 +149,36 @@ export default async function (fastify, opts) {
     fastify.put('/:id', async (request, reply) => {
         const { id } = request.params;
         const { clientId, clientName, items, paymentTerms, discount, status, expirationDate, notes } = request.body;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+
+        let clientIdValue = clientId;
+        if (clientId !== undefined) {
+            const clientIdResult = optionalNonEmptyString(clientId, 'clientId');
+            if (!clientIdResult.ok) return badRequest(reply, clientIdResult.message);
+            clientIdValue = clientIdResult.value;
+        }
+
+        let clientNameValue = clientName;
+        if (clientName !== undefined) {
+            const clientNameResult = optionalNonEmptyString(clientName, 'clientName');
+            if (!clientNameResult.ok) return badRequest(reply, clientNameResult.message);
+            clientNameValue = clientNameResult.value;
+        }
+
+        let expirationDateValue = expirationDate;
+        if (expirationDate !== undefined) {
+            const expirationDateResult = optionalDateString(expirationDate, 'expirationDate');
+            if (!expirationDateResult.ok) return badRequest(reply, expirationDateResult.message);
+            expirationDateValue = expirationDateResult.value;
+        }
+
+        let discountValue = discount;
+        if (discount !== undefined) {
+            const discountResult = optionalNonNegativeNumber(discount, 'discount');
+            if (!discountResult.ok) return badRequest(reply, discountResult.message);
+            discountValue = discountResult.value;
+        }
 
         // Update quote
         const quoteResult = await query(
@@ -166,7 +203,7 @@ export default async function (fastify, opts) {
                 notes,
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
-            [clientId, clientName, paymentTerms, discount, status, expirationDate, notes, id]
+            [clientIdValue, clientNameValue, paymentTerms, discountValue, status, expirationDateValue, notes, idResult.value]
         );
 
         if (quoteResult.rows.length === 0) {
@@ -176,11 +213,30 @@ export default async function (fastify, opts) {
         // If items are provided, update them
         let updatedItems = [];
         if (items) {
+            if (!Array.isArray(items) || items.length === 0) {
+                return badRequest(reply, 'Items must be a non-empty array');
+            }
+            const normalizedItems = [];
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
+                if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
+                const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
+                if (!quantityResult.ok) return badRequest(reply, quantityResult.message);
+                const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
+                if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+                normalizedItems.push({
+                    ...item,
+                    productName: productNameResult.value,
+                    quantity: quantityResult.value,
+                    unitPrice: unitPriceResult.value
+                });
+            }
             // Delete existing items
-            await query('DELETE FROM quote_items WHERE quote_id = $1', [id]);
+            await query('DELETE FROM quote_items WHERE quote_id = $1', [idResult.value]);
 
             // Insert new items
-            for (const item of items) {
+            for (const item of normalizedItems) {
                 const itemId = 'qi-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 const itemResult = await query(
                     `INSERT INTO quote_items (id, quote_id, product_id, product_name, special_bid_id, quantity, unit_price, discount, note) 
@@ -195,7 +251,7 @@ export default async function (fastify, opts) {
                         unit_price as "unitPrice",
                         discount,
                         note`,
-                    [itemId, id, item.productId, item.productName, item.specialBidId || null, item.quantity, item.unitPrice, item.discount || 0, item.note || null]
+                    [itemId, idResult.value, item.productId, item.productName, item.specialBidId || null, item.quantity, item.unitPrice, item.discount || 0, item.note || null]
                 );
                 updatedItems.push(itemResult.rows[0]);
             }
@@ -214,7 +270,7 @@ export default async function (fastify, opts) {
                     note
                 FROM quote_items
                 WHERE quote_id = $1`,
-                [id]
+                [idResult.value]
             );
             updatedItems = itemsResult.rows;
         }

@@ -103,7 +103,7 @@ export default async function (fastify, opts) {
             WHERE id = $13 
             RETURNING *
         `, [
-            name || null, isDisabled, type, contactName, clientCode, email, phone,
+            name || null, isDisabled, type, contactName, clientCode,
             emailResult.value, phone, address, vatNumber, taxCode, billingCode, paymentTerms, idResult.value
         ]);
 
@@ -137,7 +137,7 @@ export default async function (fastify, opts) {
         const { id } = request.params;
         const idResult = requireNonEmptyString(id, 'id');
         if (!idResult.ok) return badRequest(reply, idResult.message);
-        const result = await query('DELETE FROM clients WHERE id = $1 RETURNING id', [id]);
+        const result = await query('DELETE FROM clients WHERE id = $1 RETURNING id', [idResult.value]);
         const result = await query('DELETE FROM clients WHERE id = $1 RETURNING id', [idResult.value]);
         if (result.rows.length === 0) {
             return reply.code(404).send({ error: 'Client not found' });

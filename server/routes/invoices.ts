@@ -1,5 +1,6 @@
 import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
+import { requireNonEmptyString, optionalNonEmptyString, parseDateString, optionalDateString, parsePositiveNumber, parseNonNegativeNumber, optionalNonNegativeNumber, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
     // All invoices routes require at least manager role
@@ -79,9 +80,63 @@ export default async function (fastify, opts) {
     fastify.post('/', async (request, reply) => {
         const { linkedSaleId, clientId, clientName, invoiceNumber, issueDate, dueDate, status, subtotal, taxAmount, total, amountPaid, notes, items } = request.body;
 
-        if (!clientId || !clientName || !invoiceNumber || !issueDate || !dueDate || !items || items.length === 0) {
-            return reply.code(400).send({ error: 'Required fields missing: clientId, clientName, invoiceNumber, issueDate, dueDate, items' });
+        const clientIdResult = requireNonEmptyString(clientId, 'clientId');
+        if (!clientIdResult.ok) return badRequest(reply, clientIdResult.message);
+
+        const clientNameResult = requireNonEmptyString(clientName, 'clientName');
+        if (!clientNameResult.ok) return badRequest(reply, clientNameResult.message);
+
+        const invoiceNumberResult = requireNonEmptyString(invoiceNumber, 'invoiceNumber');
+        if (!invoiceNumberResult.ok) return badRequest(reply, invoiceNumberResult.message);
+
+        const issueDateResult = parseDateString(issueDate, 'issueDate');
+        if (!issueDateResult.ok) return badRequest(reply, issueDateResult.message);
+
+        const dueDateResult = parseDateString(dueDate, 'dueDate');
+        if (!dueDateResult.ok) return badRequest(reply, dueDateResult.message);
+
+        if (new Date(dueDateResult.value) < new Date(issueDateResult.value)) {
+            return badRequest(reply, 'dueDate must be on or after issueDate');
         }
+
+        if (!Array.isArray(items) || items.length === 0) {
+            return badRequest(reply, 'Items must be a non-empty array');
+        }
+
+        const normalizedItems = [];
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const descriptionResult = requireNonEmptyString(item.description, `items[${i}].description`);
+            if (!descriptionResult.ok) return badRequest(reply, descriptionResult.message);
+            const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
+            if (!quantityResult.ok) return badRequest(reply, quantityResult.message);
+            const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
+            if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+            const taxRateResult = parseNonNegativeNumber(item.taxRate, `items[${i}].taxRate`);
+            if (!taxRateResult.ok) return badRequest(reply, taxRateResult.message);
+            const discountResult = optionalNonNegativeNumber(item.discount, `items[${i}].discount`);
+            if (!discountResult.ok) return badRequest(reply, discountResult.message);
+            normalizedItems.push({
+                ...item,
+                description: descriptionResult.value,
+                quantity: quantityResult.value,
+                unitPrice: unitPriceResult.value,
+                taxRate: taxRateResult.value,
+                discount: discountResult.value || 0
+            });
+        }
+
+        const subtotalResult = optionalNonNegativeNumber(subtotal, 'subtotal');
+        if (!subtotalResult.ok) return badRequest(reply, subtotalResult.message);
+
+        const taxAmountResult = optionalNonNegativeNumber(taxAmount, 'taxAmount');
+        if (!taxAmountResult.ok) return badRequest(reply, taxAmountResult.message);
+
+        const totalResult = optionalNonNegativeNumber(total, 'total');
+        if (!totalResult.ok) return badRequest(reply, totalResult.message);
+
+        const amountPaidResult = optionalNonNegativeNumber(amountPaid, 'amountPaid');
+        if (!amountPaidResult.ok) return badRequest(reply, amountPaidResult.message);
 
         const invoiceId = 'inv-' + Date.now();
 
@@ -110,14 +165,14 @@ export default async function (fastify, opts) {
                     EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                     EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
                 [
-                    invoiceId, linkedSaleId || null, clientId, clientName, invoiceNumber, issueDate, dueDate,
-                    status || 'draft', subtotal, taxAmount, total, amountPaid || 0, notes
+                    invoiceId, linkedSaleId || null, clientIdResult.value, clientNameResult.value, invoiceNumberResult.value, issueDateResult.value, dueDateResult.value,
+                    status || 'draft', subtotalResult.value || 0, taxAmountResult.value || 0, totalResult.value || 0, amountPaidResult.value || 0, notes
                 ]
             );
 
             // Insert invoice items
             const createdItems = [];
-            for (const item of items) {
+            for (const item of normalizedItems) {
                 const itemId = 'inv-item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 const itemResult = await query(
                     `INSERT INTO invoice_items (
@@ -167,6 +222,77 @@ export default async function (fastify, opts) {
     fastify.put('/:id', async (request, reply) => {
         const { id } = request.params;
         const { clientId, clientName, invoiceNumber, issueDate, dueDate, status, subtotal, taxAmount, total, amountPaid, notes, items } = request.body;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
+
+        let clientIdValue = clientId;
+        if (clientId !== undefined) {
+            const clientIdResult = optionalNonEmptyString(clientId, 'clientId');
+            if (!clientIdResult.ok) return badRequest(reply, clientIdResult.message);
+            clientIdValue = clientIdResult.value;
+        }
+
+        let clientNameValue = clientName;
+        if (clientName !== undefined) {
+            const clientNameResult = optionalNonEmptyString(clientName, 'clientName');
+            if (!clientNameResult.ok) return badRequest(reply, clientNameResult.message);
+            clientNameValue = clientNameResult.value;
+        }
+
+        let invoiceNumberValue = invoiceNumber;
+        if (invoiceNumber !== undefined) {
+            const invoiceNumberResult = optionalNonEmptyString(invoiceNumber, 'invoiceNumber');
+            if (!invoiceNumberResult.ok) return badRequest(reply, invoiceNumberResult.message);
+            invoiceNumberValue = invoiceNumberResult.value;
+        }
+
+        let issueDateValue = issueDate;
+        if (issueDate !== undefined) {
+            const issueDateResult = optionalDateString(issueDate, 'issueDate');
+            if (!issueDateResult.ok) return badRequest(reply, issueDateResult.message);
+            issueDateValue = issueDateResult.value;
+        }
+
+        let dueDateValue = dueDate;
+        if (dueDate !== undefined) {
+            const dueDateResult = optionalDateString(dueDate, 'dueDate');
+            if (!dueDateResult.ok) return badRequest(reply, dueDateResult.message);
+            dueDateValue = dueDateResult.value;
+        }
+
+        if (issueDate && dueDate) {
+            if (new Date(dueDate) < new Date(issueDate)) {
+                return badRequest(reply, 'dueDate must be on or after issueDate');
+            }
+        }
+
+        let subtotalValue = subtotal;
+        if (subtotal !== undefined) {
+            const subtotalResult = optionalNonNegativeNumber(subtotal, 'subtotal');
+            if (!subtotalResult.ok) return badRequest(reply, subtotalResult.message);
+            subtotalValue = subtotalResult.value;
+        }
+
+        let taxAmountValue = taxAmount;
+        if (taxAmount !== undefined) {
+            const taxAmountResult = optionalNonNegativeNumber(taxAmount, 'taxAmount');
+            if (!taxAmountResult.ok) return badRequest(reply, taxAmountResult.message);
+            taxAmountValue = taxAmountResult.value;
+        }
+
+        let totalValue = total;
+        if (total !== undefined) {
+            const totalResult = optionalNonNegativeNumber(total, 'total');
+            if (!totalResult.ok) return badRequest(reply, totalResult.message);
+            totalValue = totalResult.value;
+        }
+
+        let amountPaidValue = amountPaid;
+        if (amountPaid !== undefined) {
+            const amountPaidResult = optionalNonNegativeNumber(amountPaid, 'amountPaid');
+            if (!amountPaidResult.ok) return badRequest(reply, amountPaidResult.message);
+            amountPaidValue = amountPaidResult.value;
+        }
 
         try {
             // Update invoice
@@ -201,7 +327,7 @@ export default async function (fastify, opts) {
                     notes,
                     EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                     EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
-                [clientId, clientName, invoiceNumber, issueDate, dueDate, status, subtotal, taxAmount, total, amountPaid, notes, id]
+                [clientIdValue, clientNameValue, invoiceNumberValue, issueDateValue, dueDateValue, status, subtotalValue, taxAmountValue, totalValue, amountPaidValue, notes, idResult.value]
             );
 
             if (invoiceResult.rows.length === 0) {
@@ -211,11 +337,36 @@ export default async function (fastify, opts) {
             // If items are provided, update them
             let updatedItems = [];
             if (items) {
+                if (!Array.isArray(items) || items.length === 0) {
+                    return badRequest(reply, 'Items must be a non-empty array');
+                }
+                const normalizedItems = [];
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    const descriptionResult = requireNonEmptyString(item.description, `items[${i}].description`);
+                    if (!descriptionResult.ok) return badRequest(reply, descriptionResult.message);
+                    const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
+                    if (!quantityResult.ok) return badRequest(reply, quantityResult.message);
+                    const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
+                    if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
+                    const taxRateResult = parseNonNegativeNumber(item.taxRate, `items[${i}].taxRate`);
+                    if (!taxRateResult.ok) return badRequest(reply, taxRateResult.message);
+                    const discountResult = optionalNonNegativeNumber(item.discount, `items[${i}].discount`);
+                    if (!discountResult.ok) return badRequest(reply, discountResult.message);
+                    normalizedItems.push({
+                        ...item,
+                        description: descriptionResult.value,
+                        quantity: quantityResult.value,
+                        unitPrice: unitPriceResult.value,
+                        taxRate: taxRateResult.value,
+                        discount: discountResult.value || 0
+                    });
+                }
                 // Delete existing items
-                await query('DELETE FROM invoice_items WHERE invoice_id = $1', [id]);
+                await query('DELETE FROM invoice_items WHERE invoice_id = $1', [idResult.value]);
 
                 // Insert new items
-                for (const item of items) {
+                for (const item of normalizedItems) {
                     const itemId = 'inv-item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                     const itemResult = await query(
                         `INSERT INTO invoice_items (
@@ -232,7 +383,7 @@ export default async function (fastify, opts) {
                             tax_rate as "taxRate",
                             discount`,
                         [
-                            itemId, id, item.productId || null, item.description, item.quantity,
+                            itemId, idResult.value, item.productId || null, item.description, item.quantity,
                             item.unitPrice, item.taxRate, item.discount || 0
                         ]
                     );
@@ -252,7 +403,7 @@ export default async function (fastify, opts) {
                         discount
                     FROM invoice_items
                     WHERE invoice_id = $1`,
-                    [id]
+                    [idResult.value]
                 );
                 updatedItems = itemsResult.rows;
             }
@@ -282,10 +433,12 @@ export default async function (fastify, opts) {
     // DELETE /:id - Delete invoice
     fastify.delete('/:id', async (request, reply) => {
         const { id } = request.params;
+        const idResult = requireNonEmptyString(id, 'id');
+        if (!idResult.ok) return badRequest(reply, idResult.message);
 
         // Items and payments will be deleted automatically via CASCADE
         try {
-            const result = await query('DELETE FROM invoices WHERE id = $1 RETURNING id', [id]);
+            const result = await query('DELETE FROM invoices WHERE id = $1 RETURNING id', [idResult.value]);
 
             if (result.rows.length === 0) {
                 return reply.code(404).send({ error: 'Invoice not found' });
