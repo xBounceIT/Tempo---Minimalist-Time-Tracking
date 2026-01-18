@@ -714,6 +714,17 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              onUpdateUser(user.id, { isDisabled: true });
+                            }}
+                            disabled={user.id === currentUserId}
+                            className="text-slate-400 hover:text-amber-600 hover:bg-amber-50 disabled:opacity-0 transition-colors p-2 rounded-lg"
+                            title="Disable User"
+                          >
+                            <i className="fa-solid fa-ban"></i>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
                               confirmDelete(user);
                             }}
                             disabled={user.id === currentUserId}
@@ -734,6 +745,19 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                           title="Edit User"
                         >
                           <i className="fa-solid fa-user-pen"></i>
+                        </button>
+                      )}
+                      {currentUserRole === 'manager' && user.role === 'user' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onUpdateUser(user.id, { isDisabled: true });
+                          }}
+                          disabled={user.id === currentUserId}
+                          className="text-slate-400 hover:text-amber-600 hover:bg-amber-50 disabled:opacity-0 transition-colors p-2 rounded-lg"
+                          title="Disable User"
+                        >
+                          <i className="fa-solid fa-ban"></i>
                         </button>
                       )}
                     </div>
