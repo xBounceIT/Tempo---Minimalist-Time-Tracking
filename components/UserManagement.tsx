@@ -129,6 +129,36 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
               }
             }
           }
+        } else {
+          const task = tasks.find(t => t.id === id);
+          if (newTaskIds.length === 0) {
+            newProjectIds = [];
+            newClientIds = [];
+          } else if (task) {
+            const project = projects.find(p => p.id === task.projectId);
+            if (project) {
+              const hasTaskForProject = newTaskIds.some(taskId => {
+                const remainingTask = tasks.find(t => t.id === taskId);
+                return remainingTask?.projectId === project.id;
+              });
+
+              if (!hasTaskForProject) {
+                newProjectIds = newProjectIds.filter(projectId => projectId !== project.id);
+              }
+
+              const client = clients.find(c => c.id === project.clientId);
+              if (client) {
+                const hasProjectForClient = newProjectIds.some(projectId => {
+                  const remainingProject = projects.find(p => p.id === projectId);
+                  return remainingProject?.clientId === client.id;
+                });
+
+                if (!hasProjectForClient) {
+                  newClientIds = newClientIds.filter(clientId => clientId !== client.id);
+                }
+              }
+            }
+          }
         }
       } else if (type === 'project') {
         newProjectIds = newList;
