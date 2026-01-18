@@ -900,6 +900,16 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+                                onUpdateUser(user.id, { isDisabled: false });
+                              }}
+                              className="text-slate-400 hover:text-praetor transition-colors p-2"
+                              title="Re-enable User"
+                            >
+                              <i className="fa-solid fa-rotate-left"></i>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 confirmDelete(user);
                               }}
                               disabled={user.id === currentUserId}
@@ -911,16 +921,28 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                           </>
                         )}
                         {currentUserRole === 'manager' && (user.role === 'user' || user.id === currentUserId) && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEdit(user);
-                            }}
-                            className="text-slate-400 hover:text-praetor transition-colors p-2"
-                            title="Edit User"
-                          >
-                            <i className="fa-solid fa-user-pen"></i>
-                          </button>
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(user);
+                              }}
+                              className="text-slate-400 hover:text-praetor transition-colors p-2"
+                              title="Edit User"
+                            >
+                              <i className="fa-solid fa-user-pen"></i>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUpdateUser(user.id, { isDisabled: false });
+                              }}
+                              className="text-slate-400 hover:text-praetor transition-colors p-2"
+                              title="Re-enable User"
+                            >
+                              <i className="fa-solid fa-rotate-left"></i>
+                            </button>
+                          </>
                         )}
                       </div>
                     </td>
