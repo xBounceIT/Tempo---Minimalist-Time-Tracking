@@ -38,9 +38,9 @@ export default async function (fastify, opts) {
         return projects;
     });
 
-    // POST / - Create project (admin/manager only)
+    // POST / - Create project (manager only)
     fastify.post('/', {
-        onRequest: [authenticateToken, requireRole('admin', 'manager')]
+        onRequest: [authenticateToken, requireRole('manager')]
     }, async (request, reply) => {
         const { name, clientId, description, color } = request.body;
 
@@ -80,9 +80,9 @@ export default async function (fastify, opts) {
         }
     });
 
-    // DELETE /:id - Delete project (admin/manager only)
+    // DELETE /:id - Delete project (manager only)
     fastify.delete('/:id', {
-        onRequest: [authenticateToken, requireRole('admin', 'manager')]
+        onRequest: [authenticateToken, requireRole('manager')]
     }, async (request, reply) => {
         const { id } = request.params;
         const idResult = requireNonEmptyString(id, 'id');
@@ -96,9 +96,9 @@ export default async function (fastify, opts) {
         return { message: 'Project deleted' };
     });
 
-    // PUT /:id - Update project (admin/manager only)
+    // PUT /:id - Update project (manager only)
     fastify.put('/:id', {
-        onRequest: [authenticateToken, requireRole('admin', 'manager')]
+        onRequest: [authenticateToken, requireRole('manager')]
     }, async (request, reply) => {
         const { id } = request.params;
         const { name, clientId, description, color, isDisabled } = request.body;

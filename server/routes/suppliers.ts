@@ -4,7 +4,7 @@ import { requireNonEmptyString, optionalNonEmptyString, optionalEmail, parseBool
 
 export default async function (fastify, opts) {
   fastify.addHook('onRequest', authenticateToken);
-  fastify.addHook('onRequest', requireRole('admin', 'manager'));
+  fastify.addHook('onRequest', requireRole('manager'));
 
   fastify.get('/', async () => {
     const result = await query('SELECT * FROM suppliers ORDER BY name');

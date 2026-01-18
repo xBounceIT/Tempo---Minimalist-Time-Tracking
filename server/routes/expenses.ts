@@ -3,9 +3,9 @@ import { authenticateToken, requireRole } from '../middleware/auth.ts';
 import { requireNonEmptyString, optionalNonEmptyString, parseDateString, optionalDateString, parsePositiveNumber, optionalPositiveNumber, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
-    // All expenses routes require at least manager role
+    // All expenses routes require manager role
     fastify.addHook('onRequest', authenticateToken);
-    fastify.addHook('onRequest', requireRole('admin', 'manager'));
+    fastify.addHook('onRequest', requireRole('manager'));
 
     // GET / - List all expenses
     fastify.get('/', async (request, reply) => {

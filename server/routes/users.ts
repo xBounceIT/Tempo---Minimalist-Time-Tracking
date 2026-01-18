@@ -133,6 +133,10 @@ export default async function (fastify, opts) {
             if (!costPerHourResult.ok) return badRequest(reply, costPerHourResult.message);
         }
 
+        if (request.user.role === 'admin' && costPerHour !== undefined) {
+            return reply.code(403).send({ error: 'Admins cannot update cost per hour' });
+        }
+
         // Managers can only edit users with role 'user'
         if (request.user.role === 'manager') {
             const userCheck = await query('SELECT role FROM users WHERE id = $1', [idResult.value]);

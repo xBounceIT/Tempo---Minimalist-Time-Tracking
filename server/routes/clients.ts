@@ -40,9 +40,9 @@ export default async function (fastify, opts) {
         return clients;
     });
 
-    // POST / - Create client (admin/manager only)
+    // POST / - Create client (manager only)
     fastify.post('/', {
-        onRequest: [authenticateToken, requireRole('admin', 'manager')]
+        onRequest: [authenticateToken, requireRole('manager')]
     }, async (request, reply) => {
         const {
             name, type, contactName, clientCode, email, phone,
@@ -71,9 +71,9 @@ export default async function (fastify, opts) {
         });
     });
 
-    // PUT /:id - Update client (admin/manager only)
+    // PUT /:id - Update client (manager only)
     fastify.put('/:id', {
-        onRequest: [authenticateToken, requireRole('admin', 'manager')]
+        onRequest: [authenticateToken, requireRole('manager')]
     }, async (request, reply) => {
         const { id } = request.params;
         const {
@@ -130,9 +130,9 @@ export default async function (fastify, opts) {
         };
     });
 
-    // DELETE /:id - Delete client (admin only)
+    // DELETE /:id - Delete client (manager only)
     fastify.delete('/:id', {
-        onRequest: [authenticateToken, requireRole('admin')]
+        onRequest: [authenticateToken, requireRole('manager')]
     }, async (request, reply) => {
         const { id } = request.params;
         const idResult = requireNonEmptyString(id, 'id');

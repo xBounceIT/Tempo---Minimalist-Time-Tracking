@@ -3,9 +3,9 @@ import { authenticateToken, requireRole } from '../middleware/auth.ts';
 import { requireNonEmptyString, optionalNonEmptyString, parsePositiveNumber, parseNonNegativeNumber, optionalNonNegativeNumber, badRequest } from '../utils/validation.ts';
 
 export default async function (fastify, opts) {
-    // All sales routes require at least manager role
+    // All sales routes require manager role
     fastify.addHook('onRequest', authenticateToken);
-    fastify.addHook('onRequest', requireRole('admin', 'manager'));
+    fastify.addHook('onRequest', requireRole('manager'));
 
     // GET / - List all sales with their items
     fastify.get('/', async (request, reply) => {
