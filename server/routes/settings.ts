@@ -102,25 +102,22 @@ export default async function (fastify, opts) {
         if (newPasswordResult.value.length < 8) {
             return badRequest(reply, 'New password must be at least 8 characters long');
         }
-        }
-
+        
         // Get user's current password hash
         const userRes = await query('SELECT password_hash FROM users WHERE id = $1', [request.user.id]);
-            return reply.code(404).send({ error: 'User not found' });
+        if (userRes.rows.length === 0) {
             return reply.code(404).send({ error: 'User not found' });
         }
 
         const { password_hash } = userRes.rows[0];
 
         const isMatch = await bcrypt.compare(currentPasswordResult.value, password_hash);
-        const isMatch = await bcrypt.compare(currentPassword, password_hash);
+        if (!isMatch) {
             return badRequest(reply, 'Incorrect current password');
-            return reply.code(400).send({ error: 'Incorrect current password' });
         }
 
         // Hash new password
-        const newHash = await bcrypt.hash(newPasswordResult.value, salt);
-        const newHash = await bcrypt.hash(newPassword, salt);
+        const newHash = await bcrypt.hash(newPasswordResult.value, 12);
 
         // Update password
         await query(
