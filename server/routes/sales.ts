@@ -19,6 +19,7 @@ export default async function (fastify, opts) {
                 payment_terms as "paymentTerms", 
                 discount, 
                 status, 
+                is_disabled as "isDisabled",
                 notes,
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"
@@ -98,8 +99,8 @@ export default async function (fastify, opts) {
         try {
             // Insert sale
             const saleResult = await query(
-                `INSERT INTO sales (id, linked_quote_id, client_id, client_name, payment_terms, discount, status, notes) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+                `INSERT INTO sales (id, linked_quote_id, client_id, client_name, payment_terms, discount, status, is_disabled, notes) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
              RETURNING 
                 id, 
                 linked_quote_id as "linkedQuoteId",
@@ -108,10 +109,11 @@ export default async function (fastify, opts) {
                 payment_terms as "paymentTerms", 
                 discount, 
                 status, 
+                is_disabled as "isDisabled",
                 notes,
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
-                [saleId, linkedQuoteId || null, clientIdResult.value, clientNameResult.value, paymentTerms || 'immediate', discountResult.value || 0, status || 'pending', notes]
+                [saleId, linkedQuoteId || null, clientIdResult.value, clientNameResult.value, paymentTerms || 'immediate', discountResult.value || 0, status || 'pending', false, notes]
             );
 
             // Insert sale items
@@ -147,7 +149,7 @@ export default async function (fastify, opts) {
     // PUT /:id - Update sale
     fastify.put('/:id', async (request, reply) => {
         const { id } = request.params;
-        const { clientId, clientName, items, paymentTerms, discount, status, notes } = request.body;
+        const { clientId, clientName, items, paymentTerms, discount, status, notes, isDisabled } = request.body;
         const idResult = requireNonEmptyString(id, 'id');
         if (!idResult.ok) return badRequest(reply, idResult.message);
 
@@ -182,8 +184,9 @@ export default async function (fastify, opts) {
                  discount = COALESCE($4, discount),
                  status = COALESCE($5, status),
                  notes = COALESCE($6, notes),
+                 is_disabled = COALESCE($7, is_disabled),
                  updated_at = CURRENT_TIMESTAMP
-             WHERE id = $7 
+             WHERE id = $8 
              RETURNING 
                 id, 
                 linked_quote_id as "linkedQuoteId",
@@ -192,10 +195,11 @@ export default async function (fastify, opts) {
                 payment_terms as "paymentTerms", 
                 discount, 
                 status, 
+                is_disabled as "isDisabled",
                 notes,
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"`,
-                [clientIdValue, clientNameValue, paymentTerms, discountValue, status, notes, idResult.value]
+                [clientIdValue, clientNameValue, paymentTerms, discountValue, status, notes, isDisabled, idResult.value]
             );
 
             if (saleResult.rows.length === 0) {

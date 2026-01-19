@@ -410,10 +410,13 @@ CREATE TABLE IF NOT EXISTS sales (
     payment_terms VARCHAR(20) NOT NULL DEFAULT 'immediate',
     discount DECIMAL(5, 2) NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'cancelled')),
+    is_disabled BOOLEAN DEFAULT FALSE,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS is_disabled BOOLEAN DEFAULT FALSE;
 
 CREATE INDEX IF NOT EXISTS idx_sales_client_id ON sales(client_id);
 CREATE INDEX IF NOT EXISTS idx_sales_status ON sales(status);

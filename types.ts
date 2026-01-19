@@ -167,6 +167,7 @@ export interface Sale {
   paymentTerms: 'immediate' | '15gg' | '21gg' | '30gg' | '45gg' | '60gg' | '90gg' | '120gg' | '180gg' | '240gg' | '365gg';
   discount: number;
   status: 'pending' | 'completed' | 'cancelled';
+  isDisabled?: boolean;
   notes?: string;
   createdAt: number;
   updatedAt: number;
