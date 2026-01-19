@@ -483,52 +483,54 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
 
               <div className="space-y-4">
                 <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">2. Detailed Filters</h4>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    {canFilterUsers && (
+                <div className="flex flex-col lg:flex-row lg:items-end gap-6">
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      {canFilterUsers && (
+                        <CustomSelect
+                          label="User"
+                          options={userOptions}
+                          value={filterUser}
+                          onChange={setFilterUser}
+                          searchable={true}
+                        />
+                      )}
                       <CustomSelect
-                        label="User"
-                        options={userOptions}
-                        value={filterUser}
-                        onChange={setFilterUser}
+                        label="Client"
+                        options={clientOptions}
+                        value={filterClient}
+                        onChange={handleClientChange}
                         searchable={true}
                       />
-                    )}
-                    <CustomSelect
-                      label="Client"
-                      options={clientOptions}
-                      value={filterClient}
-                      onChange={handleClientChange}
-                      searchable={true}
-                    />
-                    <CustomSelect
-                      label="Project"
-                      options={projectOptions}
-                      value={filterProject}
-                      onChange={handleProjectChange}
-                      searchable={true}
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <CustomSelect
-                      label="Task"
-                      options={taskOptions}
-                      value={filterTask}
-                      onChange={setFilterTask}
-                      searchable={true}
-                    />
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Notes Containing</label>
-                      <input
-                        type="text"
-                        value={noteSearch}
-                        onChange={e => setNoteSearch(e.target.value)}
-                        placeholder="Search notes..."
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm"
+                      <CustomSelect
+                        label="Project"
+                        options={projectOptions}
+                        value={filterProject}
+                        onChange={handleProjectChange}
+                        searchable={true}
                       />
                     </div>
+                    <div className="space-y-4">
+                      <CustomSelect
+                        label="Task"
+                        options={taskOptions}
+                        value={filterTask}
+                        onChange={setFilterTask}
+                        searchable={true}
+                      />
+                      <div>
+                        <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Notes Containing</label>
+                        <input
+                          type="text"
+                          value={noteSearch}
+                          onChange={e => setNoteSearch(e.target.value)}
+                          placeholder="Search notes..."
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="col-span-2 flex justify-end">
+                  <div className="flex justify-end lg:justify-start">
                     <button
                       type="button"
                       onClick={handleClearFilters}

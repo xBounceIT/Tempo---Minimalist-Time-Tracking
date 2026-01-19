@@ -537,7 +537,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
             </div>
 
             {/* Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="md:col-span-2 relative">
                     <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input
@@ -566,7 +566,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
                         searchable={false}
                     />
                 </div>
-                <div className="md:col-span-4 flex justify-end">
+                <div className="flex items-center justify-end">
                     <button
                         type="button"
                         onClick={handleClearFilters}

@@ -285,6 +285,55 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
     );
   };
 
+  const renderExpiredBidRow = (bid: SpecialBid) => (
+    <div
+      key={bid.id}
+      onClick={() => openEditModal(bid)}
+      className="p-6 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 active:bg-slate-100 active:scale-[0.98] transition-all flex items-center justify-between gap-4 cursor-pointer select-none"
+    >
+      <div className="flex gap-4 items-center">
+        <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center">
+          <i className="fa-solid fa-handshake"></i>
+        </div>
+        <div>
+          <h5 className="font-bold text-slate-500 line-through">{bid.clientName}</h5>
+          <div className="text-xs font-semibold text-slate-500 line-through">{bid.productName}</div>
+          <span className="text-[10px] font-black text-amber-500 uppercase">Expired</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-6">
+        <div className="text-right">
+          <div className="text-sm font-bold text-slate-500">{Number(bid.unitPrice).toFixed(2)} {currency}</div>
+          <div className="text-xs text-slate-400">
+            {new Date(bid.startDate).toLocaleDateString()} - {new Date(bid.endDate).toLocaleDateString()}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditModal(bid);
+            }}
+            className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
+            title="Edit Special Bid"
+          >
+            <i className="fa-solid fa-pen-to-square"></i>
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              confirmDelete(bid);
+            }}
+            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title="Delete Special Bid"
+          >
+            <i className="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {isModalOpen && (
@@ -492,7 +541,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
           />
         </div>
-        <div className="md:col-span-4 flex justify-end">
+        <div className="flex items-center justify-end">
           <button
             type="button"
             onClick={handleClearFilters}
@@ -594,6 +643,8 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
       <StandardTable
         title="Expired Special Bids"
         totalCount={filteredExpiredBids.length}
+        totalLabel="EXPIRED"
+        containerClassName="border-dashed bg-slate-50"
         footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
         footer={
           <>
@@ -650,30 +701,17 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
           </>
         }
       >
-        <table className="w-full text-left border-collapse">
-          <thead className="bg-slate-50 border-b border-slate-100">
-            <tr>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Product</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Price</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Validity Period</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {paginatedExpiredBids.map(renderBidRow)}
-            {filteredExpiredBids.length === 0 && (
-              <tr>
-                <td colSpan={5} className="p-12 text-center">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
-                    <i className="fa-solid fa-tags text-2xl"></i>
-                  </div>
-                  <p className="text-slate-400 text-sm font-bold">No expired special bids found.</p>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <div className="divide-y divide-slate-100">
+          {paginatedExpiredBids.map(renderExpiredBidRow)}
+          {filteredExpiredBids.length === 0 && (
+            <div className="p-12 text-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
+                <i className="fa-solid fa-tags text-2xl"></i>
+              </div>
+              <p className="text-slate-400 text-sm font-bold">No expired special bids found.</p>
+            </div>
+          )}
+        </div>
       </StandardTable>
     </div>
   );
