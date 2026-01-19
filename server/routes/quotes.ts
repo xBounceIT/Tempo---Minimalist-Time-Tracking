@@ -180,6 +180,16 @@ export default async function (fastify, opts) {
             discountValue = discountResult.value;
         }
 
+        if (status === 'quoted') {
+            const linkedSaleResult = await query(
+                'SELECT id FROM sales WHERE linked_quote_id = $1 LIMIT 1',
+                [idResult.value]
+            );
+            if (linkedSaleResult.rows.length > 0) {
+                return reply.code(409).send({ error: 'Cannot revert quote with existing sale orders' });
+            }
+        }
+
         // Update quote
         const quoteResult = await query(
             `UPDATE quotes 

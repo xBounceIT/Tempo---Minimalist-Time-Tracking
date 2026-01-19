@@ -32,6 +32,7 @@ interface QuotesViewProps {
     onDeleteQuote: (id: string) => void;
     onCreateSale?: (quote: Quote) => void;
     quoteFilterId?: string | null;
+    quoteIdsWithSales?: Set<string>;
     currency: string;
 }
 
@@ -40,7 +41,7 @@ const calcProductSalePrice = (costo: number, molPercentage: number) => {
     return costo / (1 - molPercentage / 100);
 };
 
-const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, specialBids, onAddQuote, onUpdateQuote, onDeleteQuote, onCreateSale, quoteFilterId, currency }) => {
+const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, specialBids, onAddQuote, onUpdateQuote, onDeleteQuote, onCreateSale, quoteFilterId, quoteIdsWithSales, currency }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -97,6 +98,20 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
     React.useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, filterClientId, filterStatus, filterQuoteId]);
+
+    const hasActiveFilters =
+        searchTerm.trim() !== '' ||
+        filterClientId !== 'all' ||
+        filterStatus !== 'all' ||
+        filterQuoteId !== 'all';
+
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setFilterClientId('all');
+        setFilterStatus('all');
+        setFilterQuoteId('all');
+        setCurrentPage(1);
+    };
 
     // Form State
     const [formData, setFormData] = useState<Partial<Quote>>({
@@ -782,6 +797,17 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                         buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
                     />
                 </div>
+                <div className="md:col-span-5 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        disabled={!hasActiveFilters}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <i className="fa-solid fa-rotate-left"></i>
+                        Clear filters
+                    </button>
+                </div>
             </div>
 
             <StandardTable
@@ -858,6 +884,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                         {paginatedQuotes.map(quote => {
                             const { total } = calculateTotals(quote.items, quote.discount);
                             const expired = isExpired(quote.expirationDate);
+                            const isRevertLocked = quote.status === 'confirmed' && quoteIdsWithSales?.has(quote.id);
                             return (
                                 <tr
                                     key={quote.id}
@@ -911,10 +938,12 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
+                                                    if (isRevertLocked) return;
                                                     onUpdateQuote(quote.id, { status: quote.status === 'quoted' ? 'confirmed' : 'quoted' });
                                                 }}
-                                                className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                                                title={quote.status === 'quoted' ? 'Mark as Confirmed' : 'Mark as Quoted'}
+                                                disabled={isRevertLocked}
+                                                className={`p-2 text-slate-400 rounded-lg transition-all ${isRevertLocked ? 'cursor-not-allowed opacity-50' : 'hover:text-emerald-600 hover:bg-emerald-50'}`}
+                                                title={isRevertLocked ? 'Cannot revert: linked sale order exists' : (quote.status === 'quoted' ? 'Mark as Confirmed' : 'Mark as Quoted')}
                                             >
                                                 <i className={`fa-solid ${quote.status === 'quoted' ? 'fa-check' : 'fa-rotate-left'}`}></i>
                                             </button>

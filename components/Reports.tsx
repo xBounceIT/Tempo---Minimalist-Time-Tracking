@@ -96,6 +96,16 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
   const [filterTask, setFilterTask] = useState('all');
   const [noteSearch, setNoteSearch] = useState('');
 
+  const hasActiveFilters =
+    period !== 'this_month' ||
+    startDate !== initialDates.start ||
+    endDate !== initialDates.end ||
+    filterUser !== 'all' ||
+    filterClient !== 'all' ||
+    filterProject !== 'all' ||
+    filterTask !== 'all' ||
+    noteSearch.trim() !== '';
+
   const canFilterUsers = currentUser.role === 'admin' || currentUser.role === 'manager';
   const canSeeCost = currentUser.role === 'manager'; // Only managers can see cost
 
@@ -281,6 +291,15 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
 
     setStartDate(toLocalISOString(start));
     setEndDate(toLocalISOString(end));
+  };
+
+  const handleClearFilters = () => {
+    handlePeriodChange('this_month');
+    setFilterUser('all');
+    setFilterClient('all');
+    setFilterProject('all');
+    setFilterTask('all');
+    setNoteSearch('');
   };
 
   const generateReport = () => {
@@ -508,6 +527,17 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm"
                       />
                     </div>
+                  </div>
+                  <div className="col-span-2 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      disabled={!hasActiveFilters}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <i className="fa-solid fa-rotate-left"></i>
+                      Clear filters
+                    </button>
                   </div>
                 </div>
               </div>

@@ -70,6 +70,15 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
     setExpiredPage(1);
   }, [searchTerm, filterClientId]);
 
+  const hasActiveFilters = searchTerm.trim() !== '' || filterClientId !== 'all';
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setFilterClientId('all');
+    setCurrentPage(1);
+    setExpiredPage(1);
+  };
+
   const [formData, setFormData] = useState<Partial<SpecialBid>>({
     clientId: '',
     clientName: '',
@@ -482,6 +491,17 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
             searchable={true}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
           />
+        </div>
+        <div className="md:col-span-4 flex justify-end">
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            disabled={!hasActiveFilters}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i className="fa-solid fa-rotate-left"></i>
+            Clear filters
+          </button>
         </div>
       </div>
 

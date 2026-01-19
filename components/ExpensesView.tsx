@@ -47,6 +47,14 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expenses, onAddExpense, onU
         });
     }, [expenses, searchTerm, filterCategory]);
 
+    const hasActiveFilters = searchTerm.trim() !== '' || filterCategory !== 'all';
+
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setFilterCategory('all');
+        setCurrentPage(1);
+    };
+
     // Form State
     const [formData, setFormData] = useState<Partial<Expense>>({
         description: '',
@@ -277,6 +285,17 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expenses, onAddExpense, onU
                         placeholder="Filter by Category"
                         searchable={false}
                     />
+                </div>
+                <div className="md:col-span-3 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        disabled={!hasActiveFilters}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <i className="fa-solid fa-rotate-left"></i>
+                        Clear filters
+                    </button>
                 </div>
             </div>
 

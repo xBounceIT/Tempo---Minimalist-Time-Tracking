@@ -72,6 +72,15 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
         setCurrentPage(1);
     }, [searchTerm, filterClientId, filterStatus]);
 
+    const hasActiveFilters = searchTerm.trim() !== '' || filterClientId !== 'all' || filterStatus !== 'all';
+
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setFilterClientId('all');
+        setFilterStatus('all');
+        setCurrentPage(1);
+    };
+
     // Form State
     const [formData, setFormData] = useState<Partial<Invoice>>({
         clientId: '',
@@ -556,6 +565,17 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
                         placeholder="Filter by Status"
                         searchable={false}
                     />
+                </div>
+                <div className="md:col-span-4 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        disabled={!hasActiveFilters}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <i className="fa-solid fa-rotate-left"></i>
+                        Clear filters
+                    </button>
                 </div>
             </div>
 

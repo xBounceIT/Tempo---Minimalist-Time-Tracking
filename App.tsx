@@ -475,6 +475,16 @@ const App: React.FC = () => {
   });
   const [quoteFilterId, setQuoteFilterId] = useState<string | null>(null);
 
+  const quoteIdsWithSales = useMemo(() => {
+    const ids = new Set<string>();
+    sales.forEach(sale => {
+      if (sale.linkedQuoteId) {
+        ids.add(sale.linkedQuoteId);
+      }
+    });
+    return ids;
+  }, [sales]);
+
   const isRouteAccessible = useMemo(() => {
     if (!currentUser) return false;
     if (activeView === '404') return false;
@@ -1622,6 +1632,7 @@ const App: React.FC = () => {
                 onDeleteQuote={handleDeleteQuote}
                 onCreateSale={handleCreateSaleFromQuote}
                 quoteFilterId={quoteFilterId}
+                quoteIdsWithSales={quoteIdsWithSales}
                 currency={generalSettings.currency}
               />
             )}

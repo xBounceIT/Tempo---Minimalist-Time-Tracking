@@ -142,6 +142,14 @@ const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, e
         }
     };
 
+    const hasActiveFilters = timePeriod !== '6' || !!customRange.start || !!customRange.end;
+
+    const handleClearFilters = () => {
+        setTimePeriod('6');
+        setCustomRange({ start: null, end: null });
+        setIsRangeModalOpen(false);
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row md:items-end gap-4">
@@ -149,7 +157,7 @@ const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, e
                     <h2 className="text-2xl font-black text-slate-800">Financial Reports</h2>
                     <p className="text-slate-500 text-sm">Overview of your business performance</p>
                 </div>
-                <div className="w-full md:w-fit flex-shrink-0">
+                <div className="w-full md:w-fit flex-shrink-0 flex flex-col md:flex-row md:items-center gap-2">
                     <CustomSelect
                         options={timeFrameOptions}
                         value={timePeriod}
@@ -157,6 +165,15 @@ const FinancialReportsView: React.FC<FinancialReportsViewProps> = ({ invoices, e
                         dropdownPosition="bottom"
                         displayValue={displayValue}
                     />
+                    <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        disabled={!hasActiveFilters}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <i className="fa-solid fa-rotate-left"></i>
+                        Clear filters
+                    </button>
                 </div>
             </div>
 

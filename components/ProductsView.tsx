@@ -24,12 +24,24 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
         const saved = localStorage.getItem('praetor_products_rowsPerPage');
         return saved ? parseInt(saved, 10) : 5;
     });
+    const [disabledCurrentPage, setDisabledCurrentPage] = useState(1);
+    const [disabledRowsPerPage, setDisabledRowsPerPage] = useState(() => {
+        const saved = localStorage.getItem('praetor_products_disabled_rowsPerPage');
+        return saved ? parseInt(saved, 10) : 5;
+    });
 
     const handleRowsPerPageChange = (val: string) => {
         const value = parseInt(val, 10);
         setRowsPerPage(value);
         localStorage.setItem('praetor_products_rowsPerPage', value.toString());
         setCurrentPage(1); // Reset to first page
+    };
+
+    const handleDisabledRowsPerPageChange = (val: string) => {
+        const value = parseInt(val, 10);
+        setDisabledRowsPerPage(value);
+        localStorage.setItem('praetor_products_disabled_rowsPerPage', value.toString());
+        setDisabledCurrentPage(1);
     };
 
     // Category Management State
@@ -160,6 +172,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
     const totalPages = Math.ceil(activeProductsTotal.length / rowsPerPage);
     const startIndex = (currentPage - 1) * rowsPerPage;
     const activeProducts = activeProductsTotal.slice(startIndex, startIndex + rowsPerPage);
+    const disabledTotalPages = Math.ceil(disabledProducts.length / disabledRowsPerPage);
+    const disabledStartIndex = (disabledCurrentPage - 1) * disabledRowsPerPage;
+    const disabledProductsPage = disabledProducts.slice(disabledStartIndex, disabledStartIndex + disabledRowsPerPage);
 
     // Get unique categories from existing products + custom ones
     const existingCategories = Array.from(new Set(products.map(p => p.category).filter((c): c is string => !!c)));
@@ -676,13 +691,69 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
 
             {
                 disabledProducts.length > 0 && (
-                    <div className="bg-slate-50 rounded-3xl border border-slate-200 shadow-sm overflow-hidden border-dashed">
-                        <div className="px-8 py-4 bg-slate-100/50 border-b border-slate-200 flex justify-between items-center">
-                            <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Disabled Products</h4>
-                            <span className="bg-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black">{disabledProducts.length} DISABLED</span>
-                        </div>
+                    <StandardTable
+                        title="Disabled Products"
+                        totalCount={disabledProducts.length}
+                        totalLabel="DISABLED"
+                        containerClassName="border-dashed bg-slate-50"
+                        footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
+                        footer={
+                            <>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+                                    <CustomSelect
+                                        options={[
+                                            { id: '5', name: '5' },
+                                            { id: '10', name: '10' },
+                                            { id: '20', name: '20' },
+                                            { id: '50', name: '50' }
+                                        ]}
+                                        value={disabledRowsPerPage.toString()}
+                                        onChange={(val) => handleDisabledRowsPerPageChange(val)}
+                                        className="w-20"
+                                        buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
+                                        searchable={false}
+                                    />
+                                    <span className="text-xs font-bold text-slate-400 ml-2">
+                                        Showing {disabledProductsPage.length > 0 ? disabledStartIndex + 1 : 0}-{Math.min(disabledStartIndex + disabledRowsPerPage, disabledProducts.length)} of {disabledProducts.length}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setDisabledCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={disabledCurrentPage === 1}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                                    >
+                                        <i className="fa-solid fa-chevron-left text-xs"></i>
+                                    </button>
+                                    <div className="flex items-center gap-1">
+                                        {Array.from({ length: disabledTotalPages }, (_, i) => i + 1).map(page => (
+                                            <button
+                                                key={page}
+                                                onClick={() => setDisabledCurrentPage(page)}
+                                                className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${disabledCurrentPage === page
+                                                    ? 'bg-praetor text-white shadow-md shadow-slate-200'
+                                                    : 'text-slate-500 hover:bg-slate-100'
+                                                    }`}
+                                            >
+                                                {page}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={() => setDisabledCurrentPage(prev => Math.min(disabledTotalPages, prev + 1))}
+                                        disabled={disabledCurrentPage === disabledTotalPages || disabledTotalPages === 0}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                                    >
+                                        <i className="fa-solid fa-chevron-right text-xs"></i>
+                                    </button>
+                                </div>
+                            </>
+                        }
+                    >
                         <div className="divide-y divide-slate-100">
-                            {disabledProducts.map(p => (
+                            {disabledProductsPage.map(p => (
                                 <div key={p.id} onClick={() => openEditModal(p)} className="p-6 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all flex items-center justify-between gap-4 cursor-pointer">
                                     <div className="flex gap-4 items-center">
                                         <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center">
@@ -716,7 +787,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </StandardTable>
                 )
             }
         </div >

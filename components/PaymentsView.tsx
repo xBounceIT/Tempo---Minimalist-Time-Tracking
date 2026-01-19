@@ -48,6 +48,14 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ payments, clients, invoices
         });
     }, [payments, searchTerm, filterClientId]);
 
+    const hasActiveFilters = searchTerm.trim() !== '' || filterClientId !== 'all';
+
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setFilterClientId('all');
+        setCurrentPage(1);
+    };
+
     const activeClients = clients.filter(c => !c.isDisabled);
     const activeInvoices = invoices.filter(i => i.status !== 'cancelled');
 
@@ -311,6 +319,17 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ payments, clients, invoices
                         placeholder="Filter by Client"
                         searchable={true}
                     />
+                </div>
+                <div className="md:col-span-3 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        disabled={!hasActiveFilters}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <i className="fa-solid fa-rotate-left"></i>
+                        Clear filters
+                    </button>
                 </div>
             </div>
 

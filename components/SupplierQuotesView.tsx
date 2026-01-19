@@ -83,6 +83,16 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
     setCurrentPage(1);
   }, [searchTerm, filterSupplierId, filterStatus]);
 
+  const hasActiveFilters =
+    searchTerm.trim() !== '' || filterSupplierId !== 'all' || filterStatus !== 'all';
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setFilterSupplierId('all');
+    setFilterStatus('all');
+    setCurrentPage(1);
+  };
+
   const [formData, setFormData] = useState<Partial<SupplierQuote>>({
     supplierId: '',
     supplierName: '',
@@ -639,6 +649,17 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
             searchable={false}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
           />
+        </div>
+        <div className="md:col-span-4 flex justify-end">
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            disabled={!hasActiveFilters}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i className="fa-solid fa-rotate-left"></i>
+            Clear filters
+          </button>
         </div>
       </div>
 
