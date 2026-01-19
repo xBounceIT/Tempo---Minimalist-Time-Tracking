@@ -41,8 +41,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
     // Form State
     const [formData, setFormData] = useState<Partial<Product>>({
         name: '',
-        costo: 0,
-        molPercentage: 0,
+        costo: undefined,
+        molPercentage: undefined,
         costUnit: 'unit',
         category: '',
         taxRate: 0,
@@ -63,8 +63,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
         setEditingProduct(null);
         setFormData({
             name: '',
-            costo: 0,
-            molPercentage: 0,
+            costo: undefined,
+            molPercentage: undefined,
             costUnit: 'unit',
             category: '',
             taxRate: 0,
@@ -97,6 +97,12 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
 
         const newErrors: Record<string, string> = {};
         if (!formData.name?.trim()) newErrors.name = 'Product name is required';
+        if (formData.costo === undefined || formData.costo === null || Number.isNaN(formData.costo)) {
+            newErrors.costo = 'Costo is required';
+        }
+        if (formData.molPercentage === undefined || formData.molPercentage === null || Number.isNaN(formData.molPercentage)) {
+            newErrors.molPercentage = 'MOL % is required';
+        }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -175,6 +181,14 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
             costUnit: unit
         });
     };
+
+    const hasPricing =
+        formData.costo !== undefined &&
+        formData.costo !== null &&
+        !Number.isNaN(formData.costo) &&
+        formData.molPercentage !== undefined &&
+        formData.molPercentage !== null &&
+        !Number.isNaN(formData.molPercentage);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -354,10 +368,18 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                                 type="number"
                                                 step="0.01"
                                                 value={formData.costo ?? ''}
-                                                onChange={(e) => setFormData({ ...formData, costo: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                                                className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all min-w-0"
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setFormData({
+                                                        ...formData,
+                                                        costo: value === '' ? undefined : parseFloat(value)
+                                                    });
+                                                    if (errors.costo) setErrors({ ...errors, costo: '' });
+                                                }}
+                                                className={`flex-1 text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all min-w-0 ${errors.costo ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
                                             />
                                         </div>
+                                        {errors.costo && <p className="text-red-500 text-[10px] font-bold ml-1 mt-1">{errors.costo}</p>}
                                     </div>
 
                                     <div className="space-y-1.5">
@@ -369,23 +391,31 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                                 min="0"
                                                 max="99.99"
                                                 value={formData.molPercentage ?? ''}
-                                                onChange={(e) => setFormData({ ...formData, molPercentage: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                                                className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all min-w-0"
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setFormData({
+                                                        ...formData,
+                                                        molPercentage: value === '' ? undefined : parseFloat(value)
+                                                    });
+                                                    if (errors.molPercentage) setErrors({ ...errors, molPercentage: '' });
+                                                }}
+                                                className={`flex-1 text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all min-w-0 ${errors.molPercentage ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
                                             />
                                         </div>
+                                        {errors.molPercentage && <p className="text-red-500 text-[10px] font-bold ml-1 mt-1">{errors.molPercentage}</p>}
                                     </div>
 
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 ml-1">Sale Price (calculated)</label>
                                         <div className="w-full text-sm px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold">
-                                            {calcSalePrice(formData.costo || 0, formData.molPercentage || 0).toFixed(2)}
+                                            {hasPricing ? calcSalePrice(formData.costo!, formData.molPercentage!).toFixed(2) : '--'}
                                         </div>
                                     </div>
 
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 ml-1">Margine (calculated)</label>
                                         <div className="w-full text-sm px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-emerald-600 font-semibold">
-                                            {calcMargine(formData.costo || 0, formData.molPercentage || 0).toFixed(2)}
+                                            {hasPricing ? calcMargine(formData.costo!, formData.molPercentage!).toFixed(2) : '--'}
                                         </div>
                                     </div>
                                 </div>

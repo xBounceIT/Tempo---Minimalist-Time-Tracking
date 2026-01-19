@@ -8,7 +8,13 @@ const PAYMENT_TERMS_OPTIONS = [
   { id: '15gg', name: '15 days' },
   { id: '21gg', name: '21 days' },
   { id: '30gg', name: '30 days' },
-  { id: '45gg', name: '45 days' }
+  { id: '45gg', name: '45 days' },
+  { id: '60gg', name: '60 days' },
+  { id: '90gg', name: '90 days' },
+  { id: '120gg', name: '120 days' },
+  { id: '180gg', name: '180 days' },
+  { id: '240gg', name: '240 days' },
+  { id: '365gg', name: '365 days' }
 ];
 
 const STATUS_OPTIONS = [
@@ -258,7 +264,12 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedQuotes = filteredQuotes.slice(startIndex, startIndex + rowsPerPage);
 
-  const isExpired = (expirationDate: string) => new Date(expirationDate) < new Date();
+  const isExpired = (expirationDate: string) => {
+    const normalizedDate = expirationDate.includes('T') ? expirationDate : `${expirationDate}T00:00:00`;
+    const expiry = new Date(normalizedDate);
+    expiry.setDate(expiry.getDate() + 1);
+    return new Date() >= expiry;
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">

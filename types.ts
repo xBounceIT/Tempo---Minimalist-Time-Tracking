@@ -138,7 +138,7 @@ export interface Quote {
   clientId: string;
   clientName: string;
   items: QuoteItem[];
-  paymentTerms: 'immediate' | '15gg' | '21gg' | '30gg' | '45gg';
+  paymentTerms: 'immediate' | '15gg' | '21gg' | '30gg' | '45gg' | '60gg' | '90gg' | '120gg' | '180gg' | '240gg' | '365gg';
   discount: number; // global discount percentage
   status: 'quoted' | 'confirmed';
   expirationDate: string; // ISO date string
@@ -163,7 +163,7 @@ export interface Sale {
   clientId: string;
   clientName: string;
   items: SaleItem[];
-  paymentTerms: 'immediate' | '15gg' | '21gg' | '30gg' | '45gg';
+  paymentTerms: 'immediate' | '15gg' | '21gg' | '30gg' | '45gg' | '60gg' | '90gg' | '120gg' | '180gg' | '240gg' | '365gg';
   discount: number;
   status: 'pending' | 'completed' | 'cancelled';
   notes?: string;
@@ -300,7 +300,7 @@ export interface SupplierQuote {
   supplierName: string;
   purchaseOrderNumber: string;
   items: SupplierQuoteItem[];
-  paymentTerms: 'immediate' | '15gg' | '21gg' | '30gg' | '45gg';
+  paymentTerms: 'immediate' | '15gg' | '21gg' | '30gg' | '45gg' | '60gg' | '90gg' | '120gg' | '180gg' | '240gg' | '365gg';
   discount: number;
   status: 'received' | 'approved' | 'rejected';
   expirationDate: string;

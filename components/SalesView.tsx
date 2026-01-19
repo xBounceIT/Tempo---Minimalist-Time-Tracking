@@ -9,6 +9,12 @@ const PAYMENT_TERMS_OPTIONS = [
     { id: '21gg', name: '21 days' },
     { id: '30gg', name: '30 days' },
     { id: '45gg', name: '45 days' },
+    { id: '60gg', name: '60 days' },
+    { id: '90gg', name: '90 days' },
+    { id: '120gg', name: '120 days' },
+    { id: '180gg', name: '180 days' },
+    { id: '240gg', name: '240 days' },
+    { id: '365gg', name: '365 days' },
 ];
 
 const STATUS_OPTIONS = [

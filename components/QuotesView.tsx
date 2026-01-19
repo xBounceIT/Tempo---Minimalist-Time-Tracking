@@ -9,6 +9,12 @@ const PAYMENT_TERMS_OPTIONS = [
     { id: '21gg', name: '21 days' },
     { id: '30gg', name: '30 days' },
     { id: '45gg', name: '45 days' },
+    { id: '60gg', name: '60 days' },
+    { id: '90gg', name: '90 days' },
+    { id: '120gg', name: '120 days' },
+    { id: '180gg', name: '180 days' },
+    { id: '240gg', name: '240 days' },
+    { id: '365gg', name: '365 days' },
 ];
 
 const STATUS_OPTIONS = [
@@ -165,10 +171,40 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
 
     const handleClientChange = (clientId: string) => {
         const client = clients.find(c => c.id === clientId);
-        setFormData({
-            ...formData,
-            clientId,
-            clientName: client?.name || '',
+        setFormData(prev => {
+            const updatedItems = (prev.items || []).map(item => {
+                if (!item.productId) {
+                    if (item.specialBidId) {
+                        return { ...item, specialBidId: '' };
+                    }
+                    return item;
+                }
+
+                const product = products.find(p => p.id === item.productId);
+                if (!product) {
+                    return { ...item, specialBidId: '' };
+                }
+
+                const applicableBid = activeSpecialBids.find(b =>
+                    b.clientId === clientId &&
+                    b.productId === item.productId
+                );
+                const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+                const cost = applicableBid ? Number(applicableBid.unitPrice) : Number(product.costo);
+
+                return {
+                    ...item,
+                    specialBidId: applicableBid ? applicableBid.id : '',
+                    unitPrice: calcProductSalePrice(cost, mol)
+                };
+            });
+
+            return {
+                ...prev,
+                clientId,
+                clientName: client?.name || '',
+                items: updatedItems
+            };
         });
         if (errors.clientId) {
             setErrors(prev => {
@@ -238,11 +274,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
         }
 
         if (field === 'specialBidId') {
-            const product = activeProducts.find(p => p.id === newItems[index].productId);
-
             if (!value) {
                 newItems[index].specialBidId = '';
                 // Revert to standard product cost
+                const product = products.find(p => p.id === newItems[index].productId);
                 if (product) {
                     const mol = product.molPercentage ? Number(product.molPercentage) : 0;
                     newItems[index].unitPrice = calcProductSalePrice(Number(product.costo), mol);
@@ -252,10 +287,15 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
             }
 
             const bid = specialBids.find(b => b.id === value);
-            if (bid && product) {
-                // Bid selected: Use bid price as COST
-                const mol = product.molPercentage ? Number(product.molPercentage) : 0;
-                newItems[index].unitPrice = calcProductSalePrice(Number(bid.unitPrice), mol);
+            if (bid) {
+                const product = products.find(p => p.id === bid.productId);
+                if (product) {
+                    newItems[index].productId = bid.productId;
+                    newItems[index].productName = product.name;
+                    // Bid selected: Use bid price as COST
+                    const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+                    newItems[index].unitPrice = calcProductSalePrice(Number(bid.unitPrice), mol);
+                }
             }
         }
 
@@ -310,6 +350,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
         if (!startDate || !endDate) return true;
         return now >= startDate && now <= endDate;
     });
+    const clientSpecialBids = formData.clientId
+        ? activeSpecialBids.filter(b => b.clientId === formData.clientId)
+        : activeSpecialBids;
 
     const getBidDisplayValue = (bidId?: string) => {
         if (!bidId) return 'No Special Bid';
@@ -325,7 +368,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
 
     // Check if quote is expired
     const isExpired = (expirationDate: string) => {
-        return new Date(expirationDate) < new Date();
+        const normalizedDate = expirationDate.includes('T') ? expirationDate : `${expirationDate}T00:00:00`;
+        const expiry = new Date(normalizedDate);
+        expiry.setDate(expiry.getDate() + 1);
+        return new Date() >= expiry;
     };
 
     return (
@@ -399,8 +445,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Qty</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Cost</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Mol %</div>
-                                            <div className="col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Sale Price</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Margin</div>
+                                            <div className="col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Sale Price</div>
                                         </div>
                                         <div className="w-10 flex-shrink-0"></div>
                                     </div>
@@ -425,7 +471,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                                 <CustomSelect
                                                                     options={[
                                                                         { id: 'none', name: 'No Special Bid' },
-                                                                        ...activeSpecialBids.map(b => ({ id: b.id, name: `${b.clientName} · ${b.productName}` }))
+                                                                        ...clientSpecialBids.map(b => ({ id: b.id, name: `${b.clientName} · ${b.productName}` }))
                                                                     ]}
                                                                     value={item.specialBidId || 'none'}
                                                                     onChange={(val) => updateProductRow(index, 'specialBidId', val === 'none' ? '' : val)}
@@ -468,13 +514,13 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                             <div className="col-span-1 flex items-center justify-center">
                                                                 <span className="text-xs font-bold text-slate-600">{molPercentage.toFixed(1)}%</span>
                                                             </div>
+                                                            <div className="col-span-1 flex items-center justify-center">
+                                                                <span className="text-xs font-bold text-emerald-600">{margin.toFixed(2)}</span>
+                                                            </div>
                                                             <div className="col-span-2 flex items-center justify-center">
                                                                 <span className={`text-sm font-semibold ${selectedBid ? 'text-praetor' : 'text-slate-800'}`}>
                                                                     {Number(item.unitPrice).toFixed(2)}
                                                                 </span>
-                                                            </div>
-                                                            <div className="col-span-1 flex items-center justify-center">
-                                                                <span className="text-xs font-bold text-emerald-600">{margin.toFixed(2)}</span>
                                                             </div>
                                                         </div>
                                                         <button
@@ -513,7 +559,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                                     Quote Details
                                 </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 ml-1">Payment Terms</label>
                                         <CustomSelect
@@ -534,16 +580,6 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                             value={formData.discount}
                                             onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) || 0 })}
                                             className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none font-semibold"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Status</label>
-                                        <CustomSelect
-                                            options={STATUS_OPTIONS}
-                                            value={formData.status || 'quoted'}
-                                            onChange={(val) => setFormData({ ...formData, status: val as any })}
-                                            searchable={false}
                                         />
                                     </div>
 

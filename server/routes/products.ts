@@ -25,10 +25,16 @@ export default async function (fastify, opts) {
         const nameResult = requireNonEmptyString(name, 'name');
         if (!nameResult.ok) return badRequest(reply, nameResult.message);
 
-        const costoResult = optionalNonNegativeNumber(costo, 'costo');
+        if (costo === undefined || costo === null || costo === '') {
+            return badRequest(reply, 'costo is required');
+        }
+        const costoResult = parseNonNegativeNumber(costo, 'costo');
         if (!costoResult.ok) return badRequest(reply, costoResult.message);
 
-        const molPercentageResult = optionalNonNegativeNumber(molPercentage, 'molPercentage');
+        if (molPercentage === undefined || molPercentage === null || molPercentage === '') {
+            return badRequest(reply, 'molPercentage is required');
+        }
+        const molPercentageResult = parseNonNegativeNumber(molPercentage, 'molPercentage');
         if (!molPercentageResult.ok) return badRequest(reply, molPercentageResult.message);
 
         const taxRateResult = optionalNonNegativeNumber(taxRate, 'taxRate');
@@ -39,7 +45,7 @@ export default async function (fastify, opts) {
             `INSERT INTO products (id, name, costo, mol_percentage, cost_unit, category, tax_rate, type, supplier_id) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
              RETURNING id, name, costo, mol_percentage as "molPercentage", cost_unit as "costUnit", category, tax_rate as "taxRate", type, supplier_id as "supplierId"`,
-            [id, nameResult.value, costoResult.value || 0, molPercentageResult.value || 0, costUnit || 'unit', category, taxRateResult.value || 0, type || 'item', supplierId || null]
+            [id, nameResult.value, costoResult.value, molPercentageResult.value, costUnit || 'unit', category, taxRateResult.value || 0, type || 'item', supplierId || null]
         );
         
         // If supplier was assigned, fetch supplier name
