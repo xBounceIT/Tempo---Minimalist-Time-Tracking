@@ -425,11 +425,14 @@ CREATE TABLE IF NOT EXISTS sale_items (
     sale_id VARCHAR(50) NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
     product_id VARCHAR(50) NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
     product_name VARCHAR(255) NOT NULL,
+    special_bid_id VARCHAR(50),
     quantity DECIMAL(10, 2) NOT NULL DEFAULT 1,
     unit_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
     discount DECIMAL(5, 2) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE sale_items ADD COLUMN IF NOT EXISTS special_bid_id VARCHAR(50);
 
 CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id ON sale_items(sale_id);
 

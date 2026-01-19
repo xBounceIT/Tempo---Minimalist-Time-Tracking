@@ -1153,6 +1153,7 @@ const App: React.FC = () => {
         items: quote.items.map(item => ({
           productId: item.productId,
           productName: item.productName,
+          specialBidId: item.specialBidId,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           discount: item.discount,
@@ -1630,6 +1631,7 @@ const App: React.FC = () => {
                 sales={sales}
                 clients={clients}
                 products={products}
+                specialBids={specialBids}
                 onAddSale={addSale}
                 onUpdateSale={handleUpdateSale}
                 onDeleteSale={handleDeleteSale}

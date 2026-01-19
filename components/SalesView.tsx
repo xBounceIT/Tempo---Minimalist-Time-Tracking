@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Sale, SaleItem, Client, Product } from '../types';
+import { Sale, SaleItem, Client, Product, SpecialBid } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
 
@@ -27,6 +27,7 @@ interface SalesViewProps {
     sales: Sale[];
     clients: Client[];
     products: Product[];
+    specialBids: SpecialBid[];
     onAddSale: (saleData: Partial<Sale>) => void;
     onUpdateSale: (id: string, updates: Partial<Sale>) => void;
     onDeleteSale: (id: string) => void;
@@ -39,7 +40,7 @@ const calcProductSalePrice = (costo: number, molPercentage: number) => {
     return costo / (1 - molPercentage / 100);
 };
 
-const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSale, onUpdateSale, onDeleteSale, onViewQuote, currency }) => {
+const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, specialBids, onAddSale, onUpdateSale, onDeleteSale, onViewQuote, currency }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSale, setEditingSale] = useState<Sale | null>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -167,10 +168,40 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
 
     const handleClientChange = (clientId: string) => {
         const client = clients.find(c => c.id === clientId);
-        setFormData({
-            ...formData,
-            clientId,
-            clientName: client?.name || '',
+        setFormData(prev => {
+            const updatedItems = (prev.items || []).map(item => {
+                if (!item.productId) {
+                    if (item.specialBidId) {
+                        return { ...item, specialBidId: '' };
+                    }
+                    return item;
+                }
+
+                const product = products.find(p => p.id === item.productId);
+                if (!product) {
+                    return { ...item, specialBidId: '' };
+                }
+
+                const applicableBid = activeSpecialBids.find(b =>
+                    b.clientId === clientId &&
+                    b.productId === item.productId
+                );
+                const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+                const cost = applicableBid ? Number(applicableBid.unitPrice) : Number(product.costo);
+
+                return {
+                    ...item,
+                    specialBidId: applicableBid ? applicableBid.id : '',
+                    unitPrice: calcProductSalePrice(cost, mol)
+                };
+            });
+
+            return {
+                ...prev,
+                clientId,
+                clientName: client?.name || '',
+                items: updatedItems
+            };
         });
         if (errors.clientId) {
             setErrors(prev => {
@@ -186,6 +217,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
             id: 'temp-' + Date.now(),
             productId: '',
             productName: '',
+            specialBidId: '',
             quantity: 1,
             unitPrice: 0,
             discount: 0,
@@ -215,12 +247,47 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
 
         // Auto-fill price when product is selected
         if (field === 'productId') {
-            const product = products.find(p => p.id === value);
+            const product = activeProducts.find(p => p.id === value);
             if (product) {
                 newItems[index].productName = product.name;
-                const cost = Number(product.costo || 0);
-                const mol = Number(product.molPercentage || 0);
-                newItems[index].unitPrice = calcProductSalePrice(cost, mol);
+                const applicableBid = activeSpecialBids.find(b =>
+                    b.clientId === formData.clientId &&
+                    b.productId === value
+                );
+
+                const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+
+                if (applicableBid) {
+                    newItems[index].specialBidId = applicableBid.id;
+                    newItems[index].unitPrice = calcProductSalePrice(Number(applicableBid.unitPrice), mol);
+                } else {
+                    newItems[index].specialBidId = '';
+                    newItems[index].unitPrice = calcProductSalePrice(Number(product.costo), mol);
+                }
+            }
+        }
+
+        if (field === 'specialBidId') {
+            if (!value) {
+                newItems[index].specialBidId = '';
+                const product = products.find(p => p.id === newItems[index].productId);
+                if (product) {
+                    const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+                    newItems[index].unitPrice = calcProductSalePrice(Number(product.costo), mol);
+                }
+                setFormData({ ...formData, items: newItems });
+                return;
+            }
+
+            const bid = specialBids.find(b => b.id === value);
+            if (bid) {
+                const product = products.find(p => p.id === bid.productId);
+                if (product) {
+                    newItems[index].productId = bid.productId;
+                    newItems[index].productName = product.name;
+                    const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+                    newItems[index].unitPrice = calcProductSalePrice(Number(bid.unitPrice), mol);
+                }
             }
         }
 
@@ -247,7 +314,9 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                 const lineNetAfterGlobal = lineNet * (1 - globalDiscount / 100);
                 const taxAmount = lineNetAfterGlobal * (taxRate / 100);
                 taxGroups[taxRate] = (taxGroups[taxRate] || 0) + taxAmount;
-                totalCost += item.quantity * product.costo;
+                const bid = specialBids.find(b => b.id === item.specialBidId);
+                const cost = bid ? Number(bid.unitPrice) : product.costo;
+                totalCost += item.quantity * cost;
             }
         });
 
@@ -263,6 +332,22 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
 
     const activeClients = clients.filter(c => !c.isDisabled);
     const activeProducts = products.filter(p => !p.isDisabled);
+    const activeSpecialBids = specialBids.filter(b => {
+        const now = new Date();
+        const startDate = b.startDate ? new Date(b.startDate) : null;
+        const endDate = b.endDate ? new Date(b.endDate) : null;
+        if (!startDate || !endDate) return true;
+        return now >= startDate && now <= endDate;
+    });
+    const clientSpecialBids = formData.clientId
+        ? activeSpecialBids.filter(b => b.clientId === formData.clientId)
+        : activeSpecialBids;
+
+    const getBidDisplayValue = (bidId?: string) => {
+        if (!bidId) return 'No Special Bid';
+        const bid = activeSpecialBids.find(b => b.id === bidId) || specialBids.find(b => b.id === bidId);
+        return bid ? `${bid.clientName} · ${bid.productName}` : 'No Special Bid';
+    };
 
     // Pagination Logic
     const totalPages = Math.ceil(filteredSales.length / rowsPerPage);
@@ -359,7 +444,8 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                 {formData.items && formData.items.length > 0 && (
                                     <div className="flex gap-3 px-3 mb-1 items-center">
                                         <div className="flex-1 grid grid-cols-12 gap-3">
-                                            <div className="col-span-6 text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Product / Service</div>
+                                            <div className="col-span-3 text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Special Bid</div>
+                                            <div className="col-span-3 text-[10px] font-black text-slate-400 uppercase tracking-wider">Product / Service</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Qty</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Cost</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Mol %</div>
@@ -374,7 +460,8 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                     <div className="space-y-3">
                                         {formData.items.map((item, index) => {
                                             const selectedProduct = activeProducts.find(p => p.id === item.productId);
-                                            const cost = selectedProduct ? Number(selectedProduct.costo) : 0;
+                                            const selectedBid = item.specialBidId ? specialBids.find(b => b.id === item.specialBidId) : undefined;
+                                            const cost = selectedBid ? Number(selectedBid.unitPrice) : (selectedProduct ? Number(selectedProduct.costo) : 0);
                                             const molPercentage = selectedProduct ? Number(selectedProduct.molPercentage) : 0;
                                             const salePrice = Number(item.unitPrice || 0);
                                             const margin = salePrice - cost;
@@ -383,7 +470,21 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                 <div key={item.id} className="bg-slate-50 p-3 rounded-xl">
                                                     <div className="flex gap-3 items-center">
                                                         <div className="flex-1 grid grid-cols-12 gap-3 items-center">
-                                                            <div className="col-span-6">
+                                                            <div className="col-span-3">
+                                                                <CustomSelect
+                                                                    options={[
+                                                                        { id: 'none', name: 'No Special Bid' },
+                                                                        ...clientSpecialBids.map(b => ({ id: b.id, name: `${b.clientName} · ${b.productName}` }))
+                                                                    ]}
+                                                                    value={item.specialBidId || 'none'}
+                                                                    onChange={(val) => updateProductRow(index, 'specialBidId', val === 'none' ? '' : val)}
+                                                                    placeholder="Select bid..."
+                                                                    displayValue={getBidDisplayValue(item.specialBidId)}
+                                                                    searchable={true}
+                                                                    buttonClassName="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm"
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-3">
                                                                 <CustomSelect
                                                                     options={activeProducts.map(p => ({ id: p.id, name: p.name }))}
                                                                     value={item.productId}
@@ -406,7 +507,12 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                                 />
                                                             </div>
                                                             <div className="col-span-1 flex items-center justify-center">
-                                                                <span className="text-xs font-bold text-slate-600">{cost.toFixed(2)}</span>
+                                                                <div className="relative">
+                                                                    <span className="text-xs font-bold text-slate-600">{cost.toFixed(2)}</span>
+                                                                    {selectedBid && (
+                                                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] font-black text-praetor uppercase tracking-wider bg-slate-50/50 px-1 whitespace-nowrap">Bid</div>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                             <div className="col-span-1 flex items-center justify-center">
                                                                 <span className="text-xs font-bold text-slate-600">{molPercentage.toFixed(1)}%</span>
@@ -415,7 +521,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                                                 <span className="text-xs font-bold text-emerald-600">{margin.toFixed(2)}</span>
                                                             </div>
                                                             <div className="col-span-2 flex items-center justify-center">
-                                                                <span className="text-sm font-semibold text-slate-800">
+                                                                <span className={`text-sm font-semibold ${selectedBid ? 'text-praetor' : 'text-slate-800'}`}>
                                                                     {salePrice.toFixed(2)}
                                                                 </span>
                                                             </div>
@@ -445,7 +551,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, onAddSa
                                     <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                                     Sale Details
                                 </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 ml-1">Payment Terms</label>
                                         <CustomSelect

@@ -152,6 +152,7 @@ export interface SaleItem {
   saleId: string;
   productId: string;
   productName: string;
+  specialBidId?: string;
   quantity: number;
   unitPrice: number;
   discount?: number;

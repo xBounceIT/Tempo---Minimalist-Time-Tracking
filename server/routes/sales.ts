@@ -33,6 +33,7 @@ export default async function (fastify, opts) {
                 sale_id as "saleId",
                 product_id as "productId",
                 product_name as "productName",
+                special_bid_id as "specialBidId",
                 quantity,
                 unit_price as "unitPrice",
                 discount
@@ -118,17 +119,18 @@ export default async function (fastify, opts) {
             for (const item of normalizedItems) {
                 const itemId = 'si-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 const itemResult = await query(
-                    `INSERT INTO sale_items (id, sale_id, product_id, product_name, quantity, unit_price, discount) 
-                 VALUES ($1, $2, $3, $4, $5, $6, $7) 
+                    `INSERT INTO sale_items (id, sale_id, product_id, product_name, special_bid_id, quantity, unit_price, discount) 
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
                  RETURNING 
                     id,
                     sale_id as "saleId",
                     product_id as "productId",
                     product_name as "productName",
+                    special_bid_id as "specialBidId",
                     quantity,
                     unit_price as "unitPrice",
                     discount`,
-                    [itemId, saleId, item.productId, item.productName, item.quantity, item.unitPrice, item.discount || 0]
+                    [itemId, saleId, item.productId, item.productName, item.specialBidId || null, item.quantity, item.unitPrice, item.discount || 0]
                 );
                 createdItems.push(itemResult.rows[0]);
             }
@@ -229,17 +231,18 @@ export default async function (fastify, opts) {
                 for (const item of normalizedItems) {
                     const itemId = 'si-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                     const itemResult = await query(
-                        `INSERT INTO sale_items (id, sale_id, product_id, product_name, quantity, unit_price, discount) 
-                     VALUES ($1, $2, $3, $4, $5, $6, $7) 
+                        `INSERT INTO sale_items (id, sale_id, product_id, product_name, special_bid_id, quantity, unit_price, discount) 
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
                      RETURNING 
                         id,
                         sale_id as "saleId",
                         product_id as "productId",
                         product_name as "productName",
+                        special_bid_id as "specialBidId",
                         quantity,
                         unit_price as "unitPrice",
                         discount`,
-                        [itemId, idResult.value, item.productId, item.productName, item.quantity, item.unitPrice, item.discount || 0]
+                        [itemId, idResult.value, item.productId, item.productName, item.specialBidId || null, item.quantity, item.unitPrice, item.discount || 0]
                     );
                     updatedItems.push(itemResult.rows[0]);
                 }
@@ -251,6 +254,7 @@ export default async function (fastify, opts) {
                     sale_id as "saleId",
                     product_id as "productId",
                     product_name as "productName",
+                    special_bid_id as "specialBidId",
                     quantity,
                     unit_price as "unitPrice",
                     discount
