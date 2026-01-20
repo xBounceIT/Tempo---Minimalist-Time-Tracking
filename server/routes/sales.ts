@@ -174,7 +174,166 @@ export default async function (fastify, opts) {
             discountValue = discountResult.value;
         }
 
+        const normalizeNotesValue = (value: string | null | undefined) => (value ?? '').toString();
+        const normalizeSpecialBidId = (value: string | null | undefined) => (value ? value.toString() : '');
+        const normalizeItemsForUpdate = (itemsToNormalize: any[]) => {
+            if (!Array.isArray(itemsToNormalize) || itemsToNormalize.length === 0) {
+                badRequest(reply, 'Items must be a non-empty array');
+                return null;
+            }
+
+            const normalizedItems = [];
+            for (let i = 0; i < itemsToNormalize.length; i++) {
+                const item = itemsToNormalize[i];
+                const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
+                if (!productNameResult.ok) {
+                    badRequest(reply, productNameResult.message);
+                    return null;
+                }
+                const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
+                if (!quantityResult.ok) {
+                    badRequest(reply, quantityResult.message);
+                    return null;
+                }
+                const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
+                if (!unitPriceResult.ok) {
+                    badRequest(reply, unitPriceResult.message);
+                    return null;
+                }
+                normalizedItems.push({
+                    ...item,
+                    productName: productNameResult.value,
+                    quantity: quantityResult.value,
+                    unitPrice: unitPriceResult.value
+                });
+            }
+
+            return normalizedItems;
+        };
+
+        const normalizeItemsForComparison = (itemsToNormalize: any[]) => {
+            return itemsToNormalize
+                .map(item => {
+                    const normalized = {
+                        id: item.id ? item.id.toString() : '',
+                        productId: item.productId ? item.productId.toString() : '',
+                        productName: item.productName ? item.productName.toString() : '',
+                        specialBidId: normalizeSpecialBidId(item.specialBidId),
+                        quantity: Number(item.quantity),
+                        unitPrice: Number(item.unitPrice),
+                        discount: item.discount !== undefined && item.discount !== null ? Number(item.discount) : 0
+                    };
+                    const sortKey = normalized.id || `${normalized.productId}|${normalized.productName}|${normalized.specialBidId}|${normalized.quantity}|${normalized.unitPrice}|${normalized.discount}`;
+                    return { ...normalized, sortKey };
+                })
+                .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+        };
+
+        const itemsMatch = (leftItems: any[], rightItems: any[]) => {
+            if (leftItems.length !== rightItems.length) {
+                return false;
+            }
+            for (let i = 0; i < leftItems.length; i++) {
+                const leftItem = leftItems[i];
+                const rightItem = rightItems[i];
+                if (
+                    leftItem.id !== rightItem.id ||
+                    leftItem.productId !== rightItem.productId ||
+                    leftItem.productName !== rightItem.productName ||
+                    leftItem.specialBidId !== rightItem.specialBidId ||
+                    leftItem.quantity !== rightItem.quantity ||
+                    leftItem.unitPrice !== rightItem.unitPrice ||
+                    leftItem.discount !== rightItem.discount
+                ) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        let normalizedItems: any[] | null = null;
+        if (items !== undefined) {
+            normalizedItems = normalizeItemsForUpdate(items);
+            if (!normalizedItems) return;
+        }
+
         try {
+            const existingSaleResult = await query(
+                `SELECT 
+                    id,
+                    linked_quote_id as "linkedQuoteId",
+                    client_id as "clientId",
+                    client_name as "clientName",
+                    payment_terms as "paymentTerms",
+                    discount,
+                    notes
+                FROM sales
+                WHERE id = $1`,
+                [idResult.value]
+            );
+
+            if (existingSaleResult.rows.length === 0) {
+                return reply.code(404).send({ error: 'Sale not found' });
+            }
+
+            const existingSale = existingSaleResult.rows[0];
+            let existingItems: any[] | null = null;
+
+            if (existingSale.linkedQuoteId) {
+                const lockedFields: string[] = [];
+
+                if (clientIdValue !== undefined && clientIdValue !== null && clientIdValue !== existingSale.clientId) {
+                    lockedFields.push('clientId');
+                }
+
+                if (clientNameValue !== undefined && clientNameValue !== null && clientNameValue !== existingSale.clientName) {
+                    lockedFields.push('clientName');
+                }
+
+                if (paymentTerms !== undefined && paymentTerms !== null && paymentTerms !== existingSale.paymentTerms) {
+                    lockedFields.push('paymentTerms');
+                }
+
+                if (discountValue !== undefined && discountValue !== null && Number(discountValue) !== Number(existingSale.discount)) {
+                    lockedFields.push('discount');
+                }
+
+                if (notes !== undefined && normalizeNotesValue(notes) !== normalizeNotesValue(existingSale.notes)) {
+                    lockedFields.push('notes');
+                }
+
+                if (items !== undefined) {
+                    const itemsResult = await query(
+                        `SELECT 
+                            id,
+                            sale_id as "saleId",
+                            product_id as "productId",
+                            product_name as "productName",
+                            special_bid_id as "specialBidId",
+                            quantity,
+                            unit_price as "unitPrice",
+                            discount
+                        FROM sale_items
+                        WHERE sale_id = $1`,
+                        [idResult.value]
+                    );
+                    existingItems = itemsResult.rows;
+
+                    const normalizedExistingItems = normalizeItemsForComparison(existingItems);
+                    const normalizedIncomingItems = normalizeItemsForComparison(normalizedItems ?? []);
+                    if (!itemsMatch(normalizedExistingItems, normalizedIncomingItems)) {
+                        lockedFields.push('items');
+                    }
+                }
+
+                if (lockedFields.length > 0) {
+                    return reply.code(409).send({
+                        error: 'Quote-linked sale details are read-only',
+                        fields: lockedFields
+                    });
+                }
+            }
+
             // Update sale
             const saleResult = await query(
                 `UPDATE sales 
@@ -208,26 +367,28 @@ export default async function (fastify, opts) {
 
             // If items are provided, update them
             let updatedItems = [];
-            if (items) {
-                if (!Array.isArray(items) || items.length === 0) {
-                    return badRequest(reply, 'Items must be a non-empty array');
+            if (existingSale.linkedQuoteId) {
+                if (existingItems) {
+                    updatedItems = existingItems;
+                } else {
+                    const itemsResult = await query(
+                        `SELECT 
+                        id,
+                        sale_id as "saleId",
+                        product_id as "productId",
+                        product_name as "productName",
+                        special_bid_id as "specialBidId",
+                        quantity,
+                        unit_price as "unitPrice",
+                        discount
+                    FROM sale_items
+                    WHERE sale_id = $1`,
+                        [idResult.value]
+                    );
+                    updatedItems = itemsResult.rows;
                 }
-                const normalizedItems = [];
-                for (let i = 0; i < items.length; i++) {
-                    const item = items[i];
-                    const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
-                    if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
-                    const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
-                    if (!quantityResult.ok) return badRequest(reply, quantityResult.message);
-                    const unitPriceResult = parseNonNegativeNumber(item.unitPrice, `items[${i}].unitPrice`);
-                    if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
-                    normalizedItems.push({
-                        ...item,
-                        productName: productNameResult.value,
-                        quantity: quantityResult.value,
-                        unitPrice: unitPriceResult.value
-                    });
-                }
+            } else if (items !== undefined) {
+                if (!normalizedItems) return;
                 // Delete existing items
                 await query('DELETE FROM sale_items WHERE sale_id = $1', [idResult.value]);
 

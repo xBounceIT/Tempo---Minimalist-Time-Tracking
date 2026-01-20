@@ -180,6 +180,22 @@ export default async function (fastify, opts) {
         const idResult = requireNonEmptyString(id, 'id');
         if (!idResult.ok) return badRequest(reply, idResult.message);
 
+        const currentStatusResult = await query('SELECT status FROM quotes WHERE id = $1', [idResult.value]);
+        if (currentStatusResult.rows.length === 0) {
+            return reply.code(404).send({ error: 'Quote not found' });
+        }
+        const currentStatus = currentStatusResult.rows[0].status;
+        const hasNonStatusUpdates = clientId !== undefined
+            || clientName !== undefined
+            || items !== undefined
+            || paymentTerms !== undefined
+            || discount !== undefined
+            || expirationDate !== undefined
+            || notes !== undefined;
+        if (currentStatus === 'confirmed' && hasNonStatusUpdates) {
+            return reply.code(409).send({ error: 'Confirmed quotes are read-only' });
+        }
+
         let clientIdValue = clientId;
         if (clientId !== undefined) {
             const clientIdResult = optionalNonEmptyString(clientId, 'clientId');

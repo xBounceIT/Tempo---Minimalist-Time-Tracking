@@ -128,6 +128,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
         expirationDate: new Date().toISOString().split('T')[0],
         notes: '',
     });
+    const isReadOnly = Boolean(editingQuote && editingQuote.status === 'confirmed');
 
     const openAddModal = () => {
         setEditingQuote(null);
@@ -165,6 +166,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isReadOnly) {
+            return;
+        }
 
         const newErrors: Record<string, string> = {};
 
@@ -209,6 +214,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
     };
 
     const handleClientChange = (clientId: string) => {
+        if (isReadOnly) return;
         const client = clients.find(c => c.id === clientId);
         setFormData(prev => {
             const updatedItems = (prev.items || []).map(item => {
@@ -255,6 +261,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
     };
 
     const addProductRow = () => {
+        if (isReadOnly) return;
         const newItem: Partial<QuoteItem> = {
             id: 'temp-' + Date.now(),
             productId: '',
@@ -278,12 +285,14 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
     };
 
     const removeProductRow = (index: number) => {
+        if (isReadOnly) return;
         const newItems = [...(formData.items || [])];
         newItems.splice(index, 1);
         setFormData({ ...formData, items: newItems });
     };
 
     const updateProductRow = (index: number, field: keyof QuoteItem, value: any) => {
+        if (isReadOnly) return;
         const newItems = [...(formData.items || [])];
         newItems[index] = { ...newItems[index], [field]: value };
 
@@ -527,7 +536,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                 <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-praetor">
                                     <i className={`fa-solid ${editingQuote ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
                                 </div>
-                                {editingQuote ? 'Edit Quote' : 'Create New Quote'}
+                                {isReadOnly ? 'View Quote' : (editingQuote ? 'Edit Quote' : 'Create New Quote')}
                             </h3>
                             <button
                                 onClick={() => setIsModalOpen(false)}
@@ -538,6 +547,11 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                         </div>
 
                         <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
+                            {isReadOnly && (
+                                <div className="px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-xs font-bold">
+                                    Confirmed quotes are read-only.
+                                </div>
+                            )}
                             {/* Client Selection */}
                             <div className="space-y-4">
                                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
@@ -552,6 +566,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                         onChange={handleClientChange}
                                         placeholder="Select a client..."
                                         searchable={true}
+                                        disabled={isReadOnly}
                                         className={errors.clientId ? 'border-red-300' : ''}
                                     />
                                     {errors.clientId && (
@@ -570,7 +585,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     <button
                                         type="button"
                                         onClick={addProductRow}
-                                        className="text-xs font-bold text-praetor hover:text-slate-700 flex items-center gap-1"
+                                        disabled={isReadOnly}
+                                        className="text-xs font-bold text-praetor hover:text-slate-700 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <i className="fa-solid fa-plus"></i> Add Product
                                     </button>
@@ -620,6 +636,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                                     placeholder="Select bid..."
                                                                     displayValue={getBidDisplayValue(item.specialBidId)}
                                                                     searchable={true}
+                                                                    disabled={isReadOnly}
                                                                     buttonClassName="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm"
                                                                 />
                                                             </div>
@@ -630,6 +647,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                                     onChange={(val) => updateProductRow(index, 'productId', val)}
                                                                     placeholder="Select product..."
                                                                     searchable={true}
+                                                                    disabled={isReadOnly}
                                                                     buttonClassName="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm"
                                                                 />
                                                             </div>
@@ -642,7 +660,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                                     placeholder="Qty"
                                                                     value={item.quantity}
                                                                     onChange={(e) => updateProductRow(index, 'quantity', parseFloat(e.target.value) || 0)}
-                                                                    className="w-full text-sm px-2 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-center"
+                                                                    disabled={isReadOnly}
+                                                                    className="w-full text-sm px-2 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-center disabled:opacity-50 disabled:cursor-not-allowed"
                                                                 />
                                                             </div>
                                                             <div className="col-span-1 flex flex-col items-center justify-center">
@@ -666,7 +685,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                         <button
                                                             type="button"
                                                             onClick={() => removeProductRow(index)}
-                                                            className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all flex-shrink-0"
+                                                            disabled={isReadOnly}
+                                                            className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             <i className="fa-solid fa-trash-can"></i>
                                                         </button>
@@ -677,7 +697,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                             placeholder="Note for this item..."
                                                             value={item.note || ''}
                                                             onChange={(e) => updateProductRow(index, 'note', e.target.value)}
-                                                            className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none"
+                                                            disabled={isReadOnly}
+                                                            className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                                                         />
                                                     </div>
                                                 </div>
@@ -707,6 +728,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                             value={formData.paymentTerms || 'immediate'}
                                             onChange={(val) => setFormData({ ...formData, paymentTerms: val as any })}
                                             searchable={false}
+                                            disabled={isReadOnly}
                                         />
                                     </div>
 
@@ -719,7 +741,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                             max="100"
                                             value={formData.discount}
                                             onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) || 0 })}
-                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none font-semibold"
+                                            disabled={isReadOnly}
+                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
 
@@ -730,7 +753,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                             required
                                             value={formData.expirationDate}
                                             onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
-                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
+                                            disabled={isReadOnly}
+                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
 
@@ -741,7 +765,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                             value={formData.notes}
                                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                             placeholder="Additional notes or terms..."
-                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all resize-none"
+                                            disabled={isReadOnly}
+                                            className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
                                 </div>
@@ -809,9 +834,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-10 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
+                                    disabled={isReadOnly}
+                                    className="px-10 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {editingQuote ? 'Update Quote' : 'Create Quote'}
+                                    {isReadOnly ? 'Confirmed Quote' : (editingQuote ? 'Update Quote' : 'Create Quote')}
                                 </button>
                             </div>
                         </form>
