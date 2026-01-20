@@ -1048,12 +1048,12 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Terms</th>
-                            <th className="px-8 py-4">
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 <button
                                     type="button"
                                     onClick={toggleExpirationSort}
                                     title={expirationSortTitle}
-                                    className="w-full h-full inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600"
+                                    className="w-full inline-flex items-center gap-1 leading-normal hover:text-slate-600"
                                 >
                                     Expiration
                                     {expirationSortIndicator && <span className="text-[10px]">{expirationSortIndicator}</span>}
@@ -1147,12 +1147,12 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Terms</th>
-                            <th className="px-8 py-4">
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 <button
                                     type="button"
                                     onClick={toggleExpirationSort}
                                     title={expirationSortTitle}
-                                    className="w-full h-full inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600"
+                                    className="w-full inline-flex items-center gap-1 leading-normal hover:text-slate-600"
                                 >
                                     Expiration
                                     {expirationSortIndicator && <span className="text-[10px]">{expirationSortIndicator}</span>}
