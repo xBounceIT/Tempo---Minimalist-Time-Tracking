@@ -174,6 +174,12 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
 
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'At least one product is required';
+        } else {
+            // Check that all items have a product selected
+            const invalidItem = formData.items.find(item => !item.productId);
+            if (invalidItem) {
+                newErrors.items = 'Please select a product for all items';
+            }
         }
 
         if (Object.keys(newErrors).length > 0) {

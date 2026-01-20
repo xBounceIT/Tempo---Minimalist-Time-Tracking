@@ -86,6 +86,8 @@ export default async function (fastify, opts) {
         const normalizedItems = [];
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
+            const productIdResult = requireNonEmptyString(item.productId, `items[${i}].productId`);
+            if (!productIdResult.ok) return badRequest(reply, productIdResult.message);
             const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
             if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
             const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
@@ -94,6 +96,7 @@ export default async function (fastify, opts) {
             if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
             normalizedItems.push({
                 ...item,
+                productId: productIdResult.value,
                 productName: productNameResult.value,
                 quantity: quantityResult.value,
                 unitPrice: unitPriceResult.value
@@ -239,6 +242,8 @@ export default async function (fastify, opts) {
             const normalizedItems = [];
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
+                const productIdResult = requireNonEmptyString(item.productId, `items[${i}].productId`);
+                if (!productIdResult.ok) return badRequest(reply, productIdResult.message);
                 const productNameResult = requireNonEmptyString(item.productName, `items[${i}].productName`);
                 if (!productNameResult.ok) return badRequest(reply, productNameResult.message);
                 const quantityResult = parsePositiveNumber(item.quantity, `items[${i}].quantity`);
@@ -247,6 +252,7 @@ export default async function (fastify, opts) {
                 if (!unitPriceResult.ok) return badRequest(reply, unitPriceResult.message);
                 normalizedItems.push({
                     ...item,
+                    productId: productIdResult.value,
                     productName: productNameResult.value,
                     quantity: quantityResult.value,
                     unitPrice: unitPriceResult.value
