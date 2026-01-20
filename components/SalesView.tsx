@@ -20,7 +20,7 @@ const PAYMENT_TERMS_OPTIONS = [
 const STATUS_OPTIONS = [
     { id: 'pending', name: 'Pending' },
     { id: 'completed', name: 'Completed' },
-    { id: 'cancelled', name: 'Cancelled' },
+    { id: 'cancelled', name: 'Denied' },
 ];
 
 interface SalesViewProps {
@@ -40,6 +40,18 @@ const calcProductSalePrice = (costo: number, molPercentage: number) => {
     return costo / (1 - molPercentage / 100);
 };
 
+const getSaleStatusLabel = (status: Sale['status']) => {
+    if (status === 'completed') return 'Completed';
+    if (status === 'cancelled') return 'Denied';
+    return 'Pending';
+};
+
+const getSaleStatusBadgeClass = (status: Sale['status']) => {
+    if (status === 'completed') return 'bg-emerald-100 text-emerald-700';
+    if (status === 'cancelled') return 'bg-red-100 text-red-700';
+    return 'bg-amber-100 text-amber-700';
+};
+
 const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, specialBids, onAddSale, onUpdateSale, onDeleteSale, onViewQuote, currency }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSale, setEditingSale] = useState<Sale | null>(null);
@@ -53,9 +65,9 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
         const saved = localStorage.getItem('praetor_sales_rowsPerPage');
         return saved ? parseInt(saved, 10) : 5;
     });
-    const [disabledCurrentPage, setDisabledCurrentPage] = useState(1);
-    const [disabledRowsPerPage, setDisabledRowsPerPage] = useState(() => {
-        const saved = localStorage.getItem('praetor_sales_disabled_rowsPerPage');
+    const [historyCurrentPage, setHistoryCurrentPage] = useState(1);
+    const [historyRowsPerPage, setHistoryRowsPerPage] = useState(() => {
+        const saved = localStorage.getItem('praetor_sales_history_rowsPerPage');
         return saved ? parseInt(saved, 10) : 5;
     });
 
@@ -66,11 +78,11 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
         setCurrentPage(1); // Reset to first page
     };
 
-    const handleDisabledRowsPerPageChange = (val: string) => {
+    const handleHistoryRowsPerPageChange = (val: string) => {
         const value = parseInt(val, 10);
-        setDisabledRowsPerPage(value);
-        localStorage.setItem('praetor_sales_disabled_rowsPerPage', value.toString());
-        setDisabledCurrentPage(1);
+        setHistoryRowsPerPage(value);
+        localStorage.setItem('praetor_sales_history_rowsPerPage', value.toString());
+        setHistoryCurrentPage(1);
     };
 
     // Filter State
@@ -78,12 +90,9 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
     const [filterClientId, setFilterClientId] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
 
-    const activeSales = useMemo(() => sales.filter(sale => !sale.isDisabled), [sales]);
-    const disabledSales = useMemo(() => sales.filter(sale => sale.isDisabled), [sales]);
-
     // Filter Logic
     const filteredSales = useMemo(() => {
-        return activeSales.filter(sale => {
+        return sales.filter(sale => {
             const matchesSearch = searchTerm === '' ||
                 sale.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 sale.items.some(item => item.productName.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -93,11 +102,15 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
 
             return matchesSearch && matchesClient && matchesStatus;
         });
-    }, [activeSales, searchTerm, filterClientId, filterStatus]);
+    }, [sales, searchTerm, filterClientId, filterStatus]);
+
+    const activeSales = useMemo(() => filteredSales.filter(sale => sale.status === 'pending'), [filteredSales]);
+    const historySales = useMemo(() => filteredSales.filter(sale => sale.status !== 'pending'), [filteredSales]);
 
     // Reset page on filter change
     React.useEffect(() => {
         setCurrentPage(1);
+        setHistoryCurrentPage(1);
     }, [searchTerm, filterClientId, filterStatus]);
 
     const hasActiveFilters = searchTerm.trim() !== '' || filterClientId !== 'all' || filterStatus !== 'all';
@@ -107,6 +120,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
         setFilterClientId('all');
         setFilterStatus('all');
         setCurrentPage(1);
+        setHistoryCurrentPage(1);
     };
 
     // Form State
@@ -376,12 +390,12 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
     const isLinkedQuote = Boolean(formData.linkedQuoteId);
 
     // Pagination Logic
-    const totalPages = Math.ceil(filteredSales.length / rowsPerPage);
+    const totalPages = Math.ceil(activeSales.length / rowsPerPage);
     const startIndex = (currentPage - 1) * rowsPerPage;
-    const paginatedSales = filteredSales.slice(startIndex, startIndex + rowsPerPage);
-    const disabledTotalPages = Math.ceil(disabledSales.length / disabledRowsPerPage);
-    const disabledStartIndex = (disabledCurrentPage - 1) * disabledRowsPerPage;
-    const disabledSalesPage = disabledSales.slice(disabledStartIndex, disabledStartIndex + disabledRowsPerPage);
+    const paginatedSales = activeSales.slice(startIndex, startIndex + rowsPerPage);
+    const historyTotalPages = Math.ceil(historySales.length / historyRowsPerPage);
+    const historyStartIndex = (historyCurrentPage - 1) * historyRowsPerPage;
+    const historySalesPage = historySales.slice(historyStartIndex, historyStartIndex + historyRowsPerPage);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -806,7 +820,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
 
             <StandardTable
                 title="Active Sales"
-                totalCount={filteredSales.length}
+                totalCount={activeSales.length}
                 containerClassName="overflow-visible"
                 footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
                 footer={
@@ -827,7 +841,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                                 searchable={false}
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                Showing {paginatedSales.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, filteredSales.length)} of {filteredSales.length}
+                                Showing {paginatedSales.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, activeSales.length)} of {activeSales.length}
                             </span>
                         </div>
 
@@ -888,13 +902,8 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                                         </div>
                                     </td>
                                     <td className="px-8 py-5">
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black ${sale.status === 'completed'
-                                            ? 'bg-emerald-100 text-emerald-700'
-                                            : sale.status === 'cancelled'
-                                                ? 'bg-red-100 text-red-700'
-                                                : 'bg-amber-100 text-amber-700'
-                                            }`}>
-                                            {sale.status.toUpperCase()}
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black ${getSaleStatusBadgeClass(sale.status)}`}>
+                                            {getSaleStatusLabel(sale.status).toUpperCase()}
                                         </span>
                                     </td>
                                     <td className="px-8 py-5 text-sm font-bold text-slate-700">
@@ -930,12 +939,22 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    onUpdateSale(sale.id, { isDisabled: true });
+                                                    onUpdateSale(sale.id, { status: 'completed' });
                                                 }}
-                                                className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
-                                                title="Disable Sale"
+                                                className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                                title="Complete Sale"
                                             >
-                                                <i className="fa-solid fa-ban"></i>
+                                                <i className="fa-solid fa-check"></i>
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onUpdateSale(sale.id, { status: 'cancelled' });
+                                                }}
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                title="Deny Sale"
+                                            >
+                                                <i className="fa-solid fa-xmark"></i>
                                             </button>
                                             <button
                                                 onClick={(e) => {
@@ -952,7 +971,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                                 </tr>
                             );
                         })}
-                        {filteredSales.length === 0 && (
+                        {activeSales.length === 0 && (
                             <tr>
                                 <td colSpan={5} className="p-12 text-center">
                                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
@@ -967,11 +986,11 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                 </table>
             </StandardTable>
 
-            {disabledSales.length > 0 && (
+            {historySales.length > 0 && (
                 <StandardTable
-                    title="Disabled Sales"
-                    totalCount={disabledSales.length}
-                    totalLabel="DISABLED"
+                    title="Sales History"
+                    totalCount={historySales.length}
+                    totalLabel="HISTORY"
                     containerClassName="border-dashed bg-slate-50"
                     footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
                     footer={
@@ -985,31 +1004,31 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                                         { id: '20', name: '20' },
                                         { id: '50', name: '50' }
                                     ]}
-                                    value={disabledRowsPerPage.toString()}
-                                    onChange={(val) => handleDisabledRowsPerPageChange(val)}
+                                    value={historyRowsPerPage.toString()}
+                                    onChange={(val) => handleHistoryRowsPerPageChange(val)}
                                     className="w-20"
                                     buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                                     searchable={false}
                                 />
                                 <span className="text-xs font-bold text-slate-400 ml-2">
-                                    Showing {disabledSalesPage.length > 0 ? disabledStartIndex + 1 : 0}-{Math.min(disabledStartIndex + disabledRowsPerPage, disabledSales.length)} of {disabledSales.length}
+                                    Showing {historySalesPage.length > 0 ? historyStartIndex + 1 : 0}-{Math.min(historyStartIndex + historyRowsPerPage, historySales.length)} of {historySales.length}
                                 </span>
                             </div>
 
                             <div className="flex items-center gap-2">
                                 <button
-                                    onClick={() => setDisabledCurrentPage(prev => Math.max(1, prev - 1))}
-                                    disabled={disabledCurrentPage === 1}
+                                    onClick={() => setHistoryCurrentPage(prev => Math.max(1, prev - 1))}
+                                    disabled={historyCurrentPage === 1}
                                     className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
                                 >
                                     <i className="fa-solid fa-chevron-left text-xs"></i>
                                 </button>
                                 <div className="flex items-center gap-1">
-                                    {Array.from({ length: disabledTotalPages }, (_, i) => i + 1).map(page => (
+                                    {Array.from({ length: historyTotalPages }, (_, i) => i + 1).map(page => (
                                         <button
                                             key={page}
-                                            onClick={() => setDisabledCurrentPage(page)}
-                                            className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${disabledCurrentPage === page
+                                            onClick={() => setHistoryCurrentPage(page)}
+                                            className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${historyCurrentPage === page
                                                 ? 'bg-praetor text-white shadow-md shadow-slate-200'
                                                 : 'text-slate-500 hover:bg-slate-100'
                                                 }`}
@@ -1019,8 +1038,8 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                                     ))}
                                 </div>
                                 <button
-                                    onClick={() => setDisabledCurrentPage(prev => Math.min(disabledTotalPages, prev + 1))}
-                                    disabled={disabledCurrentPage === disabledTotalPages || disabledTotalPages === 0}
+                                    onClick={() => setHistoryCurrentPage(prev => Math.min(historyTotalPages, prev + 1))}
+                                    disabled={historyCurrentPage === historyTotalPages || historyTotalPages === 0}
                                     className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
                                 >
                                     <i className="fa-solid fa-chevron-right text-xs"></i>
@@ -1030,40 +1049,32 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                     }
                 >
                     <div className="divide-y divide-slate-100">
-                        {disabledSalesPage.map(sale => {
+                        {historySalesPage.map(sale => {
                             const { total } = calculateTotals(sale.items, sale.discount);
                             return (
                                 <div
                                     key={sale.id}
                                     onClick={() => openEditModal(sale)}
-                                    className="p-6 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 active:bg-slate-100 active:scale-[0.98] transition-all flex items-center justify-between gap-4 cursor-pointer select-none"
+                                    className="p-6 hover:bg-slate-50/80 active:bg-slate-100 active:scale-[0.98] transition-all flex items-center justify-between gap-4 cursor-pointer select-none"
                                 >
                                     <div className="flex gap-4 items-center">
-                                        <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center">
+                                        <div className="w-10 h-10 bg-white text-praetor rounded-xl flex items-center justify-center border border-slate-200">
                                             <i className="fa-solid fa-cart-shopping"></i>
                                         </div>
                                         <div>
-                                            <h5 className="font-bold text-slate-500 line-through">{sale.clientName}</h5>
+                                            <h5 className="font-bold text-slate-700">{sale.clientName}</h5>
                                             <div className="text-[10px] font-black text-slate-400 uppercase">{sale.items.length} item{sale.items.length !== 1 ? 's' : ''}</div>
-                                            <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${getSaleStatusBadgeClass(sale.status)}`}>
+                                                {getSaleStatusLabel(sale.status)}
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-6">
                                         <div className="text-right">
-                                            <div className="text-sm font-bold text-slate-500">{total.toFixed(2)} {currency}</div>
-                                            <div className="text-[10px] font-black text-slate-400 uppercase">{sale.status}</div>
+                                            <div className="text-sm font-bold text-slate-700">{total.toFixed(2)} {currency}</div>
+                                            <div className="text-[10px] font-black text-slate-400 uppercase">{getSaleStatusLabel(sale.status)}</div>
                                         </div>
                                         <div className="flex gap-2">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onUpdateSale(sale.id, { isDisabled: false });
-                                                }}
-                                                className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
-                                                title="Enable Sale"
-                                            >
-                                                <i className="fa-solid fa-rotate-left"></i>
-                                            </button>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
