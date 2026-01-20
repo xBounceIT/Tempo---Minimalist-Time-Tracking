@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Client, Product, SpecialBid } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
+import ValidatedNumberInput from './ValidatedNumberInput';
 import Calendar from './Calendar';
 
 interface SpecialBidsViewProps {
@@ -395,15 +396,14 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 ml-1">Special Price ({currency})</label>
-                    <input
-                      type="number"
+                    <ValidatedNumberInput
                       step="0.01"
                       min="0"
                       required
                       value={formData.unitPrice ?? ''}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setFormData({ ...formData, unitPrice: value === '' ? 0 : parseFloat(value) });
+                      onValueChange={(value) => {
+                        const parsed = parseFloat(value);
+                        setFormData({ ...formData, unitPrice: value === '' || Number.isNaN(parsed) ? 0 : parsed });
                         if (errors.unitPrice) {
                           setErrors(prev => {
                             const next = { ...prev };

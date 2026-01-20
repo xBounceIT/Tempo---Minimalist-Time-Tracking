@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GeneralSettings as IGeneralSettings } from '../types';
 import CustomSelect, { Option } from './CustomSelect';
+import ValidatedNumberInput from './ValidatedNumberInput';
 
 interface GeneralSettingsProps {
     settings: IGeneralSettings;
@@ -153,11 +154,13 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate })
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Daily Hour Limit</label>
                                     <div className="flex items-center gap-3">
-                                        <input
-                                            type="number"
+                                        <ValidatedNumberInput
                                             step="0.5"
                                             value={dailyLimit}
-                                            onChange={e => setDailyLimit(parseFloat(e.target.value))}
+                                            onValueChange={(value) => {
+                                                const parsed = parseFloat(value);
+                                                setDailyLimit(value === '' || Number.isNaN(parsed) ? 0 : parsed);
+                                            }}
                                             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none transition-all text-sm font-bold"
                                         />
                                         <span className="text-xs font-bold text-slate-400 uppercase whitespace-nowrap">hrs / day</span>

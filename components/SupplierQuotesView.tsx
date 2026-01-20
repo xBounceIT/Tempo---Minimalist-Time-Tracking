@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { SupplierQuote, SupplierQuoteItem, Supplier, Product } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
+import ValidatedNumberInput from './ValidatedNumberInput';
 
 const PAYMENT_TERMS_OPTIONS = [
   { id: 'immediate', name: 'Immediate' },
@@ -414,38 +415,44 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                             />
                           </div>
                           <div className="col-span-6 md:col-span-2">
-                            <input
-                              type="number"
+                            <ValidatedNumberInput
                               step="0.01"
                               min="0"
                               required
                               placeholder="Qty"
                               value={item.quantity}
-                              onChange={(e) => updateProductRow(index, 'quantity', parseFloat(e.target.value) || 0)}
+                              onValueChange={(value) => {
+                                const parsed = parseFloat(value);
+                                updateProductRow(index, 'quantity', value === '' || Number.isNaN(parsed) ? 0 : parsed);
+                              }}
                               className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none"
                             />
                           </div>
                           <div className="col-span-6 md:col-span-2">
-                            <input
-                              type="number"
+                            <ValidatedNumberInput
                               step="0.01"
                               min="0"
                               required
                               placeholder="Unit"
                               value={item.unitPrice}
-                              onChange={(e) => updateProductRow(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                              onValueChange={(value) => {
+                                const parsed = parseFloat(value);
+                                updateProductRow(index, 'unitPrice', value === '' || Number.isNaN(parsed) ? 0 : parsed);
+                              }}
                               className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none font-semibold"
                             />
                           </div>
                           <div className="col-span-6 md:col-span-2">
-                            <input
-                              type="number"
+                            <ValidatedNumberInput
                               step="0.01"
                               min="0"
                               max="100"
                               placeholder="%"
                               value={item.discount}
-                              onChange={(e) => updateProductRow(index, 'discount', parseFloat(e.target.value) || 0)}
+                              onValueChange={(value) => {
+                                const parsed = parseFloat(value);
+                                updateProductRow(index, 'discount', value === '' || Number.isNaN(parsed) ? 0 : parsed);
+                              }}
                               className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none"
                             />
                           </div>
@@ -493,13 +500,15 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 ml-1">Global Discount (%)</label>
-                    <input
-                      type="number"
+                    <ValidatedNumberInput
                       step="0.01"
                       min="0"
                       max="100"
                       value={formData.discount}
-                      onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) || 0 })}
+                      onValueChange={(value) => {
+                        const parsed = parseFloat(value);
+                        setFormData({ ...formData, discount: value === '' || Number.isNaN(parsed) ? 0 : parsed });
+                      }}
                       className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none font-semibold"
                     />
                   </div>

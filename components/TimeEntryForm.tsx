@@ -4,6 +4,7 @@ import { Client, Project, ProjectTask, TimeEntry, UserRole } from '../types';
 import { parseSmartEntry } from '../services/geminiService';
 import CustomSelect from './CustomSelect';
 import CustomRepeatModal from './CustomRepeatModal';
+import ValidatedNumberInput from './ValidatedNumberInput';
 
 interface TimeEntryFormProps {
   clients: Client[];
@@ -80,35 +81,8 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
   const [recurrenceEndDate, setRecurrenceEndDate] = useState('');
   const [isCustomRepeatModalOpen, setIsCustomRepeatModalOpen] = useState(false);
 
-  const durationInputPattern = /^[0-9]*([.,][0-9]*)?$/;
-
-  const isValidDurationInput = (value: string) => value === '' || durationInputPattern.test(value);
-
-  const normalizeDurationInput = (value: string) => value.replace(',', '.');
-
-  const handleDurationKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.ctrlKey || event.metaKey) return;
-    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
-    if (allowedKeys.includes(event.key)) return;
-
-    if (event.key === '.' || event.key === ',') {
-      const currentValue = event.currentTarget.value;
-      if (currentValue.includes('.') || currentValue.includes(',')) {
-        event.preventDefault();
-      }
-      return;
-    }
-
-    if (!/^[0-9]$/.test(event.key)) {
-      event.preventDefault();
-    }
-  };
-
-  const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = event.target.value;
-    if (!isValidDurationInput(rawValue)) return;
-    const normalizedValue = normalizeDurationInput(rawValue);
-    setDuration(normalizedValue);
+  const handleDurationChange = (value: string) => {
+    setDuration(value);
     if (errors.hours) setErrors({ ...errors, hours: '' });
   };
 
@@ -402,13 +376,9 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
             </div>
             <div className="md:col-span-1">
               <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Hours <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                inputMode="decimal"
-                pattern="^[0-9]*([.,][0-9]*)?$"
+              <ValidatedNumberInput
                 value={duration}
-                onKeyDown={handleDurationKeyDown}
-                onChange={handleDurationChange}
+                onValueChange={handleDurationChange}
                 placeholder="0.0"
                 className={`w-full px-3 py-2.5 bg-slate-50 border rounded-lg focus:ring-2 outline-none text-sm font-bold transition-colors ${errors.hours ? 'border-red-500 focus:ring-red-200 bg-red-50' : 'border-slate-200 focus:ring-praetor'}`}
               />

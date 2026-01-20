@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Invoice, InvoiceItem, Client, Product, Sale } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
+import ValidatedNumberInput from './ValidatedNumberInput';
 
 const INVOICE_STATUS_OPTIONS = [
     { id: 'draft', name: 'Draft' },
@@ -400,46 +401,54 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
                                                     />
                                                 </div>
                                                 <div className="col-span-1">
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        step="0.01"
-                                                        required
-                                                        value={item.quantity}
-                                                        onChange={(e) => updateItemRow(index, 'quantity', parseFloat(e.target.value) || 0)}
-                                                        className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none"
-                                                    />
+                                                <ValidatedNumberInput
+                                                    min="0"
+                                                    step="0.01"
+                                                    required
+                                                    value={item.quantity}
+                                                    onValueChange={(value) => {
+                                                        const parsed = parseFloat(value);
+                                                        updateItemRow(index, 'quantity', value === '' || Number.isNaN(parsed) ? 0 : parsed);
+                                                    }}
+                                                    className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none"
+                                                />
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        step="0.01"
-                                                        required
-                                                        value={item.unitPrice}
-                                                        onChange={(e) => updateItemRow(index, 'unitPrice', parseFloat(e.target.value) || 0)}
-                                                        className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none"
-                                                    />
+                                                <ValidatedNumberInput
+                                                    min="0"
+                                                    step="0.01"
+                                                    required
+                                                    value={item.unitPrice}
+                                                    onValueChange={(value) => {
+                                                        const parsed = parseFloat(value);
+                                                        updateItemRow(index, 'unitPrice', value === '' || Number.isNaN(parsed) ? 0 : parsed);
+                                                    }}
+                                                    className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none"
+                                                />
                                                 </div>
                                                 <div className="col-span-1">
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        max="100"
-                                                        value={item.taxRate}
-                                                        onChange={(e) => updateItemRow(index, 'taxRate', parseFloat(e.target.value) || 0)}
-                                                        className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none"
-                                                    />
+                                                <ValidatedNumberInput
+                                                    min="0"
+                                                    max="100"
+                                                    value={item.taxRate}
+                                                    onValueChange={(value) => {
+                                                        const parsed = parseFloat(value);
+                                                        updateItemRow(index, 'taxRate', value === '' || Number.isNaN(parsed) ? 0 : parsed);
+                                                    }}
+                                                    className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none"
+                                                />
                                                 </div>
                                                 <div className="col-span-1">
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        max="100"
-                                                        value={item.discount || 0}
-                                                        onChange={(e) => updateItemRow(index, 'discount', parseFloat(e.target.value) || 0)}
-                                                        className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none"
-                                                    />
+                                                <ValidatedNumberInput
+                                                    min="0"
+                                                    max="100"
+                                                    value={item.discount || 0}
+                                                    onValueChange={(value) => {
+                                                        const parsed = parseFloat(value);
+                                                        updateItemRow(index, 'discount', value === '' || Number.isNaN(parsed) ? 0 : parsed);
+                                                    }}
+                                                    className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none"
+                                                />
                                                 </div>
                                                 <div className="col-span-2 flex items-center justify-end font-bold text-slate-600 text-sm">
                                                     {((item.quantity * item.unitPrice) * (1 - (item.discount || 0) / 100)).toFixed(2)}

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Expense } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
+import ValidatedNumberInput from './ValidatedNumberInput';
 
 const EXPENSE_CATEGORY_OPTIONS = [
     { id: 'office_supplies', name: 'Office Supplies' },
@@ -167,12 +168,14 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expenses, onAddExpense, onU
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-slate-500 ml-1">Amount ({currency})</label>
-                                    <input
-                                        type="number"
+                                    <ValidatedNumberInput
                                         step="0.01"
                                         required
                                         value={formData.amount}
-                                        onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                                        onValueChange={(value) => {
+                                            const parsed = parseFloat(value);
+                                            setFormData({ ...formData, amount: value === '' || Number.isNaN(parsed) ? 0 : parsed });
+                                        }}
                                         className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none font-semibold"
                                     />
                                     {errors.amount && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.amount}</p>}

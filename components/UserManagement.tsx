@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, UserRole, Client, Project, ProjectTask } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
+import ValidatedNumberInput from './ValidatedNumberInput';
 import { usersApi } from '../services/api';
 
 interface UserManagementProps {
@@ -527,11 +528,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                       <div className="w-16 flex items-center justify-center text-slate-400 text-sm font-bold border-r border-slate-200 py-2 bg-slate-100/30">
                         {currency}
                       </div>
-                      <input
-                        type="number"
-                        step="0.01"
+                      <ValidatedNumberInput
                         value={editCostPerHour}
-                        onChange={(e) => setEditCostPerHour(e.target.value)}
+                        onValueChange={setEditCostPerHour}
                         className="flex-1 px-4 py-2 bg-transparent outline-none text-sm font-semibold"
                         placeholder="0.00"
                       />

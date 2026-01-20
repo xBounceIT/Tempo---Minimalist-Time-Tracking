@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Product, Supplier } from '../types';
 import CustomSelect, { Option } from './CustomSelect';
 import StandardTable from './StandardTable';
+import ValidatedNumberInput from './ValidatedNumberInput';
 
 interface ProductsViewProps {
     products: Product[];
@@ -83,37 +84,11 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
         return calcSalePrice(costo, molPercentage) - costo;
     };
 
-    const numericInputPattern = /^[0-9]*([.,][0-9]*)?$/;
-
-    const isValidNumericInput = (value: string) => value === '' || numericInputPattern.test(value);
-
-    const normalizeNumericInput = (value: string) => value.replace(',', '.');
-
-    const handleNumericKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.ctrlKey || event.metaKey) return;
-        const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
-        if (allowedKeys.includes(event.key)) return;
-
-        if (event.key === '.' || event.key === ',') {
-            const currentValue = event.currentTarget.value;
-            if (currentValue.includes('.') || currentValue.includes(',')) {
-                event.preventDefault();
-            }
-            return;
-        }
-
-        if (!/^[0-9]$/.test(event.key)) {
-            event.preventDefault();
-        }
-    };
-
-    const handleNumericChange = (field: 'taxRate' | 'costo' | 'molPercentage') => (event: React.ChangeEvent<HTMLInputElement>) => {
-        const rawValue = event.target.value;
-        if (!isValidNumericInput(rawValue)) return;
-        const normalizedValue = normalizeNumericInput(rawValue);
+    const handleNumericValueChange = (field: 'taxRate' | 'costo' | 'molPercentage') => (value: string) => {
+        const parsed = value === '' ? undefined : parseFloat(value);
         setFormData({
             ...formData,
-            [field]: normalizedValue === '' ? undefined : parseFloat(normalizedValue)
+            [field]: parsed === undefined || Number.isNaN(parsed) ? undefined : parsed
         });
         if (errors[field]) {
             setErrors({ ...errors, [field]: '' });
@@ -433,13 +408,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                         <div className="flex items-center ml-1 min-h-[16px]">
                                             <label className="text-xs font-bold text-slate-500">Tax Rate (%)</label>
                                         </div>
-                                        <input
-                                            type="text"
-                                            inputMode="decimal"
-                                            pattern="^[0-9]*([.,][0-9]*)?$"
+                                        <ValidatedNumberInput
                                             value={formData.taxRate ?? ''}
-                                            onKeyDown={handleNumericKeyDown}
-                                            onChange={handleNumericChange('taxRate')}
+                                            onValueChange={handleNumericValueChange('taxRate')}
                                             className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all ${errors.taxRate ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
                                         />
                                         {errors.taxRate && <p className="text-red-500 text-[10px] font-bold ml-1 mt-1">{errors.taxRate}</p>}
@@ -495,13 +466,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 ml-1">Costo</label>
                                         <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                inputMode="decimal"
-                                                pattern="^[0-9]*([.,][0-9]*)?$"
+                                            <ValidatedNumberInput
                                                 value={formData.costo ?? ''}
-                                                onKeyDown={handleNumericKeyDown}
-                                                onChange={handleNumericChange('costo')}
+                                                onValueChange={handleNumericValueChange('costo')}
                                                 className={`flex-1 text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all min-w-0 ${errors.costo ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
                                             />
                                         </div>
@@ -511,13 +478,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 ml-1">MOL %</label>
                                         <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                inputMode="decimal"
-                                                pattern="^[0-9]*([.,][0-9]*)?$"
+                                            <ValidatedNumberInput
                                                 value={formData.molPercentage ?? ''}
-                                                onKeyDown={handleNumericKeyDown}
-                                                onChange={handleNumericChange('molPercentage')}
+                                                onValueChange={handleNumericValueChange('molPercentage')}
                                                 className={`flex-1 text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all min-w-0 ${errors.molPercentage ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
                                             />
                                         </div>

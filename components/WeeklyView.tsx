@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Client, Project, ProjectTask, TimeEntry, UserRole, User } from '../types';
 import CustomSelect from './CustomSelect';
+import ValidatedNumberInput from './ValidatedNumberInput';
 import { isItalianHoliday } from '../utils/holidays';
 
 interface WeeklyViewProps {
@@ -122,7 +123,12 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
         }
 
         if (field === 'duration') {
-            newRows[rowIndex].days[dateStr].duration = value === '' ? 0 : parseFloat(value);
+            if (value === '') {
+                newRows[rowIndex].days[dateStr].duration = 0;
+            } else {
+                const parsed = parseFloat(value);
+                newRows[rowIndex].days[dateStr].duration = Number.isNaN(parsed) ? 0 : parsed;
+            }
         } else {
             newRows[rowIndex].days[dateStr].note = value;
         }
@@ -365,14 +371,11 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                 {showSuccess && (row.days[day.dateStr]?.duration > 0) && (
                                                     <i className="fa-solid fa-circle-check text-emerald-500 text-[10px] absolute -top-2 -right-1 animate-in fade-in zoom-in duration-300"></i>
                                                 )}
-                                                <input
-                                                    type="number"
-                                                    step="0.1"
-                                                    min="0"
+                                                <ValidatedNumberInput
                                                     placeholder="0.0"
                                                     disabled={day.isForbidden}
                                                     value={row.days[day.dateStr]?.duration || ''}
-                                                    onChange={(e) => handleValueChange(rowIndex, day.dateStr, 'duration', e.target.value)}
+                                                    onValueChange={(value) => handleValueChange(rowIndex, day.dateStr, 'duration', value)}
                                                     className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && (row.days[day.dateStr]?.duration > 0) ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} ${day.isForbidden ? 'opacity-50 cursor-not-allowed bg-red-50/50 border-red-100' : 'border-slate-200'} border rounded-lg py-2.5 focus:ring-2 focus:ring-praetor outline-none`}
                                                 />
                                                 <input
