@@ -127,7 +127,7 @@ export default async function (fastify, opts) {
         onRequest: [authenticateToken, requireRole('admin', 'manager')]
     }, async (request, reply) => {
         const { id } = request.params;
-        const { name, isDisabled, costPerHour } = request.body;
+        const { name, isDisabled, costPerHour, role } = request.body;
         const idResult = requireNonEmptyString(id, 'id');
         if (!idResult.ok) return badRequest(reply, idResult.message);
 
@@ -139,6 +139,19 @@ export default async function (fastify, opts) {
         if (costPerHour !== undefined) {
             const costPerHourResult = optionalNonNegativeNumber(costPerHour, 'costPerHour');
             if (!costPerHourResult.ok) return badRequest(reply, costPerHourResult.message);
+        }
+
+        let roleValue: string | null = null;
+        if (role !== undefined) {
+            if (request.user.role !== 'admin') {
+                return reply.code(403).send({ error: 'Insufficient permissions' });
+            }
+            if (idResult.value === request.user.id) {
+                return reply.code(403).send({ error: 'Admins cannot change their own role' });
+            }
+            const roleResult = validateEnum(role, ['admin', 'manager', 'user'], 'role');
+            if (!roleResult.ok) return badRequest(reply, roleResult.message);
+            roleValue = roleResult.value;
         }
 
         if (request.user.role === 'admin' && costPerHour !== undefined) {
@@ -177,6 +190,11 @@ export default async function (fastify, opts) {
         if (costPerHour !== undefined) {
             updates.push(`cost_per_hour = $${paramIdx++}`);
             values.push(optionalNonNegativeNumber(costPerHour, 'costPerHour').value);
+        }
+
+        if (role !== undefined) {
+            updates.push(`role = $${paramIdx++}`);
+            values.push(roleValue);
         }
 
         if (updates.length === 0) {

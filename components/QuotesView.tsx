@@ -69,6 +69,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
     const [filterClientId, setFilterClientId] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterQuoteId, setFilterQuoteId] = useState('all');
+    const [expirationSort, setExpirationSort] = useState<'none' | 'asc' | 'desc'>('none');
 
     React.useEffect(() => {
         setFilterQuoteId(quoteFilterId || 'all');
@@ -100,7 +101,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
     React.useEffect(() => {
         setCurrentPage(1);
         setExpiredPage(1);
-    }, [searchTerm, filterClientId, filterStatus, filterQuoteId]);
+    }, [searchTerm, filterClientId, filterStatus, filterQuoteId, expirationSort]);
 
     const hasActiveFilters =
         searchTerm.trim() !== '' ||
@@ -116,6 +117,18 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
         setCurrentPage(1);
         setExpiredPage(1);
     };
+
+    const toggleExpirationSort = () => {
+        setExpirationSort(prev => (prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'));
+    };
+
+    const nextExpirationSort = expirationSort === 'none' ? 'asc' : expirationSort === 'asc' ? 'desc' : 'none';
+    const expirationSortTitle = nextExpirationSort === 'asc'
+        ? 'Order by expiration date (ascending)'
+        : nextExpirationSort === 'desc'
+            ? 'Order by expiration date (descending)'
+            : 'Clear expiration date ordering';
+    const expirationSortIndicator = expirationSort === 'asc' ? '↑' : expirationSort === 'desc' ? '↓' : '';
 
     // Form State
     const [formData, setFormData] = useState<Partial<Quote>>({
@@ -408,6 +421,13 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
         return bid ? `${bid.clientName} · ${bid.productName}` : 'No Special Bid';
     };
 
+    const getExpirationTimestamp = (expirationDate: string) => {
+        if (!expirationDate) return 0;
+        const normalizedDate = expirationDate.includes('T') ? expirationDate : `${expirationDate}T00:00:00`;
+        const timestamp = new Date(normalizedDate).getTime();
+        return Number.isNaN(timestamp) ? 0 : timestamp;
+    };
+
     // Check if quote is expired
     const isExpired = (expirationDate: string) => {
         const normalizedDate = expirationDate.includes('T') ? expirationDate : `${expirationDate}T00:00:00`;
@@ -417,8 +437,13 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
     };
 
     const isQuoteExpired = (quote: Quote) => quote.status !== 'confirmed' && (quote.isExpired ?? isExpired(quote.expirationDate));
-    const filteredActiveQuotes = filteredQuotes.filter(quote => !isQuoteExpired(quote));
-    const filteredExpiredQuotes = filteredQuotes.filter(quote => isQuoteExpired(quote));
+    const sortedQuotes = useMemo(() => {
+        if (expirationSort === 'none') return filteredQuotes;
+        const direction = expirationSort === 'asc' ? 1 : -1;
+        return [...filteredQuotes].sort((a, b) => (getExpirationTimestamp(a.expirationDate) - getExpirationTimestamp(b.expirationDate)) * direction);
+    }, [filteredQuotes, expirationSort]);
+    const filteredActiveQuotes = sortedQuotes.filter(quote => !isQuoteExpired(quote));
+    const filteredExpiredQuotes = sortedQuotes.filter(quote => isQuoteExpired(quote));
 
     // Pagination Logic
     const activeTotalPages = Math.ceil(filteredActiveQuotes.length / rowsPerPage);
@@ -433,6 +458,14 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
         const { total } = calculateTotals(quote.items, quote.discount);
         const expired = isQuoteExpired(quote);
         const isRevertLocked = quote.status === 'confirmed' && quoteIdsWithSales?.has(quote.id);
+        const isConfirmDisabled = expired || isRevertLocked;
+        const isDeleteDisabled = expired;
+        const confirmTitle = expired
+            ? 'Expired quotes cannot be confirmed or reverted'
+            : isRevertLocked
+                ? 'Cannot revert: linked sale order exists'
+                : (quote.status === 'quoted' ? 'Mark as Confirmed' : 'Mark as Quoted');
+        const deleteTitle = expired ? 'Expired quotes cannot be deleted' : 'Delete Quote';
         return (
             <tr
                 key={quote.id}
@@ -486,12 +519,12 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                if (isRevertLocked) return;
+                                if (isConfirmDisabled) return;
                                 onUpdateQuote(quote.id, { status: quote.status === 'quoted' ? 'confirmed' : 'quoted' });
                             }}
-                            disabled={isRevertLocked}
-                            className={`p-2 text-slate-400 rounded-lg transition-all ${isRevertLocked ? 'cursor-not-allowed opacity-50' : 'hover:text-emerald-600 hover:bg-emerald-50'}`}
-                            title={isRevertLocked ? 'Cannot revert: linked sale order exists' : (quote.status === 'quoted' ? 'Mark as Confirmed' : 'Mark as Quoted')}
+                            disabled={isConfirmDisabled}
+                            className={`p-2 text-slate-400 rounded-lg transition-all ${isConfirmDisabled ? 'cursor-not-allowed opacity-50' : 'hover:text-emerald-600 hover:bg-emerald-50'}`}
+                            title={confirmTitle}
                         >
                             <i className={`fa-solid ${quote.status === 'quoted' ? 'fa-check' : 'fa-rotate-left'}`}></i>
                         </button>
@@ -511,10 +544,12 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    if (isDeleteDisabled) return;
                                     confirmDelete(quote);
                                 }}
-                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                title="Delete Quote"
+                                disabled={isDeleteDisabled}
+                                className={`p-2 text-slate-400 rounded-lg transition-all ${isDeleteDisabled ? 'cursor-not-allowed opacity-50' : 'hover:text-red-600 hover:bg-red-50'}`}
+                                title={deleteTitle}
                             >
                                 <i className="fa-solid fa-trash-can"></i>
                             </button>
@@ -1013,7 +1048,17 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Terms</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiration</th>
+                            <th className="px-8 py-4">
+                                <button
+                                    type="button"
+                                    onClick={toggleExpirationSort}
+                                    title={expirationSortTitle}
+                                    className="inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600"
+                                >
+                                    Expiration
+                                    {expirationSortIndicator && <span className="text-[10px]">{expirationSortIndicator}</span>}
+                                </button>
+                            </th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
@@ -1102,7 +1147,17 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Terms</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiration</th>
+                            <th className="px-8 py-4">
+                                <button
+                                    type="button"
+                                    onClick={toggleExpirationSort}
+                                    title={expirationSortTitle}
+                                    className="inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600"
+                                >
+                                    Expiration
+                                    {expirationSortIndicator && <span className="text-[10px]">{expirationSortIndicator}</span>}
+                                </button>
+                            </th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>

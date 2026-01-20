@@ -1048,49 +1048,98 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                         </>
                     }
                 >
-                    <div className="divide-y divide-slate-100">
-                        {historySalesPage.map(sale => {
-                            const { total } = calculateTotals(sale.items, sale.discount);
-                            return (
-                                <div
-                                    key={sale.id}
-                                    onClick={() => openEditModal(sale)}
-                                    className="p-6 hover:bg-slate-50/80 active:bg-slate-100 active:scale-[0.98] transition-all flex items-center justify-between gap-4 cursor-pointer select-none"
-                                >
-                                    <div className="flex gap-4 items-center">
-                                        <div className="w-10 h-10 bg-white text-praetor rounded-xl flex items-center justify-center border border-slate-200">
-                                            <i className="fa-solid fa-cart-shopping"></i>
-                                        </div>
-                                        <div>
-                                            <h5 className="font-bold text-slate-700">{sale.clientName}</h5>
-                                            <div className="text-[10px] font-black text-slate-400 uppercase">{sale.items.length} item{sale.items.length !== 1 ? 's' : ''}</div>
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${getSaleStatusBadgeClass(sale.status)}`}>
-                                                {getSaleStatusLabel(sale.status)}
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Terms</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {historySalesPage.map(sale => {
+                                const { total } = calculateTotals(sale.items, sale.discount);
+                                return (
+                                    <tr
+                                        key={sale.id}
+                                        onClick={() => openEditModal(sale)}
+                                        className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                                    >
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-slate-100 text-praetor rounded-xl flex items-center justify-center text-sm">
+                                                    <i className="fa-solid fa-cart-shopping"></i>
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-slate-800">{sale.clientName}</div>
+                                                    <div className="text-[10px] font-black text-slate-400 uppercase">{sale.items.length} item{sale.items.length !== 1 ? 's' : ''}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-5">
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black ${getSaleStatusBadgeClass(sale.status)}`}>
+                                                {getSaleStatusLabel(sale.status).toUpperCase()}
                                             </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-6">
-                                        <div className="text-right">
-                                            <div className="text-sm font-bold text-slate-700">{total.toFixed(2)} {currency}</div>
-                                            <div className="text-[10px] font-black text-slate-400 uppercase">{getSaleStatusLabel(sale.status)}</div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    confirmDelete(sale);
-                                                }}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                title="Delete Sale"
-                                            >
-                                                <i className="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                        </td>
+                                        <td className="px-8 py-5 text-sm font-bold text-slate-700">
+                                            {total.toFixed(2)} {currency}
+                                        </td>
+                                        <td className="px-8 py-5 text-sm font-semibold text-slate-600">
+                                            {sale.paymentTerms === 'immediate' ? 'Immediate' : sale.paymentTerms}
+                                        </td>
+                                        <td className="px-8 py-5">
+                                            <div className="flex justify-end gap-2">
+                                                {onViewQuote && sale.linkedQuoteId && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onViewQuote(sale.linkedQuoteId);
+                                                        }}
+                                                        className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
+                                                        title="View Quote"
+                                                    >
+                                                        <i className="fa-solid fa-link"></i>
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openEditModal(sale);
+                                                    }}
+                                                    className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
+                                                    title="Edit Sale"
+                                                >
+                                                    <i className="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onUpdateSale(sale.id, { status: 'pending' });
+                                                    }}
+                                                    className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                                                    title="Restore Sale"
+                                                >
+                                                    <i className="fa-solid fa-rotate-left"></i>
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        confirmDelete(sale);
+                                                    }}
+                                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                    title="Delete Sale"
+                                                >
+                                                    <i className="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </StandardTable>
             )}
         </div>

@@ -64,6 +64,7 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSupplierId, setFilterSupplierId] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [expirationSort, setExpirationSort] = useState<'none' | 'asc' | 'desc'>('none');
 
   const filteredQuotes = useMemo(() => {
     return quotes.filter(quote => {
@@ -81,7 +82,7 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterSupplierId, filterStatus]);
+  }, [searchTerm, filterSupplierId, filterStatus, expirationSort]);
 
   const hasActiveFilters =
     searchTerm.trim() !== '' || filterSupplierId !== 'all' || filterStatus !== 'all';
@@ -92,6 +93,18 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
     setFilterStatus('all');
     setCurrentPage(1);
   };
+
+  const toggleExpirationSort = () => {
+    setExpirationSort(prev => (prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'));
+  };
+
+  const nextExpirationSort = expirationSort === 'none' ? 'asc' : expirationSort === 'asc' ? 'desc' : 'none';
+  const expirationSortTitle = nextExpirationSort === 'asc'
+    ? 'Order by expiration date (ascending)'
+    : nextExpirationSort === 'desc'
+      ? 'Order by expiration date (descending)'
+      : 'Clear expiration date ordering';
+  const expirationSortIndicator = expirationSort === 'asc' ? '↑' : expirationSort === 'desc' ? '↓' : '';
 
   const [formData, setFormData] = useState<Partial<SupplierQuote>>({
     supplierId: '',
@@ -270,9 +283,12 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
   const activeSuppliers = suppliers.filter(s => !s.isDisabled);
   const activeProducts = products.filter(p => !p.isDisabled);
 
-  const totalPages = Math.ceil(filteredQuotes.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedQuotes = filteredQuotes.slice(startIndex, startIndex + rowsPerPage);
+  const getExpirationTimestamp = (expirationDate: string) => {
+    if (!expirationDate) return 0;
+    const normalizedDate = expirationDate.includes('T') ? expirationDate : `${expirationDate}T00:00:00`;
+    const timestamp = new Date(normalizedDate).getTime();
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  };
 
   const isExpired = (expirationDate: string) => {
     const normalizedDate = expirationDate.includes('T') ? expirationDate : `${expirationDate}T00:00:00`;
@@ -280,6 +296,16 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
     expiry.setDate(expiry.getDate() + 1);
     return new Date() >= expiry;
   };
+
+  const sortedQuotes = useMemo(() => {
+    if (expirationSort === 'none') return filteredQuotes;
+    const direction = expirationSort === 'asc' ? 1 : -1;
+    return [...filteredQuotes].sort((a, b) => (getExpirationTimestamp(a.expirationDate) - getExpirationTimestamp(b.expirationDate)) * direction);
+  }, [filteredQuotes, expirationSort]);
+
+  const totalPages = Math.ceil(sortedQuotes.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedQuotes = sortedQuotes.slice(startIndex, startIndex + rowsPerPage);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -729,7 +755,17 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">PO #</th>
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiration</th>
+              <th className="px-8 py-4">
+                <button
+                  type="button"
+                  onClick={toggleExpirationSort}
+                  title={expirationSortTitle}
+                  className="inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600"
+                >
+                  Expiration
+                  {expirationSortIndicator && <span className="text-[10px]">{expirationSortIndicator}</span>}
+                </button>
+              </th>
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
             </tr>
           </thead>
@@ -737,6 +773,12 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
             {paginatedQuotes.map(quote => {
               const { total } = calculateTotals(quote.items, quote.discount);
               const expired = isExpired(quote.expirationDate);
+              const isConfirmDisabled = expired;
+              const isDeleteDisabled = expired;
+              const confirmTitle = expired
+                ? 'Expired quotes cannot be approved'
+                : (quote.status === 'received' ? 'Mark as Approved' : 'Mark as Received');
+              const deleteTitle = expired ? 'Expired quotes cannot be deleted' : 'Delete Quote';
               return (
                 <tr
                   key={quote.id}
@@ -789,20 +831,24 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (isConfirmDisabled) return;
                           onUpdateQuote(quote.id, { status: quote.status === 'received' ? 'approved' : 'received' });
                         }}
-                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                        title={quote.status === 'received' ? 'Mark as Approved' : 'Mark as Received'}
+                        disabled={isConfirmDisabled}
+                        className={`p-2 text-slate-400 rounded-lg transition-all ${isConfirmDisabled ? 'cursor-not-allowed opacity-50' : 'hover:text-emerald-600 hover:bg-emerald-50'}`}
+                        title={confirmTitle}
                       >
                         <i className={`fa-solid ${quote.status === 'received' ? 'fa-check' : 'fa-rotate-left'}`}></i>
                       </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (isDeleteDisabled) return;
                           confirmDelete(quote);
                         }}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                        title="Delete Quote"
+                        disabled={isDeleteDisabled}
+                        className={`p-2 text-slate-400 rounded-lg transition-all ${isDeleteDisabled ? 'cursor-not-allowed opacity-50' : 'hover:text-red-600 hover:bg-red-50'}`}
+                        title={deleteTitle}
                       >
                         <i className="fa-solid fa-trash-can"></i>
                       </button>

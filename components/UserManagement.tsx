@@ -47,6 +47,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editName, setEditName] = useState('');
+  const [editRole, setEditRole] = useState<UserRole>('user');
   const [editCostPerHour, setEditCostPerHour] = useState<string>('0');
   const [editIsDisabled, setEditIsDisabled] = useState(false);
   const [activeSearch, setActiveSearch] = useState('');
@@ -248,6 +249,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
   const handleEdit = (user: User) => {
     setEditingUser(user);
     setEditName(user.name);
+    setEditRole(user.role);
     setEditCostPerHour(user.costPerHour?.toString() || '0');
     setEditIsDisabled(!!user.isDisabled);
   };
@@ -259,6 +261,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
         isDisabled: editIsDisabled
       };
 
+      if (currentUserRole === 'admin' && editingUser.id !== currentUserId && editRole !== editingUser.role) {
+        updates.role = editRole;
+      }
+
       if (currentUserRole !== 'admin') {
         updates.costPerHour = parseFloat(editCostPerHour) || 0;
       }
@@ -269,6 +275,14 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
   };
 
   const managingUser = users.find(u => u.id === managingUserId);
+  const isEditingSelf = editingUser?.id === currentUserId;
+  const canEditRole = currentUserRole === 'admin' && !isEditingSelf;
+  const hasEditChanges = !!editingUser && (
+    editName !== editingUser.name ||
+    editIsDisabled !== !!editingUser.isDisabled ||
+    (currentUserRole !== 'admin' && parseFloat(editCostPerHour) !== (editingUser.costPerHour || 0)) ||
+    (canEditRole && editRole !== editingUser.role)
+  );
 
   // Synchronized Filtering Logic
   const getFilteredData = () => {
@@ -426,6 +440,22 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                   />
                 </div>
 
+                {currentUserRole === 'admin' && (
+                  <div>
+                    <CustomSelect
+                      label="Role"
+                      options={ROLE_OPTIONS}
+                      value={editRole}
+                      onChange={val => setEditRole(val as UserRole)}
+                      buttonClassName="py-2 text-sm"
+                      disabled={isEditingSelf}
+                    />
+                    {isEditingSelf && (
+                      <p className="text-[10px] text-slate-400 mt-1">You cannot change your own role.</p>
+                    )}
+                  </div>
+                )}
+
                 {currentUserRole !== 'admin' && (
                   <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Cost per Hour</label>
@@ -469,16 +499,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
                 </button>
                 <button
                   onClick={saveEdit}
-                  disabled={!editName || (
-                    editName === editingUser.name &&
-                    parseFloat(editCostPerHour) === (editingUser.costPerHour || 0) &&
-                    editIsDisabled === !!editingUser.isDisabled
-                  )}
-                  className={`flex-1 py-3 text-sm font-bold rounded-xl shadow-lg transition-all active:scale-95 text-white ${(!editName || (
-                    editName === editingUser.name &&
-                    parseFloat(editCostPerHour) === (editingUser.costPerHour || 0) &&
-                    editIsDisabled === !!editingUser.isDisabled
-                  )) ? 'bg-slate-300 shadow-none cursor-not-allowed' : 'bg-praetor shadow-slate-200 hover:bg-slate-800'}`}
+                  disabled={!editName || !hasEditChanges}
+                  className={`flex-1 py-3 text-sm font-bold rounded-xl shadow-lg transition-all active:scale-95 text-white ${(!editName || !hasEditChanges) ? 'bg-slate-300 shadow-none cursor-not-allowed' : 'bg-praetor shadow-slate-200 hover:bg-slate-800'}`}
                 >
                   Save Changes
                 </button>
