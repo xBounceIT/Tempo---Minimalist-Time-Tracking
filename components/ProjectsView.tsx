@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Project, Client, UserRole } from '../types';
 import { COLORS } from '../constants';
 import CustomSelect from './CustomSelect';
@@ -15,6 +16,7 @@ interface ProjectsViewProps {
 }
 
 const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, onAddProject, onUpdateProject, onDeleteProject }) => {
+    const { t } = useTranslation(['projects', 'common']);
   const [name, setName] = useState('');
   const [clientId, setClientId] = useState('');
   const [description, setDescription] = useState('');
@@ -32,8 +34,8 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
     setErrors({});
 
     const newErrors: Record<string, string> = {};
-    if (!name?.trim()) newErrors.name = 'Project name is required';
-    if (!clientId) newErrors.clientId = 'Client is required';
+    if (!name?.trim()) newErrors.name = t('projects:projects.projectNameRequired');
+    if (!clientId) newErrors.clientId = t('projects:projects.clientRequired');
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -108,10 +110,10 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                 <i className="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
               </div>
               <div>
-                <h3 className="text-lg font-black text-slate-800">Delete Project?</h3>
+                <h3 className="text-lg font-black text-slate-800">{t('common:messages.deleteConfirmNamed', { name: editingProject?.name })}</h3>
                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                  Are you sure you want to delete <span className="font-bold text-slate-800">{editingProject?.name}</span>?
-                  This action cannot be undone.
+                  {t('common:messages.deleteConfirmNamed', { name: editingProject?.name })}
+                  {t('projects:projects.deleteConfirm')}
                 </p>
               </div>
               <div className="flex gap-3 pt-2">
@@ -119,13 +121,13 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                   onClick={cancelDelete}
                   className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
                 >
-                  Cancel
+                  {t('common:buttons.cancel')}
                 </button>
                 <button
                   onClick={handleDelete}
                   className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
                 >
-                  Yes, Delete
+                  {t('common:buttons.delete')}
                 </button>
               </div>
             </div>
@@ -140,7 +142,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
               <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                 <i className="fa-solid fa-pen-to-square text-praetor"></i>
-                Edit Project
+                {t('projects:projects.editProject')}
               </h3>
               <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 transition-colors">
                 <i className="fa-solid fa-xmark text-xl"></i>
@@ -150,14 +152,14 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div className="space-y-2">
                 <CustomSelect
-                  label="Client"
+                  label={t('projects:projects.client')}
                   options={clientOptions}
                   value={clientId}
                   onChange={(val) => {
                     setClientId(val);
                     if (errors.clientId) setErrors({ ...errors, clientId: '' });
                   }}
-                  placeholder="Select Client..."
+                  placeholder={t('projects:projects.selectClient')}
                   searchable={true}
                   className={errors.clientId ? 'border-red-300' : ''}
                 />
@@ -165,7 +167,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Project Name</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">{t('projects:projects.name')}</label>
                 <input
                   type="text"
                   value={name}
@@ -173,7 +175,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                     setName(e.target.value);
                     if (errors.name) setErrors({ ...errors, name: '' });
                   }}
-                  placeholder="e.g. Website Redesign"
+                  placeholder={t('projects:projects.projectNamePlaceholder')}
                   className={`w-full text-sm px-4 py-3 border rounded-xl outline-none focus:ring-2 bg-slate-50 focus:bg-white transition-all ${errors.name ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
                   autoFocus
                 />
@@ -181,18 +183,18 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Description</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">{t('projects:projects.description')}</label>
                 <textarea
                   value={description}
                   onChange={e => setDescription(e.target.value)}
-                  placeholder="What is this project about?"
+                  placeholder={t('projects:projects.descriptionPlaceholder')}
                   rows={3}
                   className="w-full text-sm px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-praetor bg-slate-50 focus:bg-white transition-all resize-none"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Project Color</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">{t('projects:projects.color')}</label>
                 <div className="flex flex-wrap gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
                   {COLORS.map(c => (
                     <button

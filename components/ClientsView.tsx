@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Client } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
@@ -12,6 +13,7 @@ interface ClientsViewProps {
 }
 
 const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdateClient, onDeleteClient, userRole }) => {
+  const { t } = useTranslation(['crm', 'common', 'form']);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -128,13 +130,13 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
     const trimmedTaxCode = formData.taxCode?.trim() || '';
     const newErrors: Record<string, string> = {};
     if (!trimmedName) {
-      newErrors.name = 'Name is required';
+      newErrors.name = t('common:validation.nameRequired');
     }
     if (!trimmedClientCode) {
-      newErrors.clientCode = 'Client ID is required';
+      newErrors.clientCode = t('common:validation.clientCodeRequired');
     }
     if (!trimmedVatNumber && !trimmedTaxCode) {
-      const msg = 'Either VAT Number or Fiscal Code is required';
+      const msg = t('common:validation.vatOrTaxRequired');
       newErrors.vatNumber = msg;
       newErrors.taxCode = msg;
     }
@@ -220,9 +222,9 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
   const disabledClientsPage = filteredDisabledClientsTotal.slice(disabledStartIndex, disabledStartIndex + disabledRowsPerPage);
 
   const clientTypeFilterOptions = [
-    { id: 'all', name: 'All Types' },
-    { id: 'company', name: 'Companies' },
-    { id: 'individual', name: 'Individuals' }
+    { id: 'all', name: t('common:filters.allTypes') },
+    { id: 'company', name: t('common:filters.companies') },
+    { id: 'individual', name: t('common:filters.individuals') }
   ];
 
 
@@ -237,7 +239,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                 <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-praetor">
                   <i className={`fa-solid ${editingClient ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
                 </div>
-                {editingClient ? 'Edit Client' : 'Add New Client'}
+                {editingClient ? t('crm:clients.editClient') : t('crm:clients.addClient')}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -252,11 +254,11 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
               <div className="space-y-4">
                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                  Dati Identificativi
+                  {t('crm:clients.identifyingData')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Tipologia Soggetto</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.subjectType')}</label>
                     <div className="relative flex p-1 bg-slate-100 rounded-xl">
                       <div
                         className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-lg shadow-sm transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${formData.type === 'company' ? 'translate-x-0' : 'translate-x-full'
@@ -267,19 +269,19 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                         onClick={() => setFormData({ ...formData, type: 'company' })}
                         className={`relative z-10 flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-300 ${formData.type === 'company' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
                       >
-                        Azienda
+                        {t('crm:clients.typeCompany')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setFormData({ ...formData, type: 'individual' })}
                         className={`relative z-10 flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-300 ${formData.type === 'individual' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
                       >
-                        Persona Fisica
+                        {t('crm:clients.typeIndividual')}
                       </button>
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Codice Cliente (ID Univoco)</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.uniqueId')}</label>
                     <input
                       type="text"
                       value={formData.clientCode}
@@ -287,7 +289,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                         setFormData({ ...formData, clientCode: e.target.value });
                         if (errors.clientCode) setErrors({ ...errors, clientCode: '' });
                       }}
-                      placeholder="es. CL-001"
+                      placeholder={t('form:placeholderCode')}
                       className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all ${errors.clientCode ? 'border-red-500 bg-red-50' : 'border-slate-200'
                         }`}
                     />
@@ -297,7 +299,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                   </div>
                   <div className="col-span-full space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 ml-1">
-                      {formData.type === 'company' ? 'Ragione Sociale' : 'Nome e Cognome'}
+                      {formData.type === 'company' ? t('crm:clients.companyName') : t('crm:clients.personName')}
                     </label>
                     <input
                       type="text"
@@ -306,7 +308,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                         setFormData({ ...formData, name: e.target.value });
                         if (errors.name) setErrors({ ...errors, name: '' });
                       }}
-                      placeholder={formData.type === 'company' ? 'es. Acme Corp S.r.l.' : 'es. Mario Rossi'}
+                      placeholder={formData.type === 'company' ? t('form:placeholderName') : t('form:placeholderName')}
                       className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-slate-200'
                         }`}
                     />
@@ -321,46 +323,46 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
               <div className="space-y-4">
                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                  Contatti e Indirizzi
+                  {t('crm:clients.contacts')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Email Principale</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.primaryEmail')}</label>
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="email@esempio.com"
+                      placeholder={t('form:placeholderEmail')}
                       className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Telefono</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.phoneLabel')}</label>
                     <input
                       type="text"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+39 000 0000000"
+                      placeholder={t('form:placeholderPhone')}
                       className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                     />
                   </div>
                   <div className="col-span-full space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Referente / Ruolo</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.contactRole')}</label>
                     <input
                       type="text"
                       value={formData.contactName}
                       onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-                      placeholder="es. Marco Bianchi (Ufficio Acquisti)"
+                      placeholder={t('form:placeholderName')}
                       className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                     />
                   </div>
                   <div className="col-span-full space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Indirizzo (Sede Legale/Operativa)</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.streetAddress')}</label>
                     <textarea
                       rows={2}
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      placeholder="Via Esempio 123, 00100 Roma (RM)"
+                      placeholder={t('form:placeholderDescription')}
                       className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all resize-none"
                     />
                   </div>
@@ -371,11 +373,11 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
               <div className="space-y-4">
                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                  Dati Amministrativi e Fiscali
+                  {t('crm:clients.adminFiscal')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Partita IVA</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.vatNumber')}</label>
                     <input
                       type="text"
                       value={formData.vatNumber}
@@ -383,7 +385,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                         setFormData({ ...formData, vatNumber: e.target.value });
                         if (errors.vatNumber) setErrors({ ...errors, vatNumber: '', taxCode: '' });
                       }}
-                      placeholder="IT01234567890"
+                      placeholder={t('form:placeholderCode')}
                       className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all ${errors.vatNumber ? 'border-red-500 bg-red-50' : 'border-slate-200'
                         }`}
                     />
@@ -392,7 +394,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                     )}
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Codice Fiscale</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.taxCode')}</label>
                     <input
                       type="text"
                       value={formData.taxCode}
@@ -408,22 +410,22 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                     )}
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Codice Destinatario / SDI</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.billingCode')}</label>
                     <input
                       type="text"
                       value={formData.billingCode}
                       onChange={(e) => setFormData({ ...formData, billingCode: e.target.value })}
-                      placeholder="es. KRRH6B9"
+                      placeholder={t('form:placeholderCode')}
                       className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all font-mono uppercase"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Condizioni Commerciali / Pagamento</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:clients.paymentTerms')}</label>
                     <input
                       type="text"
                       value={formData.paymentTerms}
                       onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })}
-                      placeholder="es. 30 gg D.F.F.M."
+                      placeholder={t('form:placeholderNotes')}
                       className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                     />
                   </div>
@@ -443,13 +445,13 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                   onClick={() => setIsModalOpen(false)}
                   className="px-8 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
                 >
-                  Cancel
+                  {t('common:buttons.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-10 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                 >
-                  {editingClient ? 'Update Client' : 'Save Client'}
+                  {editingClient ? t('common:buttons.update') : t('common:buttons.save')}
                 </button>
               </div>
             </form>
@@ -466,10 +468,10 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                 <i className="fa-solid fa-triangle-exclamation text-xl"></i>
               </div>
               <div>
-                <h3 className="text-lg font-black text-slate-800">Delete Client?</h3>
+                <h3 className="text-lg font-black text-slate-800">{t('crm:clients.deleteClient')}</h3>
                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                  Are you sure you want to delete <span className="font-bold text-slate-800">{clientToDelete?.name}</span>?
-                  This action cannot be undone and will delete all associated projects and tasks.
+                  {t('common:messages.deleteConfirmNamed', { name: clientToDelete?.name })}
+                  {t('crm:clients.deleteConfirm')}
                 </p>
               </div>
               <div className="flex gap-3 pt-2">
@@ -477,13 +479,13 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                   onClick={() => setIsDeleteConfirmOpen(false)}
                   className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
                 >
-                  Cancel
+                  {t('common:buttons.cancel')}
                 </button>
                 <button
                   onClick={handleDelete}
                   className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
                 >
-                  Yes, Delete
+                  {t('common:buttons.delete')}
                 </button>
               </div>
             </div>
@@ -493,8 +495,8 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800">Clients</h2>
-          <p className="text-slate-500 text-sm">Manage your business contacts and billing info</p>
+          <h2 className="text-2xl font-black text-slate-800">{t('crm:clients.title')}</h2>
+          <p className="text-slate-500 text-sm">{t('crm:clients.manageBusinessContacts')}</p>
         </div>
       </div>
 
@@ -504,7 +506,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
           <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <input
             type="text"
-            placeholder="Search clients (name, code, email, phone, VAT, tax code)..."
+            placeholder={t('common:form.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-praetor outline-none shadow-sm placeholder:font-normal"
@@ -515,7 +517,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
             options={clientTypeFilterOptions}
             value={filterClientType}
             onChange={setFilterClientType}
-            placeholder="Filter by Type"
+            placeholder={t('common:form.selectOption')}
             searchable={false}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
           />
@@ -528,27 +530,27 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <i className="fa-solid fa-rotate-left"></i>
-            Clear filters
+            {t('common:form.clearFilters')}
           </button>
         </div>
       </div>
 
       <StandardTable
-        title="Active Clients"
+        title={t('crm:clients.activeClients')}
         totalCount={filteredActiveClientsTotal.length}
         headerAction={
           <button
             onClick={openAddModal}
             className="bg-praetor text-white px-4 py-2.5 rounded-xl text-sm font-black shadow-xl shadow-slate-200 transition-all hover:bg-slate-700 active:scale-95 flex items-center gap-2"
           >
-            <i className="fa-solid fa-plus"></i> Add New Client
+            <i className="fa-solid fa-plus"></i> {t('crm:clients.addClient')}
           </button>
         }
         footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
         footer={
           <>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+              <span className="text-xs font-bold text-slate-500">{t('common:labels.rowsPerPage')}</span>
               <CustomSelect
                 options={[
                   { id: '5', name: '5' },
@@ -563,7 +565,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                 searchable={false}
               />
               <span className="text-xs font-bold text-slate-400 ml-2">
-                Showing {activeClients.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, filteredActiveClientsTotal.length)} of {filteredActiveClientsTotal.length}
+                {t('common:pagination.showing', { start: activeClients.length > 0 ? startIndex + 1 : 0, end: Math.min(startIndex + rowsPerPage, filteredActiveClientsTotal.length), total: filteredActiveClientsTotal.length })}
               </span>
             </div>
 
@@ -640,7 +642,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       openEditModal(c);
                     }}
                     className="p-2.5 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-xl transition-all"
-                    title="Edit Client"
+                    title={t('crm:clients.editClient')}
                   >
                     <i className="fa-solid fa-pen-to-square"></i>
                   </button>
@@ -650,7 +652,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                       onUpdateClient(c.id, { isDisabled: true });
                     }}
                     className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
-                    title="Disable Client"
+                    title={t('crm:clients.isDisabled')}
                   >
                     <i className="fa-solid fa-ban"></i>
                   </button>
@@ -661,7 +663,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                         confirmDelete(c);
                       }}
                       className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                      title="Delete Client"
+                      title={t('common:buttons.delete')}
                     >
                       <i className="fa-solid fa-trash-can"></i>
                     </button>
@@ -675,8 +677,8 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                 <i className="fa-solid fa-users text-2xl"></i>
               </div>
-              <p className="text-slate-400 text-sm font-bold">No active clients found.</p>
-              <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">Add your first client</button>
+              <p className="text-slate-400 text-sm font-bold">{t('crm:clients.noClients')}</p>
+              <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">{t('crm:clients.createFirst')}</button>
             </div>
           )}
         </div>
@@ -684,7 +686,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
 
       {hasAnyDisabledClients && (
         <StandardTable
-          title="Disabled Clients"
+          title={t('crm:clients.disabledClients')}
           totalCount={filteredDisabledClientsTotal.length}
           totalLabel="DISABLED"
           containerClassName="border-dashed bg-slate-50"
@@ -692,7 +694,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
           footer={
             <>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+                <span className="text-xs font-bold text-slate-500">{t('common:labels.rowsPerPage')}</span>
                 <CustomSelect
                   options={[
                     { id: '5', name: '5' },
@@ -707,7 +709,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                   searchable={false}
                 />
                 <span className="text-xs font-bold text-slate-400 ml-2">
-                  Showing {disabledClientsPage.length > 0 ? disabledStartIndex + 1 : 0}-{Math.min(disabledStartIndex + disabledRowsPerPage, filteredDisabledClientsTotal.length)} of {filteredDisabledClientsTotal.length}
+                  {t('common:pagination.showing', { start: disabledClientsPage.length > 0 ? disabledStartIndex + 1 : 0, end: Math.min(disabledStartIndex + disabledRowsPerPage, filteredDisabledClientsTotal.length), total: filteredDisabledClientsTotal.length })}
                 </span>
               </div>
 
@@ -753,7 +755,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                   </div>
                   <div>
                     <h5 className="font-bold text-slate-500 line-through">{c.name}</h5>
-                    <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
+                    <span className="text-[10px] font-black text-amber-500 uppercase">{t('crm:clients.isDisabled')}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -785,7 +787,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ clients, onAddClient, onUpdat
                 <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                   <i className="fa-solid fa-user-slash text-2xl"></i>
                 </div>
-                <p className="text-slate-400 text-sm font-bold">No disabled clients found.</p>
+                <p className="text-slate-400 text-sm font-bold">{t('crm:clients.noClients')}</p>
               </div>
             )}
           </div>

@@ -3,16 +3,22 @@ import React, { useState, useEffect } from 'react';
 import CustomSelect from './CustomSelect';
 import api from '../services/api';
 import { getTheme, applyTheme, Theme } from '../utils/theme';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 
 export interface UserSettings {
   fullName: string;
   email: string;
+  language?: 'en' | 'it';
 }
 
 const Settings: React.FC = () => {
+  const { t } = useTranslation(['settings', 'common']);
+  
   const [settings, setSettings] = useState<UserSettings>({
     fullName: '',
     email: '',
+    language: 'en',
   });
   const [initialSettings, setInitialSettings] = useState<UserSettings | null>(null);
 
@@ -40,7 +46,11 @@ const Settings: React.FC = () => {
     const loadSettings = async () => {
       try {
         const data = await api.settings.get();
-        const profile = { fullName: data.fullName, email: data.email };
+        const profile = { 
+          fullName: data.fullName, 
+          email: data.email,
+          language: data.language || 'en'
+        };
         setSettings(profile);
         setInitialSettings(profile);
       } catch (err) {
@@ -56,7 +66,7 @@ const Settings: React.FC = () => {
     if (e) e.preventDefault();
     setIsSaving(true);
     try {
-      const payload = { fullName: settings.fullName, email: settings.email };
+      const payload = { fullName: settings.fullName, email: settings.email, language: settings.language };
       await api.settings.update(payload);
       setInitialSettings(payload);
       setIsSaved(true);
@@ -67,6 +77,12 @@ const Settings: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleLanguageChange = async (language: 'en' | 'it') => {
+    i18n.changeLanguage(language);
+    setSettings({ ...settings, language });
+    await handleSave({ preventDefault: () => {} } as React.FormEvent);
   };
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
@@ -105,7 +121,7 @@ const Settings: React.FC = () => {
       <div className="max-w-4xl mx-auto flex items-center justify-center py-20">
         <div className="text-center">
           <i className="fa-solid fa-circle-notch fa-spin text-praetor text-3xl mb-3"></i>
-          <p className="text-slate-500 font-medium">Loading settings...</p>
+          <p className="text-slate-500 font-medium">{t('states.loading')}</p>
         </div>
       </div>
     );
@@ -115,8 +131,8 @@ const Settings: React.FC = () => {
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">User Settings</h2>
-          <p className="text-sm text-slate-500 mt-1">Manage your individual profile and tracking preferences</p>
+          <h2 className="text-2xl font-bold text-slate-800">{t('settings.title')}</h2>
+          <p className="text-sm text-slate-500 mt-1">{t('settings.subtitle')}</p>
         </div>
       </div>
 
@@ -206,6 +222,46 @@ const Settings: React.FC = () => {
                   <h4 className="font-bold text-slate-800 mb-1">Tempo</h4>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     A vibrant indigo theme. Modern, energetic, and clean.
+                  </p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+            <i className="fa-solid fa-language text-praetor"></i>
+            <h3 className="font-bold text-slate-800">{t('settings.language.title')}</h3>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <button
+                onClick={() => handleLanguageChange('en')}
+                className={`relative p-4 rounded-xl border-2 transition-all text-left flex items-start gap-4 group ${settings.language === 'en' ? 'border-praetor bg-slate-50' : 'border-slate-100 hover:border-slate-200'}`}
+              >
+                <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0 shadow-sm flex items-center justify-center text-2xl">
+                  {settings.language === 'en' && <i className="fa-solid fa-check text-xs"></i>}
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800 mb-1">{t('settings.language.english')}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {t('settings.language.englishDesc')}
+                  </p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleLanguageChange('it')}
+                className={`relative p-4 rounded-xl border-2 transition-all text-left flex items-start gap-4 group ${settings.language === 'it' ? 'border-praetor bg-slate-50' : 'border-slate-100 hover:border-slate-200'}`}
+              >
+                <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0 shadow-sm flex items-center justify-center text-2xl">
+                  {settings.language === 'it' && <i className="fa-solid fa-check text-xs"></i>}
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800 mb-1">{t('settings.language.italian')}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {t('settings.language.italianDesc')}
                   </p>
                 </div>
               </button>

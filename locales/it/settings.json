@@ -1,0 +1,62 @@
+{
+  "title": "Impostazioni",
+  "subtitle": "Gestisci le tue preferenze personali",
+  "userProfile": {
+    "title": "Profilo Utente",
+    "fullName": "Nome Completo",
+    "email": "Indirizzo Email",
+    "updateProfile": "Aggiorna Profilo"
+  },
+  "language": {
+    "title": "Lingua / Language",
+    "english": "English",
+    "englishDesc": "Interfaccia in inglese",
+    "italian": "Italiano",
+    "italianDesc": "Interfaccia in italiano"
+  },
+  "appearance": {
+    "title": "Aspetto",
+    "default": {
+      "name": "Default",
+      "description": "L'esperienza classica di Praetor con branding blu ardesia. Professionale e distinta."
+    },
+    "tempo": {
+      "name": "Tempo",
+      "description": "Un tema indaco vibrante. Moderno, energico e pulito."
+    }
+  },
+  "password": {
+    "title": "Impostazioni Password",
+    "currentPassword": "Password Attuale",
+    "newPassword": "Nuova Password",
+    "confirmNewPassword": "Conferma Nuova Password",
+    "updatePassword": "Aggiorna Password",
+    "passwordUpdated": "Password Aggiornata",
+    "updating": "Aggiornamento...",
+    "passwordsDoNotMatch": "Le nuove password non corrispondono",
+    "passwordMinLength": "La nuova password deve avere almeno 8 caratteri",
+    "incorrectPassword": "Password attuale non corretta"
+  },
+  "general": {
+    "title": "Impostazioni Generali",
+    "currency": "Valuta",
+    "dailyLimit": "Limite Giornaliero",
+    "startOfWeek": "Inizio Settimana",
+    "treatSaturdayAsHoliday": "Tratta Sabato come Festività",
+    "enableAiInsights": "Abilita Insight AI",
+    "geminiApiKey": "Chiave API Gemini",
+    "localizationDisplay": "Localizzazione e Visualizzazione",
+    "trackingPreferences": "Preferenze di Tracciamento",
+    "aiCapabilities": "Capacità AI",
+    "saveChanges": "Salva Modifiche",
+    "changesSaved": "Modifiche Salvate",
+    "saving": "Salvataggio..."
+  },
+  "messages": {
+    "loading": "Caricamento impostazioni...",
+    "settingsSaved": "Impostazioni salvate con successo",
+    "settingsFailed": "Impossibile salvare le impostazioni",
+    "passwordUpdated": "Password aggiornata con successo",
+    "passwordFailed": "Impossibile aggiornare la password"
+  }
+}

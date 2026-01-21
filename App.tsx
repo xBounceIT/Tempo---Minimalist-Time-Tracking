@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback, useLayoutEffect } fro
 import { getTheme, applyTheme } from './utils/theme';
 import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product, Quote, Sale, WorkUnit, Invoice, Payment, Expense, Supplier, SupplierQuote, SpecialBid } from './types';
 import { COLORS } from './constants';
+import i18n from './i18n';
 import Layout from './components/Layout';
 import TimeEntryForm from './components/TimeEntryForm';
 import Reports from './components/Reports';
@@ -588,6 +589,16 @@ const App: React.FC = () => {
           const user = await api.auth.me();
           setCurrentUser(user);
           setViewingUserId(user.id);
+
+          // Load user's language preference
+          try {
+            const settings = await api.settings.get();
+            if (settings.language) {
+              i18n.changeLanguage(settings.language);
+            }
+          } catch (err) {
+            // Settings might not exist yet, that's okay
+          }
         } catch (err) {
           // Token invalid, clear it
           setAuthToken(null);

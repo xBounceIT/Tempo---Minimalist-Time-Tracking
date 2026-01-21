@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, WorkUnit } from '../types';
-import CustomSelect from './CustomSelect'; // Ensure CustomSelect is compatible or use local logic
+import CustomSelect from './CustomSelect';
 import { workUnitsApi } from '../services/api';
 
 interface WorkUnitsViewProps {
     workUnits: WorkUnit[];
     users: User[];
-    userRole: string; // Added userRole
+    userRole: string;
     onAddWorkUnit: (data: any) => Promise<void>;
     onUpdateWorkUnit: (id: string, updates: any) => Promise<void>;
     onDeleteWorkUnit: (id: string) => Promise<void>;
@@ -14,6 +15,7 @@ interface WorkUnitsViewProps {
 }
 
 const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRole, onAddWorkUnit, onUpdateWorkUnit, onDeleteWorkUnit, refreshWorkUnits }) => {
+    const { t } = useTranslation(['hr', 'common', 'form']);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
@@ -56,8 +58,8 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
         setErrors({});
 
         const newErrors: Record<string, string> = {};
-        if (!name?.trim()) newErrors.name = 'Unit name is required';
-        if (selectedManagerIds.length === 0) newErrors.managers = 'At least one manager is required';
+        if (!name?.trim()) newErrors.name = t('common:validation.unitNameRequired');
+        if (selectedManagerIds.length === 0) newErrors.managers = t('common:validation.managersRequired');
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -156,15 +158,15 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-800 tracking-tight">Work Units</h2>
-                    <p className="text-slate-500 font-medium">Manage implementation teams and their managers</p>
+                    <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('hr:workUnits.title')}</h2>
+                    <p className="text-slate-500 font-medium">{t('hr:workUnits.subtitle')}</p>
                 </div>
                 {userRole === 'admin' && (
                     <button
                         onClick={openCreateModal}
                         className="px-6 py-3 bg-praetor text-white font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
-                        <i className="fa-solid fa-plus"></i> New Work Unit
+                        <i className="fa-solid fa-plus"></i> {t('hr:workUnits.newWorkUnit')}
                     </button>
                 )}
             </div>

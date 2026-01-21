@@ -167,6 +167,7 @@ export interface LoginResponse {
 export interface Settings {
     fullName: string;
     email: string;
+    language?: 'en' | 'it';
 }
 
 // Auth API

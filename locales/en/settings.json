@@ -1,0 +1,62 @@
+{
+  "title": "Settings",
+  "subtitle": "Manage your personal preferences",
+  "userProfile": {
+    "title": "User Profile",
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "updateProfile": "Update Profile"
+  },
+  "language": {
+    "title": "Language / Lingua",
+    "english": "English",
+    "englishDesc": "Interface in English",
+    "italian": "Italiano",
+    "italianDesc": "Interfaccia in italiano"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "default": {
+      "name": "Default",
+      "description": "The classic Praetor experience with slate blue branding. Professional and distinct."
+    },
+    "tempo": {
+      "name": "Tempo",
+      "description": "A vibrant indigo theme. Modern, energetic, and clean."
+    }
+  },
+  "password": {
+    "title": "Password Settings",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "updatePassword": "Update Password",
+    "passwordUpdated": "Password Updated",
+    "updating": "Updating...",
+    "passwordsDoNotMatch": "New passwords do not match",
+    "passwordMinLength": "New password must be at least 8 characters long",
+    "incorrectPassword": "Incorrect current password"
+  },
+  "general": {
+    "title": "General Settings",
+    "currency": "Currency",
+    "dailyLimit": "Daily Limit",
+    "startOfWeek": "Start of Week",
+    "treatSaturdayAsHoliday": "Treat Saturday as Holiday",
+    "enableAiInsights": "Enable AI Insights",
+    "geminiApiKey": "Gemini API Key",
+    "localizationDisplay": "Localization & Display",
+    "trackingPreferences": "Tracking Preferences",
+    "aiCapabilities": "AI Capabilities",
+    "saveChanges": "Save Changes",
+    "changesSaved": "Changes Saved",
+    "saving": "Saving..."
+  },
+  "messages": {
+    "loading": "Loading settings...",
+    "settingsSaved": "Settings saved successfully",
+    "settingsFailed": "Failed to save settings",
+    "passwordUpdated": "Password updated successfully",
+    "passwordFailed": "Failed to update password"
+  }
+}

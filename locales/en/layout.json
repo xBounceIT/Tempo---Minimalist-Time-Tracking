@@ -1,0 +1,50 @@
+{
+  "modules": {
+    "timesheets": "Timesheets",
+    "crm": "CRM",
+    "hr": "HR",
+    "projects": "Projects",
+    "finances": "Finances",
+    "suppliers": "Suppliers",
+    "configuration": "Configuration"
+  },
+  "routes": {
+    "tracker": "Tracker",
+    "reports": "Reports",
+    "recurring": "Recurring",
+    "tasks": "Tasks",
+    "projects": "Projects",
+    "clients": "Clients",
+    "products": "Products",
+    "specialBids": "Special Bids",
+    "quotes": "Quotes",
+    "sales": "Sales",
+    "workforce": "Workforce",
+    "workUnits": "Work Units",
+    "manage": "Manage",
+    "invoices": "Invoices",
+    "payments": "Payments",
+    "expenses": "Expenses",
+    "financialReports": "Financial Reports",
+    "authentication": "Authentication",
+    "general": "General Settings"
+  },
+  "menu": {
+    "settings": "Settings",
+    "logout": "Logout",
+    "profile": "Profile",
+    "help": "Help",
+    "documentation": "Documentation"
+  },
+  "header": {
+    "welcome": "Welcome, {{name}}",
+    "viewProfile": "View Profile",
+    "editProfile": "Edit Profile",
+    "switchUser": "Switch User"
+  },
+  "sidebar": {
+    "toggle": "Toggle Sidebar",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  }
+}

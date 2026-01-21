@@ -1,0 +1,136 @@
+{
+  "tracker": {
+    "title": "Tracker Ore",
+    "mode": {
+      "daily": "Giornaliero",
+      "weekly": "Settimanale"
+    },
+    "myTimesheet": "Il Mio Timesheet",
+    "managingUser": "Gestione Utente",
+    "switchUserView": "Cambia Visualizzazione Utente",
+    "activityFor": "Attività per {{date}}",
+    "logsForDate": "Registri specificamente per questa data",
+    "dayTotal": "Totale Giornaliero",
+    "noEntries": "Nessuna voce timesheet per questa selezione",
+    "clientProject": "Cliente / Progetto",
+    "notes": "Note",
+    "recurring": "Ricorrente"
+  },
+  "entry": {
+    "addEntry": "Aggiungi Voce Timesheet",
+    "editEntry": "Modifica Voce Timesheet",
+    "date": "Data",
+    "client": "Cliente",
+    "project": "Progetto",
+    "task": "Attività",
+    "hours": "Ore",
+    "notes": "Note (opzionali)",
+    "hourlyRate": "Tariffa Oraria",
+    "dailyGoal": "Obiettivo Giornaliero",
+    "addToTimesheet": "Aggiungi al Timesheet",
+    "entryAdded": "Voce timesheet aggiunta con successo",
+    "entryUpdated": "Voce timesheet aggiornata con successo",
+    "entryDeleted": "Voce timesheet eliminata",
+    "deleteConfirm": "Sei sicuro di voler eliminare questa voce timesheet?",
+    "aiInput": "Input AI Intelligente",
+    "aiPlaceholder": "Descrivi il tuo lavoro in linguaggio naturale...",
+    "aiProcessing": "L'AI sta analizzando il tuo input...",
+    "aiGenerate": "Genera Voce dall'AI",
+    "recurring": "Questa è un'attività ricorrente"
+  },
+  "calendar": {
+    "today": "Oggi",
+    "target": "Obiettivo",
+    "overLimit": "Oltre il limite",
+    "dailyGoal": "Obiettivo Giornaliero",
+    "hoursWorked": "Ore Lavorate",
+    "remaining": "Rimanenti",
+    "week": "Settimana",
+    "month": "Mese",
+    "selectDate": "Seleziona Data",
+    "goToToday": "Vai a Oggi",
+    "holidays": "Festività",
+    "weekend": "Weekend"
+  },
+  "weekly": {
+    "title": "Timesheet Settimanale",
+    "submit": "Invia Settimana",
+    "submitConfirm": "Sei sicuro di voler inviare questa settimana?",
+    "submitSuccess": "Settimana inviata con successo",
+    "totalHours": "Ore Totali",
+    "days": {
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Gio",
+      "fri": "Ven",
+      "sat": "Sab",
+      "sun": "Dom"
+    }
+  },
+  "reports": {
+    "title": "Report Timesheet",
+    "weeklyActivity": "Attività Settimanale (Inizia {{start}})",
+    "hoursByProject": "Ore per Progetto",
+    "hoursByClient": "Ore per Cliente",
+    "hoursByTask": "Ore per Attività",
+    "totalTracked": "Totale Tracciato",
+    "tasksCompleted": "Attività Completate",
+    "mostActiveProject": "Progetto Più Attivo",
+    "filterBy": "Filtra per",
+    "dateRange": "Intervallo Date",
+    "user": "Utente",
+    "client": "Cliente",
+    "project": "Progetto",
+    "exportReport": "Esporta Report",
+    "printReport": "Stampa Report",
+    "noData": "Nessun dato disponibile per il periodo selezionato"
+  },
+  "recurring": {
+    "title": "Attività Ricorrenti",
+    "subtitle": "Gestisci la generazione automatica di voci timesheet",
+    "noRecurringTasks": "Nessuna attività ricorrente configurata",
+    "addRecurring": "Aggiungi Attività Ricorrente",
+    "editRecurring": "Modifica Attività Ricorrente",
+    "deleteRecurring": "Elimina Attività Ricorrente",
+    "stopConfirm": "Interrompere la generazione di voci per questa attività?",
+    "stopOnly": "Solo Interrompi Ricorrenza",
+    "stopOnlyDesc": "Mantiene tutto lo storico esistente. Smette semplicemente di ripetere l'attività in futuro.",
+    "deleteFuture": "Elimina Oggi & Futuro",
+    "deleteFutureDesc": "Interrompe la ricorrenza e rimuove le voci da oggi in poi. Lo storico passato viene salvato.",
+    "deleteAll": "Elimina Tutto",
+    "deleteAllDesc": "Rimuove completamente le impostazioni dell'attività e TUTTI i registri associati per sempre.",
+    "patterns": {
+      "daily": "Giornaliero",
+      "weekly": "Settimanale",
+      "monthly": "Mensile",
+      "custom": "Personalizzato"
+    },
+    "startDate": "Data Inizio",
+    "endDate": "Data Fine",
+    "duration": "Durata (ore)",
+    "setPattern": "Imposta Pattern",
+    "cancel": "Annulla",
+    "every": "Ogni",
+    "dayOfWeek": "Giorno della Settimana",
+    "occurrence": "Occorrenza",
+    "occurrences": {
+      "first": "Primo",
+      "second": "Secondo",
+      "third": "Terzo",
+      "fourth": "Quarto",
+      "last": "Ultimo"
+    }
+  },
+  "projects": {
+    "title": "Progetti nei Timesheet",
+    "assigned": "Progetti Assegnati",
+    "noProjects": "Nessun progetto assegnato"
+  },
+  "tasks": {
+    "title": "Attività nei Timesheet",
+    "assigned": "Attività Assegnate",
+    "noTasks": "Nessuna attività assegnata",
+    "assignedTo": "Assegnato a {{user}}"
+  }
+}

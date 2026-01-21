@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { User } from '../types';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 interface LoginProps {
   users: User[];
@@ -11,6 +12,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin, logoutReason, onClearLogoutReason }) => {
+  const { t } = useTranslation(['auth', 'common', 'notifications']);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,8 +26,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, logoutReason, onClearLogoutReaso
     setError('');
 
     const newErrors: Record<string, string> = {};
-    if (!username.trim()) newErrors.username = 'Username is required';
-    if (!password.trim()) newErrors.password = 'Password is required';
+    if (!username.trim()) newErrors.username = t('validation.usernameRequired');
+    if (!password.trim()) newErrors.password = t('validation.passwordRequired');
 
     if (Object.keys(newErrors).length > 0) {
       setFieldErrors(newErrors);
@@ -38,7 +40,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, logoutReason, onClearLogoutReaso
       const response = await api.auth.login(username, password);
       onLogin(response.user, response.token);
     } catch (err) {
-      setError((err as Error).message || 'Invalid username or password');
+      setError((err as Error).message || t('auth.invalidCredentials'));
     } finally {
       setIsLoading(false);
     }
@@ -49,15 +51,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, logoutReason, onClearLogoutReaso
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <img src="/praetor-logo.png" alt="Praetor Logo" className="h-56 mx-auto object-contain" />
-          <p className="text-slate-500 text-sm">Sign in to your workspace</p>
+          <p className="text-slate-500 text-sm">{t('auth.signInToWorkspace')}</p>
         </div>
 
         {logoutReason === 'inactivity' && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
             <i className="fa-solid fa-clock text-amber-500 mt-0.5"></i>
             <div className="flex-1">
-              <p className="text-sm font-bold text-amber-800">Session Expired</p>
-              <p className="text-xs text-amber-600">You were logged out due to inactivity. Please sign in again.</p>
+              <p className="text-sm font-bold text-amber-800">{t('auth.sessionExpired')}</p>
+              <p className="text-xs text-amber-600">{t('auth.sessionExpiredMessage')}</p>
             </div>
             {onClearLogoutReason && (
               <button type="button" onClick={onClearLogoutReason} className="text-amber-400 hover:text-amber-600 transition-colors">
@@ -69,7 +71,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, logoutReason, onClearLogoutReaso
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('common.username')}</label>
             <input
               type="text"
               value={username}
@@ -78,14 +80,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, logoutReason, onClearLogoutReaso
                 if (fieldErrors.username) setFieldErrors({ ...fieldErrors, username: '' });
               }}
               className={`w-full px-4 py-3 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all font-semibold text-slate-700 ${fieldErrors.username ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
-              placeholder="Enter username"
+              placeholder={t('auth.enterUsername')}
               disabled={isLoading}
             />
             {fieldErrors.username && <p className="text-red-500 text-[10px] font-bold mt-1">{fieldErrors.username}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Password</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('common.password')}</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -95,7 +97,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, logoutReason, onClearLogoutReaso
                   if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: '' });
                 }}
                 className={`w-full px-4 py-3 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all pr-10 font-semibold text-slate-700 ${fieldErrors.password ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
-                placeholder="Enter password"
+                placeholder={t('auth.enterPassword')}
                 disabled={isLoading}
               />
               <button
@@ -124,11 +126,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, logoutReason, onClearLogoutReaso
             {isLoading ? (
               <>
                 <i className="fa-solid fa-circle-notch fa-spin"></i>
-                Signing in...
+                {t('states.signingIn')}
               </>
             ) : (
               <>
-                Sign In <i className="fa-solid fa-arrow-right"></i>
+                {t('auth.signIn')} <i className="fa-solid fa-arrow-right"></i>
               </>
             )}
           </button>
@@ -136,7 +138,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, logoutReason, onClearLogoutReaso
 
         <div className="mt-8 pt-6 border-t border-slate-100 text-center">
           <p className="text-xs text-slate-400">
-            <strong>Default:</strong> "admin" / "password"
+            <strong>{t('auth.defaultCredentials')}:</strong> "admin" / "password"
           </p>
         </div>
       </div>

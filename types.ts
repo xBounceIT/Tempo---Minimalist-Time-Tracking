@@ -12,6 +12,12 @@ export interface User {
   isDisabled?: boolean;
 }
 
+export interface UserSettings {
+  fullName: string;
+  email: string;
+  language?: 'en' | 'it';
+}
+
 export interface GeneralSettings {
   currency: string;
   dailyLimit: number;

@@ -1,18 +1,20 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 interface SessionTimeoutHandlerProps {
     onLogout: () => void;
-    warnAfterMs?: number; // Default 20 minutes
-    logoutAfterMs?: number; // Default 30 minutes
+    warnAfterMs?: number;
+    logoutAfterMs?: number;
 }
 
 const SessionTimeoutHandler: React.FC<SessionTimeoutHandlerProps> = ({
     onLogout,
-    warnAfterMs = 20 * 60 * 1000, // 20 minutes
-    logoutAfterMs = 30 * 60 * 1000 // 30 minutes
+    warnAfterMs = 20 * 60 * 1000,
+    logoutAfterMs = 30 * 60 * 1000
 }) => {
+    const { t } = useTranslation('auth');
     const [showWarning, setShowWarning] = useState(false);
     const [lastActivity, setLastActivity] = useState(Date.now());
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -88,10 +90,10 @@ const SessionTimeoutHandler: React.FC<SessionTimeoutHandlerProps> = ({
                     </div>
 
                     <h3 className="text-2xl font-black text-slate-800 mb-2 tracking-tight">
-                        Still there?
+                        {t('sessionTimeout.title')}
                     </h3>
                     <p className="text-slate-500 leading-relaxed mb-8">
-                        Your session is about to expire due to inactivity. Would you like to stay logged in?
+                        {t('sessionTimeout.message')}
                     </p>
 
                     <div className="flex flex-col gap-3">
@@ -105,14 +107,14 @@ const SessionTimeoutHandler: React.FC<SessionTimeoutHandlerProps> = ({
                             ) : (
                                 <i className="fa-solid fa-check group-hover:scale-110 transition-transform"></i>
                             )}
-                            Yes, Keep Me Logged In
+                            {t('sessionTimeout.stayLoggedIn')}
                         </button>
 
                         <button
                             onClick={onLogout}
                             className="w-full py-4 bg-slate-50 text-slate-500 rounded-2xl font-bold hover:bg-slate-100 transition-colors"
                         >
-                            No, Log Me Out
+                            {t('sessionTimeout.logout')}
                         </button>
                     </div>
                 </div>
@@ -120,7 +122,7 @@ const SessionTimeoutHandler: React.FC<SessionTimeoutHandlerProps> = ({
                 <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 flex justify-center">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                         <i className="fa-solid fa-shield-halved"></i>
-                        Secure Session Management
+                        {t('sessionTimeout.secure')}
                     </p>
                 </div>
             </div>

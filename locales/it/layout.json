@@ -1,0 +1,50 @@
+{
+  "modules": {
+    "timesheets": "Timesheet",
+    "crm": "CRM",
+    "hr": "HR",
+    "projects": "Progetti",
+    "finances": "Finanze",
+    "suppliers": "Fornitori",
+    "configuration": "Configurazione"
+  },
+  "routes": {
+    "tracker": "Tracker",
+    "reports": "Report",
+    "recurring": "Ricorrenti",
+    "tasks": "Attività",
+    "projects": "Progetti",
+    "clients": "Clienti",
+    "products": "Prodotti",
+    "specialBids": "Offerte Speciali",
+    "quotes": "Preventivi",
+    "sales": "Vendite",
+    "workforce": "Personale",
+    "workUnits": "Unità di Lavoro",
+    "manage": "Gestisci",
+    "invoices": "Fatture",
+    "payments": "Pagamenti",
+    "expenses": "Spese",
+    "financialReports": "Report Finanziari",
+    "authentication": "Autenticazione",
+    "general": "Impostazioni Generali"
+  },
+  "menu": {
+    "settings": "Impostazioni",
+    "logout": "Esci",
+    "profile": "Profilo",
+    "help": "Aiuto",
+    "documentation": "Documentazione"
+  },
+  "header": {
+    "welcome": "Benvenuto, {{name}}",
+    "viewProfile": "Visualizza Profilo",
+    "editProfile": "Modifica Profilo",
+    "switchUser": "Cambia Utente"
+  },
+  "sidebar": {
+    "toggle": "Attiva/Disattiva Barra Laterale",
+    "expand": "Espandi",
+    "collapse": "Comprimi"
+  }
+}

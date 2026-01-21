@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface Option {
   id: string;
@@ -39,6 +40,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   dropdownPosition = 'bottom',
   displayValue
 }) => {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -80,17 +82,16 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   };
 
   const getButtonLabel = () => {
-    // Use custom display value if provided
     if (displayValue) return displayValue;
 
     if (isMulti) {
       const selected = selectedOptions as Option[];
-      if (selected.length === 0) return placeholder || 'Select...';
+      if (selected.length === 0) return placeholder || t('select.placeholder');
       if (selected.length === 1) return selected[0].name;
-      return `${selected.length} selected`;
+      return `${selected.length} ${t('select.selected').toLowerCase()}`;
     }
     const selected = selectedOptions as Option | undefined;
-    return selected ? selected.name : placeholder || 'Select...';
+    return selected ? selected.name : placeholder || t('select.placeholder');
   };
 
   const isSelected = (id: string) => {
@@ -171,7 +172,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 autoFocus
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search..."
+                placeholder={t('select.search')}
                 className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-praetor text-slate-700"
                 onClick={(e) => e.stopPropagation()}
               />
@@ -179,7 +180,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           )}
 
           {filteredOptions.length === 0 ? (
-            <div className="px-4 py-3 text-xs text-slate-400 italic text-center">No options found</div>
+            <div className="px-4 py-3 text-xs text-slate-400 italic text-center">{t('select.noOptions')}</div>
           ) : (
             <>
               {isMulti && filteredOptions.length > 1 && (
@@ -193,7 +194,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                     }}
                     className="flex-1 text-[10px] font-bold py-1 px-2 rounded bg-slate-100 text-praetor hover:bg-slate-200 transition-colors"
                   >
-                    Select All
+                    {t('select.selectAll')}
                   </button>
                   <button
                     type="button"
@@ -203,7 +204,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                     }}
                     className="flex-1 text-[10px] font-bold py-1 px-2 rounded bg-slate-50 text-slate-500 hover:bg-slate-100 transition-colors"
                   >
-                    Clear
+                    {t('select.clear')}
                   </button>
                 </div>
               )}

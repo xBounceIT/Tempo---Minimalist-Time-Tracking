@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type StandardTableProps = {
   title: string;
@@ -16,7 +17,7 @@ type StandardTableProps = {
 const StandardTable = ({
   title,
   totalCount,
-  totalLabel = 'TOTAL',
+  totalLabel,
   headerExtras,
   headerAction,
   containerClassName,
@@ -25,6 +26,7 @@ const StandardTable = ({
   footerClassName,
   children,
 }: StandardTableProps) => {
+  const { t } = useTranslation('common');
   return (
     <div className={`bg-white rounded-3xl border border-slate-200 shadow-sm ${containerClassName ?? ''}`.trim()}>
       <div className="px-8 py-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center rounded-t-3xl">
@@ -32,7 +34,7 @@ const StandardTable = ({
           <h4 className="font-black text-slate-400 uppercase text-[10px] tracking-widest">{title}</h4>
           {typeof totalCount === 'number' && (
             <span className="bg-slate-100 text-praetor px-3 py-1 rounded-full text-[10px] font-black">
-              {totalCount} {totalLabel}
+              {totalCount} {totalLabel || t('table.total')}
             </span>
           )}
         </div>

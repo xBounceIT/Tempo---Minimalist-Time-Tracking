@@ -9,7 +9,7 @@ export default async function (fastify, opts) {
         onRequest: [authenticateToken]
     }, async (request, reply) => {
         const result = await query(
-            `SELECT full_name, email
+            `SELECT full_name, email, language
        FROM settings WHERE user_id = $1`,
             [request.user.id]
         );
@@ -26,14 +26,16 @@ export default async function (fastify, opts) {
             const s = insertResult.rows[0];
             return {
                 fullName: s.full_name,
-                email: s.email
+                email: s.email,
+                language: s.language || 'en'
             };
         }
 
         const s = result.rows[0];
         return {
             fullName: s.full_name,
-            email: s.email
+            email: s.email,
+            language: s.language || 'en'
         };
     });
 
@@ -41,28 +43,35 @@ export default async function (fastify, opts) {
     fastify.put('/', {
         onRequest: [authenticateToken]
     }, async (request, reply) => {
-        const { fullName, email } = request.body;
+        const { fullName, email, language } = request.body;
         const fullNameResult = optionalNonEmptyString(fullName, 'fullName');
         if (!fullNameResult.ok) return badRequest(reply, fullNameResult.message);
 
         const emailResult = optionalEmail(email, 'email');
         if (!emailResult.ok) return badRequest(reply, emailResult.message);
 
+        // Validate language if provided
+        if (language !== undefined && language !== null && language !== 'en' && language !== 'it') {
+            return badRequest(reply, 'Language must be either "en" or "it"');
+        }
+
         const result = await query(
-            `INSERT INTO settings (user_id, full_name, email)
-       VALUES ($1, $2, $3)
+            `INSERT INTO settings (user_id, full_name, email, language)
+       VALUES ($1, $2, $3, $4)
        ON CONFLICT (user_id) DO UPDATE SET
          full_name = COALESCE($2, settings.full_name),
          email = COALESCE($3, settings.email),
+         language = COALESCE($4, settings.language),
          updated_at = CURRENT_TIMESTAMP
-       RETURNING full_name, email`,
-            [request.user.id, fullNameResult.value, emailResult.value]
+       RETURNING full_name, email, language`,
+            [request.user.id, fullNameResult.value, emailResult.value, language || 'en']
         );
 
         const s = result.rows[0];
         return {
             fullName: s.full_name,
-            email: s.email
+            email: s.email,
+            language: s.language || 'en'
         };
     });
 

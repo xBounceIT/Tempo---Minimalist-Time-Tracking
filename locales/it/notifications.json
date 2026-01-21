@@ -1,0 +1,48 @@
+{
+  "success": {
+    "saved": "Modifiche salvate con successo",
+    "created": "Creato con successo",
+    "updated": "Aggiornato con successo",
+    "deleted": "Eliminato con successo",
+    "sent": "Inviato con successo",
+    "submitted": "Inviato con successo",
+    "completed": "Completato con successo",
+    "copied": "Copiato negli appunti"
+  },
+  "errors": {
+    "generic": "Si è verificato un errore. Riprova.",
+    "network": "Errore di rete. Controlla la tua connessione.",
+    "notFound": "Non trovato",
+    "unauthorized": "Non sei autorizzato a eseguire questa azione",
+    "forbidden": "Accesso negato",
+    "validation": "Controlla il tuo input e riprova",
+    "saveFailed": "Impossibile salvare le modifiche",
+    "deleteFailed": "Impossibile eliminare l'elemento",
+    "createFailed": "Impossibile creare l'elemento",
+    "updateFailed": "Impossibile aggiornare l'elemento",
+    "loadFailed": "Impossibile caricare i dati"
+  },
+  "warnings": {
+    "unsavedChanges": "Hai modifiche non salvate. Sei sicuro di voler lasciare?",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo elemento? Questa azione non può essere annullata.",
+    "requiredField": "Questo campo è obbligatorio",
+    "invalidFormat": "Formato non valido",
+    "valueTooLow": "Il valore è troppo basso",
+    "valueTooHigh": "Il valore è troppo alto"
+  },
+  "info": {
+    "noData": "Nessun dato disponibile",
+    "noResults": "Nessun risultato trovato",
+    "loading": "Caricamento...",
+    "processing": "Elaborazione...",
+    "pleaseWait": "Attendere prego..."
+  },
+  "confirmations": {
+    "delete": "Eliminare {{item}}?",
+    "deleteConfirm": "Sei sicuro di voler eliminare {{item}}? Questa azione non può essere annullata.",
+    "discardChanges": "Scartare le modifiche non salvate?",
+    "submit": "Inviare per revisione?",
+    "approve": "Approvare questo elemento?",
+    "reject": "Rifiutare questo elemento?"
+  }
+}
