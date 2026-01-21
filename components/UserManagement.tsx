@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, UserRole, Client, Project, ProjectTask } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
@@ -18,13 +19,15 @@ interface UserManagementProps {
   currency: string;
 }
 
-const ROLE_OPTIONS = [
-  { id: 'user', name: 'User' },
-  { id: 'manager', name: 'Manager' },
-  { id: 'admin', name: 'Admin' },
-];
-
 const UserManagement: React.FC<UserManagementProps> = ({ users, clients, projects, tasks, onAddUser, onDeleteUser, onUpdateUser, currentUserId, currentUserRole, currency }) => {
+    const { t } = useTranslation(['hr', 'common']);
+  
+  const ROLE_OPTIONS = [
+    { id: 'user', name: t('hr:roles.user') },
+    { id: 'manager', name: t('hr:roles.manager') },
+    { id: 'admin', name: t('hr:roles.admin') },
+  ];
+
   const [newName, setNewName] = useState('');
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('password');
@@ -73,9 +76,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
     setFormErrors({});
 
     const newErrors: Record<string, string> = {};
-    if (!newName?.trim()) newErrors.name = 'Name is required';
-    if (!newUsername?.trim()) newErrors.username = 'Username is required';
-    if (!newPassword?.trim()) newErrors.password = 'Password is required';
+    if (!newName?.trim()) newErrors.name = t('common:validation.nameRequired');
+    if (!newUsername?.trim()) newErrors.username = t('common:validation.usernameRequired');
+    if (!newPassword?.trim()) newErrors.password = t('common:validation.passwordRequired');
 
     if (Object.keys(newErrors).length > 0) {
       setFormErrors(newErrors);
@@ -85,9 +88,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, clients, project
     const result = await onAddUser(newName, newUsername, newPassword, newRole);
     if (!result.success) {
       if (result.error?.includes('Username already exists')) {
-        setFormErrors({ username: 'Username already exists' });
+        setFormErrors({ username: t('common:validation.usernameAlreadyExists') || result.error });
       } else {
-        setFormErrors({ general: result.error || 'Failed to add user' });
+        setFormErrors({ general: result.error || t('common:messages.errorOccurred') });
       }
       return;
     }

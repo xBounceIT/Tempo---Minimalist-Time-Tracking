@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ProjectTask, Project, Client, UserRole, User } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
@@ -17,6 +18,7 @@ interface TasksViewProps {
 }
 
 const TasksView: React.FC<TasksViewProps> = ({ tasks, projects, clients, role, users, onAddTask, onUpdateTask, onDeleteTask }) => {
+    const { t } = useTranslation(['projects', 'common']);
   const [name, setName] = useState('');
   const [projectId, setProjectId] = useState('');
   const [description, setDescription] = useState('');

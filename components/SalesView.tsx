@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sale, SaleItem, Client, Product, SpecialBid } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
@@ -41,10 +42,10 @@ const calcProductSalePrice = (costo: number, molPercentage: number) => {
     return costo / (1 - molPercentage / 100);
 };
 
-const getSaleStatusLabel = (status: Sale['status']) => {
-    if (status === 'completed') return 'Completed';
-    if (status === 'cancelled') return 'Denied';
-    return 'Pending';
+const getSaleStatusLabel = (status: Sale['status'], t: any) => {
+    if (status === 'completed') return t('crm:sales.statusCompleted');
+    if (status === 'cancelled') return t('crm:sales.statusCancelled');
+    return t('crm:sales.statusPending');
 };
 
 const getSaleStatusBadgeClass = (status: Sale['status']) => {
@@ -54,6 +55,7 @@ const getSaleStatusBadgeClass = (status: Sale['status']) => {
 };
 
 const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, specialBids, onAddSale, onUpdateSale, onDeleteSale, onViewQuote, currency }) => {
+    const { t } = useTranslation(['crm', 'common']);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSale, setEditingSale] = useState<Sale | null>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -910,7 +912,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                                     </td>
                                     <td className="px-8 py-5">
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black ${getSaleStatusBadgeClass(sale.status)}`}>
-                                            {getSaleStatusLabel(sale.status).toUpperCase()}
+                                            {getSaleStatusLabel(sale.status, t).toUpperCase()}
                                         </span>
                                     </td>
                                     <td className="px-8 py-5 text-sm font-bold text-slate-700">
@@ -1087,7 +1089,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                                         </td>
                                         <td className="px-8 py-5">
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-black ${getSaleStatusBadgeClass(sale.status)}`}>
-                                                {getSaleStatusLabel(sale.status).toUpperCase()}
+                                                {getSaleStatusLabel(sale.status, t).toUpperCase()}
                                             </span>
                                         </td>
                                         <td className="px-8 py-5 text-sm font-bold text-slate-700">

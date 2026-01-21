@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Product, Supplier } from '../types';
 import CustomSelect, { Option } from './CustomSelect';
 import StandardTable from './StandardTable';
@@ -13,6 +14,7 @@ interface ProductsViewProps {
 }
 
 const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddProduct, onUpdateProduct, onDeleteProduct }) => {
+    const { t } = useTranslation(['crm', 'common']);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -132,12 +134,12 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
         setErrors({});
 
         const newErrors: Record<string, string> = {};
-        if (!formData.name?.trim()) newErrors.name = 'Product name is required';
+        if (!formData.name?.trim()) newErrors.name = t('common:validation.productNameRequired');
         if (formData.costo === undefined || formData.costo === null || Number.isNaN(formData.costo)) {
-            newErrors.costo = 'Costo is required';
+            newErrors.costo = t('common:validation.costRequired');
         }
         if (formData.molPercentage === undefined || formData.molPercentage === null || Number.isNaN(formData.molPercentage)) {
-            newErrors.molPercentage = 'MOL % is required';
+            newErrors.molPercentage = t('common:validation.molPercentageRequired');
         }
         if (
             !newErrors.molPercentage &&
@@ -146,7 +148,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
             !Number.isNaN(formData.molPercentage)
         ) {
             if (formData.molPercentage <= 0 || formData.molPercentage >= 100) {
-                newErrors.molPercentage = 'MOL % must be greater than 0 and less than 100';
+                newErrors.molPercentage = t('common:validation.molPercentageRange');
             }
         }
         if (formData.taxRate === undefined || formData.taxRate === null || Number.isNaN(formData.taxRate)) {
