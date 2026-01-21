@@ -207,5 +207,8 @@
     "active": "Attivo",
     "disabled": "Disabilitato",
     "all": "Tutti"
+  },
+  "table": {
+    "total": "totale"
   }
 }
