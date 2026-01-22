@@ -62,8 +62,19 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
     // Category Management State
     const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
-    const defaultCategories = ['Electronics', 'Software', 'Services', 'Hardware', 'Accessories', 'Subscription', 'Consulting', 'Maintenance', 'Supplies', 'Other'];
-    const [customCategories, setCustomCategories] = useState<string[]>(defaultCategories);
+    const defaultCategories = [
+        t('crm:products.defaultCategories.electronics'),
+        t('crm:products.defaultCategories.software'),
+        t('crm:products.defaultCategories.services'),
+        t('crm:products.defaultCategories.hardware'),
+        t('crm:products.defaultCategories.accessories'),
+        t('crm:products.defaultCategories.subscription'),
+        t('crm:products.defaultCategories.consulting'),
+        t('crm:products.defaultCategories.maintenance'),
+        t('crm:products.defaultCategories.supplies'),
+        t('crm:products.defaultCategories.other')
+    ];
+    const [customCategories, setCustomCategories] = useState<string[]>([]);
 
     // Form State
     const [formData, setFormData] = useState<Partial<Product>>({
@@ -263,7 +274,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
 
     // Get unique categories from existing products + custom ones
     const existingCategories = Array.from(new Set(products.map(p => p.category).filter((c): c is string => !!c)));
-    const allCategories = Array.from(new Set([...existingCategories, ...customCategories])).sort();
+    const allCategories = Array.from(new Set([...defaultCategories, ...existingCategories, ...customCategories])).sort();
 
     const categoryOptions: Option[] = allCategories.map(c => ({ id: c, name: c }));
 
@@ -286,7 +297,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
     const filterCategoryOptions: Option[] = [{ id: 'all', name: t('crm:products.allCategories') }, ...categoryOptions];
     const filterTypeOptions: Option[] = [{ id: 'all', name: t('common:filters.allTypes') }, ...typeOptions];
     const filterSupplierOptions: Option[] = [
-        { id: 'all', name: t('common:filters.all') },
+        { id: 'all', name: t('common:filters.allSuppliers') },
         { id: 'none', name: t('crm:products.noSupplier') },
         ...activeSuppliers.map(s => ({ id: s.id, name: s.name }))
     ];

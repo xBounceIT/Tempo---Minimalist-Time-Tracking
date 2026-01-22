@@ -115,7 +115,20 @@
     "unusualTaxRate": "Unusual tax rate (over 30%).",
     "editProductTooltip": "Edit Product",
     "disableProduct": "Disable Product",
-    "deleteProductTooltip": "Delete Product"
+    "deleteProductTooltip": "Delete Product",
+    "defaultCategories": {
+      "electronics": "Electronics",
+      "software": "Software",
+      "services": "Services",
+      "hardware": "Hardware",
+      "accessories": "Accessories",
+      "subscription": "Subscription",
+      "consulting": "Consulting",
+      "maintenance": "Maintenance",
+      "supplies": "Supplies",
+      "other": "Other"
+    },
+    "selectOption": "Select an option..."
   },
   "specialBids": {
     "title": "Special Bids",

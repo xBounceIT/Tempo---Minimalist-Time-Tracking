@@ -109,7 +109,20 @@
     "unusualTaxRate": "Aliquota insolita (superiore al 30%).",
     "editProductTooltip": "Modifica Prodotto",
     "disableProduct": "Disabilita Prodotto",
-    "deleteProductTooltip": "Elimina Prodotto"
+    "deleteProductTooltip": "Elimina Prodotto",
+    "defaultCategories": {
+      "electronics": "Elettronica",
+      "software": "Software",
+      "services": "Servizi",
+      "hardware": "Hardware",
+      "accessories": "Accessori",
+      "subscription": "Abbonamento",
+      "consulting": "Consulenza",
+      "maintenance": "Manutenzione",
+      "supplies": "Forniture",
+      "other": "Altro"
+    },
+    "selectOption": "Seleziona un'opzione..."
   },
   "specialBids": {
     "title": "Special Bid",

@@ -1,7 +1,7 @@
 {
   "suppliers": {
     "title": "Fornitori",
-    "subtitle": "Gestisci la tua directory fornitori",
+    "subtitle": "Gestisci i tuoi fornitori",
     "addSupplier": "Aggiungi Nuovo Fornitore",
     "editSupplier": "Modifica Fornitore",
     "supplierDetails": "Dettagli Fornitore",
