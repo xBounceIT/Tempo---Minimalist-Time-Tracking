@@ -210,5 +210,13 @@
   },
   "table": {
     "total": "totale"
+  },
+  "select": {
+    "placeholder": "Seleziona...",
+    "selected": "selezionati",
+    "search": "Cerca...",
+    "noOptions": "Nessuna opzione trovata",
+    "selectAll": "Seleziona Tutto",
+    "clear": "Cancella"
   }
 }

@@ -210,5 +210,13 @@
   },
   "table": {
     "total": "total"
+  },
+  "select": {
+    "placeholder": "Select...",
+    "selected": "selected",
+    "search": "Search...",
+    "noOptions": "No options found",
+    "selectAll": "Select All",
+    "clear": "Clear"
   }
 }
