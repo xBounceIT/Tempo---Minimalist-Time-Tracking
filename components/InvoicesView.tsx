@@ -338,7 +338,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
                                         options={activeClients.map(c => ({ id: c.id, name: c.name }))}
                                         value={formData.clientId || ''}
                                         onChange={handleClientChange}
-                                        placeholder={t('invoices.selectProductPlaceholder')}
+                                        placeholder={t('invoices.allClients')}
                                         searchable={true}
                                         className={errors.clientId ? 'border-red-300' : ''}
                                     />
@@ -636,7 +636,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('common.labels.amount')}</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('invoices.balance')}</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('invoices.status')}</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('common.common.more')}</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('common.more')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">

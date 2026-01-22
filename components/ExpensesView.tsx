@@ -197,7 +197,7 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expenses, onAddExpense, onU
                                     {errors.expenseDate && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.expenseDate}</p>}
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-500 ml-1">{t('expenses.vendor')} ({t('common.common.optional')})</label>
+                                    <label className="text-xs font-bold text-slate-500 ml-1">{t('expenses.vendor')} ({t('common.optional')})</label>
                                     <input
                                         type="text"
                                         placeholder={t('expenses.vendorPlaceholder')}
@@ -349,7 +349,7 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expenses, onAddExpense, onU
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('expenses.category')}</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('expenses.vendor')}</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('expenses.amount')}</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('common.common.more')}</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('common.more')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
