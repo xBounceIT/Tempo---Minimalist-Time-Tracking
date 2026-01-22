@@ -152,7 +152,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
             }
         }
         if (formData.taxRate === undefined || formData.taxRate === null || Number.isNaN(formData.taxRate)) {
-            newErrors.taxRate = 'Tax rate is required';
+            newErrors.taxRate = t('common:validation.taxRateRequired');
         }
         if (
             !newErrors.taxRate &&
@@ -161,16 +161,16 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
             !Number.isNaN(formData.taxRate)
         ) {
             if (formData.taxRate < 0 || formData.taxRate > 100) {
-                newErrors.taxRate = 'Tax rate must be between 0 and 100';
+                newErrors.taxRate = t('common:validation.taxRateRange');
             }
         }
         const typeValue = formData.type;
         if (!typeValue || !['item', 'service'].includes(typeValue)) {
-            newErrors.type = 'Type is required';
+            newErrors.type = t('common:validation.typeRequired');
         }
         const costUnitValue = formData.costUnit;
         if (!costUnitValue || !['unit', 'hours'].includes(costUnitValue)) {
-            newErrors.costUnit = 'Unit of measure is required';
+            newErrors.costUnit = t('common:validation.unitOfMeasureRequired');
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -268,26 +268,26 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
     const categoryOptions: Option[] = allCategories.map(c => ({ id: c, name: c }));
 
     const unitOptions: Option[] = [
-        { id: 'unit', name: 'Unit' },
-        { id: 'hours', name: 'Hours' }
+        { id: 'unit', name: t('crm:products.unit') },
+        { id: 'hours', name: t('crm:products.hours') }
     ];
 
     const typeOptions: Option[] = [
-        { id: 'item', name: 'Item' },
-        { id: 'service', name: 'Service' }
+        { id: 'item', name: t('crm:products.typeItem') },
+        { id: 'service', name: t('crm:products.typeService') }
     ];
 
     const activeSuppliers = suppliers.filter(s => !s.isDisabled);
     const supplierOptions: Option[] = [
-        { id: '', name: 'No Supplier' },
+        { id: '', name: t('crm:products.noSupplier') },
         ...activeSuppliers.map(s => ({ id: s.id, name: s.name }))
     ];
 
-    const filterCategoryOptions: Option[] = [{ id: 'all', name: 'All Categories' }, ...categoryOptions];
-    const filterTypeOptions: Option[] = [{ id: 'all', name: 'All Types' }, ...typeOptions];
+    const filterCategoryOptions: Option[] = [{ id: 'all', name: t('crm:products.allCategories') }, ...categoryOptions];
+    const filterTypeOptions: Option[] = [{ id: 'all', name: t('common:filters.allTypes') }, ...typeOptions];
     const filterSupplierOptions: Option[] = [
-        { id: 'all', name: 'All Suppliers' },
-        { id: 'none', name: 'No Supplier' },
+        { id: 'all', name: t('common:filters.all') },
+        { id: 'none', name: t('crm:products.noSupplier') },
         ...activeSuppliers.map(s => ({ id: s.id, name: s.name }))
     ];
 
@@ -330,7 +330,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                 <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-praetor">
                                     <i className="fa-solid fa-plus"></i>
                                 </div>
-                                Add Category
+                                {t('crm:products.addCategoryModalTitle')}
                             </h3>
                             <button
                                 onClick={() => setIsAddCategoryModalOpen(false)}
@@ -341,14 +341,14 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                         </div>
                         <div className="p-6 space-y-4">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-500 ml-1">Category Name</label>
+                                <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:products.categoryName')}</label>
                                 <input
                                     type="text"
                                     autoFocus
                                     value={newCategoryName}
                                     onChange={(e) => setNewCategoryName(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
-                                    placeholder="e.g. Software Licenses"
+                                    placeholder={t('crm:products.categoryNamePlaceholder')}
                                     className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
                                 />
                             </div>
@@ -357,13 +357,13 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     onClick={() => setIsAddCategoryModalOpen(false)}
                                     className="px-6 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
                                 >
-                                    Cancel
+                                    {t('crm:products.cancel')}
                                 </button>
                                 <button
                                     onClick={handleAddCategory}
                                     className="px-6 py-2.5 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                                 >
-                                    Add Category
+                                    {t('crm:products.addCategory')}
                                 </button>
                             </div>
                         </div>
@@ -380,7 +380,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                 <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-praetor">
                                     <i className={`fa-solid ${editingProduct ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
                                 </div>
-                                {editingProduct ? 'Edit Product' : 'Add New Product'}
+                                {editingProduct ? t('crm:products.editProductTitle') : t('crm:products.addProductTitle')}
                             </h3>
                             <button
                                 onClick={() => setIsModalOpen(false)}
@@ -394,11 +394,11 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                             <div className="space-y-4">
                                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                                    Product Details
+                                    {t('crm:products.productDetails')}
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="col-span-full space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Product Name</label>
+                                        <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:products.productName')}</label>
                                         <input
                                             type="text"
                                             required
@@ -407,7 +407,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                                 setFormData({ ...formData, name: e.target.value });
                                                 if (errors.name) setErrors({ ...errors, name: '' });
                                             }}
-                                            placeholder="e.g. Consulting Services"
+                                            placeholder={t('crm:products.categoryNamePlaceholder')}
                                             className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
                                         />
                                         {errors.name && <p className="text-red-500 text-[10px] font-bold ml-1 mt-1">{errors.name}</p>}
@@ -415,20 +415,20 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
 
                                     <div className="space-y-1.5">
                                         <div className="flex justify-between items-center ml-1 min-h-[16px]">
-                                            <label className="text-xs font-bold text-slate-500">Category</label>
+                                            <label className="text-xs font-bold text-slate-500">{t('crm:products.category')}</label>
                                             <button
                                                 type="button"
                                                 onClick={() => setIsAddCategoryModalOpen(true)}
                                                 className="text-[10px] font-black text-praetor hover:text-slate-700 uppercase tracking-tighter flex items-center gap-1"
                                             >
-                                                <i className="fa-solid fa-plus"></i> Add Category
+                                                <i className="fa-solid fa-plus"></i> {t('crm:products.addCategory')}
                                             </button>
                                         </div>
                                         <CustomSelect
                                             options={categoryOptions}
                                             value={formData.category || ''}
                                             onChange={(val) => setFormData({ ...formData, category: val })}
-                                            placeholder="Select category"
+                                            placeholder={t('crm:products.selectOption')}
                                             searchable={true}
                                         />
                                     </div>
@@ -436,9 +436,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     <div className="space-y-1.5">
                                         <div className="ml-1 space-y-1">
                                             {showTaxRateWarning && (
-                                                <p className="text-amber-600 text-[10px] font-bold">Unusual tax rate (over 30%).</p>
+                                                <p className="text-amber-600 text-[10px] font-bold">{t('crm:products.unusualTaxRate')}</p>
                                             )}
-                                            <label className="text-xs font-bold text-slate-500">Tax Rate (%)</label>
+                                            <label className="text-xs font-bold text-slate-500">{t('crm:products.taxRate')} (%)</label>
                                         </div>
                                         <ValidatedNumberInput
                                             value={formData.taxRate ?? ''}
@@ -450,7 +450,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
 
                                     <div className="space-y-1.5">
                                         <div className="flex items-center ml-1 min-h-[16px]">
-                                            <label className="text-xs font-bold text-slate-500">Type</label>
+                                            <label className="text-xs font-bold text-slate-500">{t('crm:products.type')}</label>
                                         </div>
                                         <CustomSelect
                                             options={typeOptions}
@@ -464,25 +464,25 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
 
                                     <div className="space-y-1.5">
                                         <div className="flex items-center ml-1 min-h-[16px]">
-                                            <label className="text-xs font-bold text-slate-500 font-black">Unit of Measure</label>
+                                            <label className="text-xs font-bold text-slate-500 font-black">{t('crm:products.unitOfMeasure')}</label>
                                         </div>
                                         <div className={`w-full text-sm px-4 py-2.5 border rounded-xl font-bold flex items-center gap-2 ${errors.costUnit ? 'border-red-500 bg-red-50 text-red-600' : 'bg-slate-100 border-slate-200 text-slate-500'}`}>
                                             <i className={`fa-solid ${formData.type === 'service' ? 'fa-clock' : 'fa-box-open'}`}></i>
-                                            {formData.type === 'service' ? 'Hours' : 'Unit'}
+                                            {formData.type === 'service' ? t('crm:products.hours') : t('crm:products.unit')}
                                         </div>
                                         {errors.costUnit && <p className="text-red-500 text-[10px] font-bold ml-1 mt-1">{errors.costUnit}</p>}
-                                        <p className="text-[10px] text-slate-400 ml-1">Automatically set based on Type</p>
+                                        <p className="text-[10px] text-slate-400 ml-1">{t('crm:products.autoSetBasedOnType')}</p>
                                     </div>
 
                                     <div className="space-y-1.5">
                                         <div className="flex items-center ml-1 min-h-[16px]">
-                                            <label className="text-xs font-bold text-slate-500">Supplier</label>
+                                            <label className="text-xs font-bold text-slate-500">{t('crm:products.supplier')}</label>
                                         </div>
                                         <CustomSelect
                                             options={supplierOptions}
                                             value={formData.supplierId || ''}
                                             onChange={(val) => setFormData({ ...formData, supplierId: val })}
-                                            placeholder="Select supplier"
+                                            placeholder={t('crm:products.selectOption')}
                                             searchable={true}
                                         />
                                     </div>
@@ -492,11 +492,11 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                             <div className="space-y-4">
                                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                                    Pricing and Unit
+                                    {t('crm:products.pricingAndUnit')}
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Costo</label>
+                                        <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:products.cost')}</label>
                                         <div className="flex gap-2">
                                             <ValidatedNumberInput
                                                 value={formData.costo ?? ''}
@@ -508,7 +508,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">MOL %</label>
+                                        <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:products.mol')}</label>
                                         <div className="flex gap-2">
                                             <ValidatedNumberInput
                                                 value={formData.molPercentage ?? ''}
@@ -520,14 +520,14 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Sale Price (calculated)</label>
+                                        <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:products.salePriceCalculated')}</label>
                                         <div className="w-full text-sm px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold">
                                             {hasPricing ? calcSalePrice(formData.costo!, formData.molPercentage!).toFixed(2) : '--'}
                                         </div>
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Margine (calculated)</label>
+                                        <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:products.marginCalculated')}</label>
                                         <div className="w-full text-sm px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-emerald-600 font-semibold">
                                             {hasPricing ? calcMargine(formData.costo!, formData.molPercentage!).toFixed(2) : '--'}
                                         </div>
@@ -541,13 +541,13 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     onClick={() => setIsModalOpen(false)}
                                     className="px-10 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
                                 >
-                                    Cancel
+                                    {t('common:buttons.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     className="px-12 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                                 >
-                                    {editingProduct ? 'Update Product' : 'Save Product'}
+                                    {editingProduct ? t('crm:products.updateProduct') : t('crm:products.saveProduct')}
                                 </button>
                             </div>
                         </form>
@@ -565,10 +565,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     <i className="fa-solid fa-triangle-exclamation text-xl"></i>
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-black text-slate-800">Delete Product?</h3>
+                                    <h3 className="text-lg font-black text-slate-800">{t('crm:products.deleteProductTitle')}</h3>
                                     <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                                        Are you sure you want to delete <span className="font-bold text-slate-800">{productToDelete?.name}</span>?
-                                        This action cannot be undone.
+                                        {t('crm:products.deleteConfirm', { productName: productToDelete?.name })}
                                     </p>
                                 </div>
                                 <div className="flex gap-3 pt-2">
@@ -576,13 +575,13 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                         onClick={() => setIsDeleteConfirmOpen(false)}
                                         className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
                                     >
-                                        Cancel
+                                        {t('common:buttons.cancel')}
                                     </button>
                                     <button
                                         onClick={handleDelete}
                                         className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
                                     >
-                                        Yes, Delete
+                                        {t('crm:products.yesDelete')}
                                     </button>
                                 </div>
                             </div>
@@ -593,8 +592,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-800">Products</h2>
-                    <p className="text-slate-500 text-sm">Manage products and services for billing</p>
+                    <h2 className="text-2xl font-black text-slate-800">{t('crm:products.title')}</h2>
+                    <p className="text-slate-500 text-sm">{t('crm:products.subtitle')}</p>
                 </div>
             </div>
 
@@ -604,7 +603,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                     <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input
                         type="text"
-                        placeholder="Search products, categories, or suppliers..."
+                        placeholder={t('crm:products.searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-praetor outline-none shadow-sm placeholder:font-normal"
@@ -615,7 +614,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                         options={filterCategoryOptions}
                         value={filterCategory}
                         onChange={setFilterCategory}
-                        placeholder="Filter by Category"
+                        placeholder={t('crm:products.filterByCategory')}
                         searchable={true}
                         buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
                     />
@@ -625,7 +624,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                         options={filterTypeOptions}
                         value={filterType}
                         onChange={setFilterType}
-                        placeholder="Filter by Type"
+                        placeholder={t('crm:products.filterByType')}
                         searchable={false}
                         buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
                     />
@@ -635,7 +634,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                         options={filterSupplierOptions}
                         value={filterSupplierId}
                         onChange={setFilterSupplierId}
-                        placeholder="Filter by Supplier"
+                        placeholder={t('crm:products.filterBySupplier')}
                         searchable={true}
                         buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
                     />
@@ -648,27 +647,27 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                         className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <i className="fa-solid fa-rotate-left"></i>
-                        Clear filters
+                        {t('crm:products.clearFilters')}
                     </button>
                 </div>
             </div>
 
             <StandardTable
-                title="Active Products"
+                title={t('crm:products.activeProducts')}
                 totalCount={filteredActiveProductsTotal.length}
                 headerAction={
                     <button
                         onClick={openAddModal}
                         className="bg-praetor text-white px-4 py-2.5 rounded-xl text-sm font-black shadow-xl shadow-slate-200 transition-all hover:bg-slate-700 active:scale-95 flex items-center gap-2"
                     >
-                        <i className="fa-solid fa-plus"></i> Add New Product
+                        <i className="fa-solid fa-plus"></i> {t('crm:products.addNewProduct')}
                     </button>
                 }
                 footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
                 footer={
                     <>
                         <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+                            <span className="text-xs font-bold text-slate-500">{t('common:labels.rowsPerPage')}</span>
                             <CustomSelect
                                 options={[
                                     { id: '5', name: '5' },
@@ -683,7 +682,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                 searchable={false}
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                Showing {activeProducts.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, filteredActiveProductsTotal.length)} of {filteredActiveProductsTotal.length}
+                                {t('crm:products.showing')} {activeProducts.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, filteredActiveProductsTotal.length)} {t('crm:products.of')} {filteredActiveProductsTotal.length}
                             </span>
                         </div>
 
@@ -723,14 +722,14 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Name / Category / Supplier</th>
-                            <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Costo</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">MOL %</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sale Price</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Margine</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tax Rate</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:products.name')} / {t('crm:products.category')} / {t('crm:products.supplier')}</th>
+                            <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:products.type')}</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:products.cost')}</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:products.mol')}</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:products.salePrice')}</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:products.margin')}</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:products.taxRate')}</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('common:labels.actions')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -743,14 +742,14 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                         </div>
                                         <div className="min-w-0">
                                             <div className="font-bold text-slate-800 truncate">{p.name}</div>
-                                            <div className="text-[10px] font-black text-slate-400 uppercase truncate">{p.category || 'No Category'}</div>
-                                            <div className="text-[10px] font-semibold text-slate-500 truncate">{p.supplierName || 'No Supplier'}</div>
+                                            <div className="text-[10px] font-black text-slate-400 uppercase truncate">{p.category || t('crm:products.noCategory')}</div>
+                                            <div className="text-[10px] font-semibold text-slate-500 truncate">{p.supplierName || t('crm:products.noSupplier')}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td className="px-4 py-5">
                                     <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${p.type === 'service' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                        {p.type || 'item'}
+                                        {p.type || t('crm:products.typeItem')}
                                     </span>
                                 </td>
                                 <td className="px-6 py-5 text-sm font-semibold text-slate-500">
@@ -776,7 +775,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                                 openEditModal(p);
                                             }}
                                             className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
-                                            title="Edit Product"
+                                            title={t('crm:products.editProductTooltip')}
                                         >
                                             <i className="fa-solid fa-pen-to-square"></i>
                                         </button>
@@ -786,7 +785,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                                 onUpdateProduct(p.id, { isDisabled: true });
                                             }}
                                             className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
-                                            title="Disable Product"
+                                            title={t('crm:products.disableProduct')}
                                         >
                                             <i className="fa-solid fa-ban"></i>
                                         </button>
@@ -796,7 +795,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                                 confirmDelete(p);
                                             }}
                                             className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                            title="Delete Product"
+                                            title={t('crm:products.deleteProductTooltip')}
                                         >
                                             <i className="fa-solid fa-trash-can"></i>
                                         </button>
@@ -810,8 +809,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                                         <i className="fa-solid fa-boxes-stacked text-2xl"></i>
                                     </div>
-                                    <p className="text-slate-400 text-sm font-bold">No active products found.</p>
-                                    <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">Add your first product</button>
+                                    <p className="text-slate-400 text-sm font-bold">{t('crm:products.noActiveProducts')}</p>
+                                    <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">{t('crm:products.addFirstProduct')}</button>
                                 </td>
                             </tr>
                         )}
@@ -821,15 +820,15 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
 
             {hasAnyDisabledProducts && (
                 <StandardTable
-                    title="Disabled Products"
+                    title={t('crm:products.disabledProducts')}
                     totalCount={filteredDisabledProductsTotal.length}
-                    totalLabel="DISABLED"
+                    totalLabel={t('crm:products.disabled')}
                     containerClassName="border-dashed bg-slate-50"
                     footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
                     footer={
                         <>
                             <div className="flex items-center gap-3">
-                                <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+                                <span className="text-xs font-bold text-slate-500">{t('common:labels.rowsPerPage')}</span>
                                 <CustomSelect
                                     options={[
                                         { id: '5', name: '5' },
@@ -844,7 +843,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     searchable={false}
                                 />
                                 <span className="text-xs font-bold text-slate-400 ml-2">
-                                    Showing {disabledProductsPage.length > 0 ? disabledStartIndex + 1 : 0}-{Math.min(disabledStartIndex + disabledRowsPerPage, filteredDisabledProductsTotal.length)} of {filteredDisabledProductsTotal.length}
+                                    {t('crm:products.showing')} {disabledProductsPage.length > 0 ? disabledStartIndex + 1 : 0}-{Math.min(disabledStartIndex + disabledRowsPerPage, filteredDisabledProductsTotal.length)} {t('crm:products.of')} {filteredDisabledProductsTotal.length}
                                 </span>
                             </div>
 
@@ -890,7 +889,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     </div>
                                     <div>
                                         <h5 className="font-bold text-slate-500 line-through">{p.name}</h5>
-                                        <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
+                                        <span className="text-[10px] font-black text-amber-500 uppercase">{t('crm:products.disabled')}</span>
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
@@ -920,7 +919,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                 <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                                     <i className="fa-solid fa-ban text-2xl"></i>
                                 </div>
-                                <p className="text-slate-400 text-sm font-bold">No disabled products found.</p>
+                                <p className="text-slate-400 text-sm font-bold">{t('crm:products.noDisabledProducts')}</p>
                             </div>
                         )}
                     </div>
