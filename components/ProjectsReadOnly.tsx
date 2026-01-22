@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
 import { Project, Client } from '../types';
@@ -10,6 +11,7 @@ interface ProjectsReadOnlyProps {
 }
 
 const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }) => {
+    const { t } = useTranslation(['timesheets', 'common']);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterClientId, setFilterClientId] = useState('all');
 
@@ -63,7 +65,7 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
     const projectsPage = filteredProjectsTotal.slice(startIndex, startIndex + rowsPerPage);
 
     const clientOptions = [
-        { id: 'all', name: 'All Clients' },
+        { id: 'all', name: t('projects.allClients') },
         ...clients.map(client => ({ id: client.id, name: client.name }))
     ];
 
@@ -74,7 +76,7 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                     <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input
                         type="text"
-                        placeholder="Search projects, descriptions, or clients..."
+                        placeholder={t('projects:projects.searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-praetor outline-none shadow-sm placeholder:font-normal"
@@ -85,7 +87,7 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                         options={clientOptions}
                         value={filterClientId}
                         onChange={setFilterClientId}
-                        placeholder="Filter by Client"
+                        placeholder={t('projects.filterByClient')}
                         searchable={true}
                         buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
                     />
@@ -98,20 +100,20 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                         className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <i className="fa-solid fa-rotate-left"></i>
-                        Clear filters
+                        {t('common:labels.clearFilters')}
                     </button>
                 </div>
             </div>
 
             <StandardTable
-                title="Projects Directory"
+                title={t('projects.projectsDirectory')}
                 totalCount={filteredProjectsTotal.length}
                 containerClassName="rounded-xl overflow-hidden"
                 footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
                 footer={
                     <>
                         <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+                            <span className="text-xs font-bold text-slate-500">{t('common:pagination.rowsPerPage')}:</span>
                             <CustomSelect
                                 options={[
                                     { id: '5', name: '5' },
@@ -126,7 +128,11 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                                 searchable={false}
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                Showing {projectsPage.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + rowsPerPage, filteredProjectsTotal.length)} of {filteredProjectsTotal.length}
+                                {t('common.pagination.showing', {
+                                    start: projectsPage.length > 0 ? startIndex + 1 : 0,
+                                    end: Math.min(startIndex + rowsPerPage, filteredProjectsTotal.length),
+                                    total: filteredProjectsTotal.length
+                                })}
                             </span>
                         </div>
 
@@ -166,16 +172,16 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                 <table className="w-full text-left">
                     <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Client</th>
-                            <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Project Name</th>
-                            <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Description</th>
-                            <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Status</th>
+                            <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('projects.client')}</th>
+                            <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('projects.projectName')}</th>
+                            <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('projects.description')}</th>
+                            <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('projects.status')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {filteredProjectsTotal.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">No projects found.</td>
+                                <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">{t('projects.noProjectsFound')}</td>
                             </tr>
                         ) : projectsPage.map(project => {
                             const client = clientLookup.get(project.clientId);
@@ -186,7 +192,7 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                                 <tr key={project.id} className={`group hover:bg-slate-50 transition-colors ${isEffectivelyDisabled ? 'opacity-60 grayscale bg-slate-50/50' : ''}`}>
                                     <td className="px-6 py-4">
                                         <span className={`text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${isClientDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-praetor'}`}>
-                                            {client?.name || 'Unknown'}
+                                            {client?.name || t('projects.unknown')}
                                             {isClientDisabled && <span className="ml-1 text-[8px]">(DISABLED)</span>}
                                         </span>
                                     </td>
@@ -197,15 +203,15 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <p className="text-xs text-slate-500 max-w-md italic">{project.description || 'No description provided.'}</p>
+                                        <p className="text-xs text-slate-500 max-w-md italic">{project.description || t('projects.noDescription')}</p>
                                     </td>
                                     <td className="px-6 py-4">
                                         {project.isDisabled ? (
-                                            <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
+                                            <span className="text-[10px] font-black text-amber-500 uppercase">{t('projects.disabled')}</span>
                                         ) : isClientDisabled ? (
-                                            <span className="text-[10px] font-black text-amber-400 uppercase">Inherited Disable</span>
+                                            <span className="text-[10px] font-black text-amber-400 uppercase">{t('projects.inheritedDisable')}</span>
                                         ) : (
-                                            <span className="text-[10px] font-black text-emerald-500 uppercase">Active</span>
+                                            <span className="text-[10px] font-black text-emerald-500 uppercase">{t('projects.active')}</span>
                                         )}
                                     </td>
                                 </tr>

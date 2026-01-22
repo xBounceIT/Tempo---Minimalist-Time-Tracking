@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TimeEntry } from '../types';
 import { isItalianHoliday } from '../utils/holidays';
 
@@ -31,6 +32,7 @@ const Calendar: React.FC<CalendarProps> = ({
   endDate,
   onRangeSelect
 }) => {
+  const { t } = useTranslation('timesheets');
   const [viewDate, setViewDate] = useState(new Date(selectedDate || startDate || new Date()));
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
   const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
@@ -296,11 +298,11 @@ const Calendar: React.FC<CalendarProps> = ({
         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-red-500"></div>
           <span className="text-[10px] font-bold text-slate-400 uppercase">
-            Festivo / {treatSaturdayAsHoliday ? 'Weekend' : 'Domenica'}
+            {t('calendar.holidayWeekend')}
           </span>
           <div className="flex items-center gap-2 ml-auto">
             <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Obiettivo Raggiunto</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">{t('calendar.goalReached')}</span>
           </div>
         </div>
       )}

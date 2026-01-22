@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart,
   Bar,
@@ -31,24 +32,6 @@ interface ReportsProps {
 
 type GroupingType = 'none' | 'date' | 'client' | 'project' | 'task';
 
-const PERIOD_OPTIONS: Option[] = [
-  { id: 'custom', name: '--- Custom ---' },
-  { id: 'today', name: 'Today' },
-  { id: 'yesterday', name: 'Yesterday' },
-  { id: 'this_week', name: 'This Week' },
-  { id: 'last_week', name: 'Last Week' },
-  { id: 'this_month', name: 'This Month' },
-  { id: 'last_month', name: 'Last Month' },
-];
-
-const GROUP_OPTIONS: Option[] = [
-  { id: 'none', name: '--- None ---' },
-  { id: 'date', name: 'Date' },
-  { id: 'client', name: 'Client' },
-  { id: 'project', name: 'Project' },
-  { id: 'task', name: 'Task' },
-];
-
 // Helper to get local YYYY-MM-DD string
 const toLocalISOString = (date: Date) => {
   const year = date.getFullYear();
@@ -58,6 +41,8 @@ const toLocalISOString = (date: Date) => {
 };
 
 const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, currentUser, startOfWeek, treatSaturdayAsHoliday, dailyGoal, currency }) => {
+  const { t } = useTranslation('timesheets');
+  
   // --- Dashboard State ---
   const [activeTab, setActiveTab] = useState<'dashboard' | 'detailed'>('dashboard');
 
@@ -122,6 +107,25 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
   const [grouping, setGrouping] = useState<GroupingType[]>(['none', 'none', 'none']);
   const [generatedEntries, setGeneratedEntries] = useState<TimeEntry[] | null>(null);
 
+  // Options that depend on translations
+  const PERIOD_OPTIONS: Option[] = [
+    { id: 'custom', name: t('reports.custom') },
+    { id: 'today', name: t('reports.today') },
+    { id: 'yesterday', name: t('reports.yesterday') },
+    { id: 'this_week', name: t('reports.thisWeek') },
+    { id: 'last_week', name: t('reports.lastWeek') },
+    { id: 'this_month', name: t('reports.thisMonth') },
+    { id: 'last_month', name: t('reports.lastMonth') },
+  ];
+
+  const GROUP_OPTIONS: Option[] = [
+    { id: 'none', name: t('reports.none') },
+    { id: 'date', name: t('reports.date') },
+    { id: 'client', name: t('reports.client') },
+    { id: 'project', name: t('reports.project') },
+    { id: 'task', name: t('reports.task') },
+  ];
+
   // --- Dashboard Data Calculation ---
   const weeklyActivityData = useMemo(() => {
     const today = new Date();
@@ -184,14 +188,14 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
 
   // --- Helpers ---
   const userOptions = useMemo(() => [
-    { id: 'all', name: '--- All Users ---' },
+    { id: 'all', name: t('reports.allUsers') },
     ...users.map(u => ({ id: u.id, name: u.name }))
-  ], [users]);
+  ], [users, t]);
 
   const clientOptions = useMemo(() => [
-    { id: 'all', name: '--- All Clients ---' },
+    { id: 'all', name: t('reports.allClients') },
     ...clients.map(c => ({ id: c.id, name: c.name }))
-  ], [clients]);
+  ], [clients, t]);
 
   // Synchronized Filter Logic
   const filteredProjects = useMemo(() => {
@@ -200,9 +204,9 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
   }, [projects, filterClient]);
 
   const projectOptions = useMemo(() => [
-    { id: 'all', name: '--- All Projects ---' },
+    { id: 'all', name: t('reports.allProjects') },
     ...filteredProjects.map(p => ({ id: p.id, name: p.name }))
-  ], [filteredProjects]);
+  ], [filteredProjects, t]);
 
   const filteredTasks = useMemo(() => {
     let relevantEntries = entries;
@@ -219,9 +223,9 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
   }, [entries, filterUser, filterClient, filterProject]);
 
   const taskOptions = useMemo(() => [
-    { id: 'all', name: '--- All Tasks ---' },
+    { id: 'all', name: t('reports.allTasks') },
     ...filteredTasks.map(t => ({ id: t, name: t }))
-  ], [filteredTasks]);
+  ], [filteredTasks, t]);
 
   const handleClientChange = (val: string) => {
     setFilterClient(val);
@@ -331,13 +335,13 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
           onClick={() => setActiveTab('dashboard')}
           className={`relative z-10 w-full py-2 text-sm font-bold transition-colors duration-300 ${activeTab === 'dashboard' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
         >
-          Dashboard
+          {t('reports.dashboard')}
         </button>
         <button
           onClick={() => setActiveTab('detailed')}
           className={`relative z-10 w-full py-2 text-sm font-bold transition-colors duration-300 ${activeTab === 'detailed' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
         >
-          Detailed Report
+          {t('reports.detailedReport')}
         </button>
       </div>
 
@@ -362,7 +366,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
-              <h3 className="text-lg font-bold text-slate-800 mb-6">Weekly Activity ({startOfWeek} Start)</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-6">{t('reports.weeklyActivity', { start: startOfWeek })}</h3>
               <div className="h-[300px] w-full" style={{ minWidth: '0px' }}>
                 {chartsVisible && (
                   <ResponsiveContainer width="100%" height="100%" minWidth={0}>
@@ -411,7 +415,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
-              <h3 className="text-lg font-bold text-slate-800 mb-6">Hours by Project</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-6">{t('reports.hoursByProject')}</h3>
               <div className="h-[300px] w-full" style={{ minWidth: '0px' }}>
                 {chartsVisible && (
                   <ResponsiveContainer width="100%" height="100%" minWidth={0}>
@@ -443,10 +447,10 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">1. Time Period</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">1. {t('reports.timePeriod')}</h4>
                 <div className="space-y-4">
                   <CustomSelect
-                    label="Selection"
+                    label={t('reports.selection')}
                     options={PERIOD_OPTIONS}
                     value={period}
                     onChange={handlePeriodChange}
@@ -454,7 +458,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                   />
                   <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">From</label>
+                      <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">{t('reports.from')}</label>
                       <input
                         type="date"
                         value={startDate}
@@ -466,7 +470,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">To</label>
+                      <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">{t('reports.to')}</label>
                       <input
                         type="date"
                         value={endDate}
@@ -482,13 +486,13 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">2. Detailed Filters</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">2. {t('reports.detailedFilters')}</h4>
                 <div className="flex flex-col lg:flex-row lg:items-end gap-6">
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       {canFilterUsers && (
                         <CustomSelect
-                          label="User"
+                          label={t('reports.user')}
                           options={userOptions}
                           value={filterUser}
                           onChange={setFilterUser}
@@ -496,14 +500,14 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                         />
                       )}
                       <CustomSelect
-                        label="Client"
+                        label={t('reports.client')}
                         options={clientOptions}
                         value={filterClient}
                         onChange={handleClientChange}
                         searchable={true}
                       />
                       <CustomSelect
-                        label="Project"
+                        label={t('reports.project')}
                         options={projectOptions}
                         value={filterProject}
                         onChange={handleProjectChange}
@@ -512,19 +516,19 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                     </div>
                     <div className="space-y-4">
                       <CustomSelect
-                        label="Task"
+                        label={t('reports.task')}
                         options={taskOptions}
                         value={filterTask}
                         onChange={setFilterTask}
                         searchable={true}
                       />
                       <div>
-                        <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Notes Containing</label>
+                        <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">{t('reports.notesContaining')}</label>
                         <input
                           type="text"
                           value={noteSearch}
                           onChange={e => setNoteSearch(e.target.value)}
-                          placeholder="Search notes..."
+                          placeholder={t('reports.searchNotes')}
                           className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm"
                         />
                       </div>
@@ -538,7 +542,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                       className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <i className="fa-solid fa-rotate-left"></i>
-                      Clear filters
+                      {t('reports.clearFilters')}
                     </button>
                   </div>
                 </div>
@@ -547,7 +551,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
 
             <div className="border-t border-slate-100 pt-8 grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">3. Visible Fields</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">3. {t('reports.visibleFields')}</h4>
                 <div className="flex flex-wrap gap-6">
                   {Object.entries(visibleFields).map(([key, value]) => (
                     <label key={key} className="flex items-center gap-2 cursor-pointer">
@@ -564,7 +568,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">4. Grouping</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-praetor mb-4">4. {t('reports.grouping')}</h4>
                 <div className="flex gap-4">
                   {[0, 1, 2].map(i => (
                     <CustomSelect
@@ -599,18 +603,18 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
             <div className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
               <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-black italic tracking-tighter">PRAETOR <span className="text-slate-400 font-normal not-italic tracking-normal text-sm ml-2">DETAILED REPORT</span></h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Generated: {new Date().toLocaleString()}</p>
+                  <h3 className="text-xl font-black italic tracking-tighter">PRAETOR <span className="text-slate-400 font-normal not-italic tracking-normal text-sm ml-2">{t('reports.detailedReportTitle')}</span></h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{t('reports.generated')} {new Date().toLocaleString()}</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-right flex items-center gap-6">
                     <div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Grand Total</p>
-                      <p className="text-2xl font-black text-white">{generatedEntries.reduce((s, e) => s + e.duration, 0).toFixed(2)} hrs</p>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('reports.grandTotal')}</p>
+                      <p className="text-2xl font-black text-white">{generatedEntries.reduce((s, e) => s + e.duration, 0).toFixed(2)} {t('reports.hours')}</p>
                     </div>
                     {visibleFields.cost && (
                       <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Cost</p>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('reports.totalCost')}</p>
                         <p className="text-2xl font-black text-emerald-400">{currency} {generatedEntries.reduce((s, e) => s + (e.hourlyCost || 0) * e.duration, 0).toFixed(2)}</p>
                       </div>
                     )}
@@ -665,7 +669,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                     className="bg-praetor hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-widest py-2 px-4 rounded-lg transition-colors border border-slate-600 hover:border-slate-500 shadow-lg shadow-slate-900/20"
                   >
                     <i className="fa-solid fa-download mr-2"></i>
-                    Export CSV
+                    {t('reports.exportCsv')}
                   </button>
                 </div>
               </div>
@@ -674,20 +678,20 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                 <table className="w-full text-left">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Date</th>
-                      {visibleFields.user && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">User</th>}
-                      {visibleFields.client && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Client</th>}
-                      {visibleFields.project && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Project</th>}
-                      {visibleFields.task && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Task</th>}
-                      {visibleFields.notes && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Note</th>}
-                      {visibleFields.duration && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Dur.</th>}
-                      {visibleFields.cost && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Cost</th>}
+                      <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('reports.date')}</th>
+                      {visibleFields.user && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('reports.user')}</th>}
+                      {visibleFields.client && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('reports.client')}</th>}
+                      {visibleFields.project && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('reports.project')}</th>}
+                      {visibleFields.task && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('reports.task')}</th>}
+                      {visibleFields.notes && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('reports.note')}</th>}
+                      {visibleFields.duration && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">{t('reports.duration')}</th>}
+                      {visibleFields.cost && <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">{t('reports.cost')}</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {generatedEntries.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center text-slate-400 italic">No entries match your filters.</td>
+                        <td colSpan={7} className="px-6 py-12 text-center text-slate-400 italic">{t('reports.noEntriesMatch')}</td>
                       </tr>
                     ) : generatedEntries.map(e => (
                       <tr key={e.id} className="hover:bg-slate-50 transition-colors">

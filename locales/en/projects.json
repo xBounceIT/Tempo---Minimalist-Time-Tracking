@@ -24,7 +24,28 @@
     "clientRequired": "Client is Required",
     "projectDisabled": "Project is Disabled",
     "inheritedFromDisabled": "Inherited from disabled Project",
-    "createNewProject": "Create New Project"
+    "createNewProject": "Create New Project",
+    "projectsDirectory": "Projects Directory",
+    "projectsDirectoryTitle": "Projects Directory",
+    "projectDetailsPlaceholder": "Project details...",
+    "saveChanges": "Save Changes",
+    "unknown": "Unknown",
+    "disabledLabel": "(DISABLED)",
+    "noDescriptionProvided": "No description provided.",
+    "statusDisabled": "Disabled",
+    "statusInheritedDisable": "Inherited Disable",
+    "statusActive": "Active",
+    "inheritedFromDisabledClient": "Inherited from disabled Client: {{clientName}}",
+    "allClients": "All Clients",
+    "searchPlaceholder": "Search projects, descriptions, or clients...",
+    "filterByClient": "Filter by Client",
+    "tableHeaders": {
+      "client": "Client",
+      "projectName": "Project Name",
+      "description": "Description",
+      "status": "Status",
+      "actions": "Actions"
+    }
   },
   "tasks": {
     "title": "Tasks",

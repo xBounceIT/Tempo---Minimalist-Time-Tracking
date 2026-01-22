@@ -218,7 +218,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                   <div className="space-y-2">
                     <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
                       <div>
-                        <p className={`text-sm font-bold ${isClientDisabled ? 'text-slate-400' : 'text-slate-700'}`}>Project is Disabled</p>
+                        <p className={`text-sm font-bold ${isClientDisabled ? 'text-slate-400' : 'text-slate-700'}`}>{t('projects:projects.projectDisabled')}</p>
                       </div>
                       <button
                         type="button"
@@ -236,7 +236,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                     {isClientDisabled && (
                       <p className="text-[10px] font-bold text-amber-600 flex items-center gap-1 px-1">
                         <i className="fa-solid fa-circle-info"></i>
-                        Inherited from disabled Client: {client?.name}
+                        {t('projects:projects.inheritedFromDisabledClient', { clientName: client?.name })}
                       </p>
                     )}
                   </div>
@@ -251,7 +251,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                   onClick={confirmDelete}
                   className="px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg transform active:scale-95 transition-all bg-red-500 shadow-red-200 hover:bg-red-600"
                 >
-                  Delete
+                  {t('common:buttons.delete')}
                 </button>
 
                 <div className="flex gap-3 ml-auto">
@@ -260,13 +260,13 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                     onClick={closeModal}
                     className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"
                   >
-                    Cancel
+                    {t('common:buttons.cancel')}
                   </button>
                   <button
                     type="submit"
                     className="px-6 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg transform active:scale-95 transition-all bg-praetor shadow-slate-200 hover:bg-slate-700"
                   >
-                    Save Changes
+                    {t('projects:projects.saveChanges')}
                   </button>
                 </div>
               </div>
@@ -280,36 +280,36 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
             <i className="fa-solid fa-briefcase text-praetor"></i>
-            Create New Project
+            {t('projects:projects.createNewProject')}
           </h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div className="lg:col-span-1">
               <CustomSelect
-                label="Client"
+                label={t('projects:projects.client')}
                 options={clientOptions}
                 value={clientId}
                 onChange={setClientId}
-                placeholder="Select Client..."
+                placeholder={t('projects:projects.selectClient')}
                 searchable={true}
               />
             </div>
             <div className="lg:col-span-1">
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Project Name</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('projects:projects.name')}</label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="e.g. Website Redesign"
+                placeholder={t('projects:projects.projectNamePlaceholder')}
                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-sm font-semibold"
               />
             </div>
             <div className="lg:col-span-1">
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Description</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('projects:projects.description')}</label>
               <input
                 type="text"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="Project details..."
+                placeholder={t('projects:projects.projectDetailsPlaceholder')}
                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-sm font-semibold"
               />
             </div>
@@ -318,7 +318,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                 type="submit"
                 className="w-full px-6 py-2 bg-praetor text-white font-bold rounded-lg hover:bg-slate-700 transition-all h-[38px] shadow-sm active:scale-95 flex items-center justify-center gap-2"
               >
-                <i className="fa-solid fa-plus"></i> Add Project
+                <i className="fa-solid fa-plus"></i> {t('projects:projects.addProject')}
               </button>
             </div>
           </form>
@@ -326,24 +326,24 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
       )}
 
       <StandardTable
-        title={`Projects Directory (${projects.length})`}
+        title={`${t('projects:projects.projectsDirectory')} (${projects.length})`}
         totalCount={undefined}
         containerClassName="rounded-xl overflow-hidden"
       >
         <table className="w-full text-left">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Client</th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Project Name</th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Description</th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">Status</th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Actions</th>
+              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('projects:projects.tableHeaders.client')}</th>
+              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('projects:projects.tableHeaders.projectName')}</th>
+              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('projects:projects.tableHeaders.description')}</th>
+              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">{t('projects:projects.tableHeaders.status')}</th>
+              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">{t('projects:projects.tableHeaders.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {projects.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">No projects found.</td>
+                <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">{t('projects:projects.noProjects')}</td>
               </tr>
             ) : projects.map(project => {
               const client = clients.find(c => c.id === project.clientId);
@@ -358,8 +358,8 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                 >
                   <td className="px-6 py-4">
                     <span className={`text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${isClientDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-praetor'}`}>
-                      {client?.name || 'Unknown'}
-                      {isClientDisabled && <span className="ml-1 text-[8px]">(DISABLED)</span>}
+                      {client?.name || t('projects:projects.unknown')}
+                      {isClientDisabled && <span className="ml-1 text-[8px]">{t('projects:projects.disabledLabel')}</span>}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -369,15 +369,15 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-xs text-slate-500 max-w-md italic">{project.description || 'No description provided.'}</p>
+                    <p className="text-xs text-slate-500 max-w-md italic">{project.description || t('projects:projects.noDescriptionProvided')}</p>
                   </td>
                   <td className="px-6 py-4">
                     {project.isDisabled ? (
-                      <span className="text-[10px] font-black text-amber-500 uppercase">Disabled</span>
+                      <span className="text-[10px] font-black text-amber-500 uppercase">{t('projects:projects.statusDisabled')}</span>
                     ) : isClientDisabled ? (
-                      <span className="text-[10px] font-black text-amber-400 uppercase">Inherited Disable</span>
+                      <span className="text-[10px] font-black text-amber-400 uppercase">{t('projects:projects.statusInheritedDisable')}</span>
                     ) : (
-                      <span className="text-[10px] font-black text-emerald-500 uppercase">Active</span>
+                      <span className="text-[10px] font-black text-emerald-500 uppercase">{t('projects:projects.statusActive')}</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -385,7 +385,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ projects, clients, role, on
                       <button
                         onClick={(e) => { e.stopPropagation(); startEditing(project); }}
                         className="text-slate-400 hover:text-praetor transition-colors p-2"
-                        title="Edit Project"
+                        title={t('projects:projects.editProject')}
                       >
                         <i className="fa-solid fa-pen-to-square"></i>
                       </button>

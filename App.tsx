@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getTheme, applyTheme } from './utils/theme';
 import { Client, Project, ProjectTask, TimeEntry, View, User, UserRole, LdapConfig, GeneralSettings as IGeneralSettings, Product, Quote, Sale, WorkUnit, Invoice, Payment, Expense, Supplier, SupplierQuote, SpecialBid } from './types';
 import { COLORS } from './constants';
@@ -81,6 +82,7 @@ const TrackerView: React.FC<{
   viewingUserId, onViewUserChange, availableUsers, currentUser, dailyGoal, onAddBulkEntries,
   enableAiInsights, onRecurringAction, geminiApiKey
 }) => {
+    const { t } = useTranslation('timesheets');
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [trackerMode, setTrackerMode] = useState<'daily' | 'weekly'>(() => {
       const saved = localStorage.getItem('trackerMode');
@@ -139,13 +141,13 @@ const TrackerView: React.FC<{
               onClick={() => setTrackerMode('daily')}
               className={`relative z-10 w-full py-2 text-xs font-bold transition-colors duration-300 ${trackerMode === 'daily' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              Daily
+              {t('tracker.mode.daily')}
             </button>
             <button
               onClick={() => setTrackerMode('weekly')}
               className={`relative z-10 w-full py-2 text-xs font-bold transition-colors duration-300 ${trackerMode === 'weekly' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              Weekly
+              {t('tracker.mode.weekly')}
             </button>
           </div>
         </div>
@@ -181,7 +183,7 @@ const TrackerView: React.FC<{
                     </div>
                     <div>
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        {isViewingSelf ? 'My Timesheet' : 'Managing User'}
+                        {isViewingSelf ? t('tracker.myTimesheet') : t('tracker.managingUser')}
                       </p>
                       <p className="text-sm font-bold text-slate-800">{viewingUser?.name}</p>
                     </div>
@@ -191,7 +193,7 @@ const TrackerView: React.FC<{
                       options={userOptions}
                       value={viewingUserId}
                       onChange={onViewUserChange}
-                      label="Switch User View"
+                      label={t('tracker.switchUserView')}
                       searchable={true}
                     />
                   </div>
@@ -216,13 +218,13 @@ const TrackerView: React.FC<{
                 <div className="flex justify-between items-end px-2">
                   <div>
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-                      {selectedDate ? `Activity for ${new Date(selectedDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}` : 'Recent Activity'}
+                      {selectedDate ? t('tracker.activityFor', { date: new Date(selectedDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric' }) }) : t('entry.recentActivity')}
                     </h3>
-                    {selectedDate && <p className="text-xs text-slate-400 font-medium">Logs specifically for this date</p>}
+                    {selectedDate && <p className="text-xs text-slate-400 font-medium">{t('tracker.logsForDate')}</p>}
                   </div>
                   {selectedDate && (
                     <div className="text-right">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">Day Total</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">{t('tracker.dayTotal')}</p>
                       <p className={`text-lg font-black transition-colors ${dailyTotal > dailyGoal ? 'text-red-600' : 'text-praetor'}`}>{dailyTotal.toFixed(2)} h</p>
                     </div>
                   )}
@@ -232,11 +234,11 @@ const TrackerView: React.FC<{
                   <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
-                        {!selectedDate && <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">Date</th>}
-                        <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">Client / Project</th>
-                        <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">Task</th>
-                        <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">Notes</th>
-                        <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter text-right">Hours</th>
+                        {!selectedDate && <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">{t('entry.date')}</th>}
+                        <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">{t('tracker.clientProject')}</th>
+                        <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">{t('entry.task')}</th>
+                        <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter">{t('tracker.notes')}</th>
+                        <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-tighter text-right">{t('entry.hours')}</th>
                         <th className="px-6 py-3 w-10"></th>
                       </tr>
                     </thead>
@@ -263,7 +265,7 @@ const TrackerView: React.FC<{
                           <td className="px-6 py-4 text-sm align-top">
                             <div className="flex items-center gap-2">
                               <span className="font-semibold text-slate-800">{entry.task}</span>
-                              {entry.isPlaceholder && <i className="fa-solid fa-repeat text-[10px] text-indigo-400" title="Recurring task"></i>}
+                              {entry.isPlaceholder && <i className="fa-solid fa-repeat text-[10px] text-indigo-400" title={t('entry.recurringTask')}></i>}
                             </div>
                           </td>
                           <td className="px-6 py-4 text-sm align-top">
@@ -332,10 +334,10 @@ const TrackerView: React.FC<{
               <div className="p-6 border-b border-slate-100">
                 <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                   <i className="fa-solid fa-triangle-exclamation text-amber-500"></i>
-                  Stop Recurring Task?
+                  {t('entry.stopRecurringTask')}
                 </h3>
                 <p className="text-sm text-slate-500 mt-1">
-                  How would you like to handle existing entries for <strong className="text-slate-800">{pendingDeleteEntry.task}</strong>?
+                  {t('entry.howHandleEntries')} <strong className="text-slate-800">{pendingDeleteEntry.task}</strong>?
                 </p>
               </div>
 
@@ -345,11 +347,11 @@ const TrackerView: React.FC<{
                   className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all group"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-slate-800 group-hover:text-indigo-700">Only Stop Recurrence</span>
+                    <span className="font-bold text-slate-800 group-hover:text-indigo-700">{t('recurring.stopOnly')}</span>
                     <i className="fa-solid fa-pause text-slate-300 group-hover:text-indigo-500"></i>
                   </div>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Keeps all existing history. Just stops the task from repeating in the future.
+                    {t('recurring.stopOnlyDesc')}
                   </p>
                 </button>
 
@@ -358,11 +360,11 @@ const TrackerView: React.FC<{
                   className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-red-300 hover:bg-red-50 transition-all group"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-slate-800 group-hover:text-red-700">Delete Today & Future</span>
+                    <span className="font-bold text-slate-800 group-hover:text-red-700">{t('recurring.deleteFuture')}</span>
                     <i className="fa-solid fa-forward text-slate-300 group-hover:text-red-500"></i>
                   </div>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Stops recurrence and removes entries from today onwards. Past history is saved.
+                    {t('recurring.deleteFutureDesc')}
                   </p>
                 </button>
 
@@ -371,11 +373,11 @@ const TrackerView: React.FC<{
                   className="w-full text-left p-4 rounded-xl border border-red-100 bg-red-50/50 hover:bg-red-100 hover:border-red-300 transition-all group"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-red-700">Delete Everything</span>
+                    <span className="font-bold text-red-700">{t('recurring.deleteAll')}</span>
                     <i className="fa-solid fa-dumpster-fire text-red-400 group-hover:text-red-600"></i>
                   </div>
                   <p className="text-xs text-red-600/70 leading-relaxed">
-                    Completely wipes the task settings and ALL associated time logs forever.
+                    {t('recurring.deleteAllDesc')}
                   </p>
                 </button>
               </div>
@@ -385,7 +387,7 @@ const TrackerView: React.FC<{
                   onClick={() => setPendingDeleteEntry(null)}
                   className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
                 >
-                  Cancel
+                  {t('entry.cancel')}
                 </button>
               </div>
             </div>

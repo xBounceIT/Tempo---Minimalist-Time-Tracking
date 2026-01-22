@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Client, Project, ProjectTask, TimeEntry, UserRole } from '../types';
 import { parseSmartEntry } from '../services/geminiService';
 import CustomSelect from './CustomSelect';
@@ -20,25 +21,7 @@ interface TimeEntryFormProps {
   geminiApiKey?: string;
 }
 
-// Helper to format custom pattern
-const getRecurrenceLabel = (pattern: string) => {
-  if (pattern === 'daily') return 'Daily';
-  if (pattern === 'weekly') return 'Weekly';
-  if (pattern === 'monthly') return 'Monthly';
-
-  if (pattern.startsWith('monthly:')) {
-    const parts = pattern.split(':');
-    if (parts.length === 3) {
-      const type = parts[1]; // first/second/third/fourth/last
-      const day = parseInt(parts[2]);
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      // Capitalize type
-      const typeStr = type.charAt(0).toUpperCase() + type.slice(1);
-      return `Every ${typeStr} ${days[day]}`;
-    }
-  }
-  return 'Custom...';
-};
+// Helper to format custom pattern - needs to be inside component to use translations
 
 const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
   clients,
@@ -53,6 +36,28 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
   enableAiInsights,
   geminiApiKey
 }) => {
+  const { t } = useTranslation('timesheets');
+  
+  // Helper to format custom pattern
+  const getRecurrenceLabel = (pattern: string) => {
+    if (pattern === 'daily') return t('entry.recurrencePatterns.daily');
+    if (pattern === 'weekly') return t('entry.recurrencePatterns.weekly');
+    if (pattern === 'monthly') return t('entry.recurrencePatterns.monthly');
+
+    if (pattern.startsWith('monthly:')) {
+      const parts = pattern.split(':');
+      if (parts.length === 3) {
+        const type = parts[1]; // first/second/third/fourth/last
+        const day = parseInt(parts[2]);
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = days[day];
+        const typeKey = `entry.recurrencePatterns.every${type.charAt(0).toUpperCase() + type.slice(1)}` as keyof typeof t;
+        return t(typeKey, { day: dayName });
+      }
+    }
+    return t('entry.recurrencePatterns.custom');
+  };
+
   const [isSmartMode, setIsSmartMode] = useState(false);
   const [smartInput, setSmartInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -134,19 +139,19 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
     // Validate duration
     const durationVal = parseFloat(duration);
     if (!duration || isNaN(durationVal) || durationVal <= 0) {
-      newErrors.hours = 'Hours are required and must be greater than 0';
+      newErrors.hours = t('entry.hoursRequired');
     }
 
     // Validate client/project/task
-    if (!selectedClientId) newErrors.clientId = 'Client is required';
-    if (!selectedProjectId) newErrors.projectId = 'Project is required';
+    if (!selectedClientId) newErrors.clientId = t('entry.clientRequired');
+    if (!selectedProjectId) newErrors.projectId = t('entry.projectRequired');
     if (!selectedTaskName || (!selectedTaskId && !selectedTaskName)) {
-      newErrors.task = 'Task is required';
+      newErrors.task = t('entry.taskRequired');
     }
 
     // Validate recurrence date if enabled
     if (makeRecurring && recurrenceEndDate && date && recurrenceEndDate < date) {
-      newErrors.recurrenceEndDate = 'End date must be after start date';
+      newErrors.recurrenceEndDate = t('entry.endDateAfterStart');
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -195,7 +200,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
     setSmartError('');
 
     if (!smartInput.trim()) {
-      setSmartError('Please enter a time entry description');
+      setSmartError(t('entry.pleaseEnterDescription'));
       return;
     }
 
@@ -222,7 +227,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
       setSmartInput('');
       setIsSmartMode(false);
     } else {
-      setSmartError("Couldn't parse entry. Try format like: '2.5 hours on task name for project'");
+      setSmartError(t('entry.couldntParse'));
     }
   };
 
@@ -254,7 +259,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
   const taskOptions = useMemo(() => {
     const opts = filteredTasks.map(t => ({ id: t.id, name: t.name }));
     if (canCreateCustomTask) {
-      opts.push({ id: 'custom', name: '+ Custom Task...' });
+      opts.push({ id: 'custom', name: t('entry.customTask') });
     }
     return opts;
   }, [filteredTasks, canCreateCustomTask]);
@@ -264,7 +269,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            <span className="text-sm font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">Logging for</span>
+            <span className="text-sm font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">{t('entry.loggingFor')}</span>
             <div className="flex items-baseline gap-1.5 leading-none">
               <span className="text-lg font-black text-praetor uppercase">
                 {new Date(date).toLocaleDateString(undefined, { weekday: 'long' })}
@@ -280,7 +285,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
             onClick={() => setIsSmartMode(!isSmartMode)}
             className="text-xs font-medium text-praetor hover:text-slate-700 underline underline-offset-4"
           >
-            {isSmartMode ? 'Switch to Manual' : 'Switch to Magic Input'}
+            {isSmartMode ? t('entry.switchToManual') : t('entry.switchToMagicInput')}
           </button>
         )}
       </div>
@@ -313,7 +318,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
             disabled={isLoading || !smartInput}
             className="w-full py-3 bg-praetor text-white font-semibold rounded-lg hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
           >
-            Log with AI
+            {t('entry.logWithAi')}
           </button>
         </form>
       ) : (
@@ -321,7 +326,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="md:col-span-1">
               <CustomSelect
-                label="Client"
+                label={t('entry.client')}
                 options={clientOptions}
                 value={selectedClientId}
                 onChange={(val) => {
@@ -335,14 +340,14 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
             </div>
             <div className="md:col-span-1">
               <CustomSelect
-                label="Project"
+                label={t('entry.project')}
                 options={projectOptions}
                 value={selectedProjectId}
                 onChange={(val) => {
                   setSelectedProjectId(val);
                   if (errors.projectId) setErrors({ ...errors, projectId: '' });
                 }}
-                placeholder={filteredProjects.length === 0 ? "No projects" : "Select project..."}
+                placeholder={filteredProjects.length === 0 ? t('entry.noProjects') : t('entry.selectProject')}
                 searchable={true}
                 className={errors.projectId ? 'border-red-300' : ''}
               />
@@ -350,11 +355,11 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
             </div>
             <div className="md:col-span-2">
               <CustomSelect
-                label="Task"
+                label={t('entry.task')}
                 options={taskOptions}
                 value={selectedTaskId || (selectedTaskName === 'custom' ? 'custom' : '')}
                 onChange={handleTaskChange}
-                placeholder={filteredTasks.length === 0 && !canCreateCustomTask ? "No tasks" : "Select task..."}
+                placeholder={filteredTasks.length === 0 && !canCreateCustomTask ? t('entry.noTasks') : t('entry.selectTask')}
                 searchable={true}
                 className={errors.task ? 'border-red-300' : ''}
               />
@@ -363,7 +368,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                 <input
                   type="text"
                   autoFocus
-                  placeholder="Type custom task name..."
+                  placeholder={t('entry.typeCustomTask')}
                   value={selectedTaskName === 'custom' ? '' : selectedTaskName}
                   onChange={(e) => {
                     setSelectedTaskName(e.target.value);
@@ -375,7 +380,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
               )}
             </div>
             <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Hours <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">{t('entry.hours')} <span className="text-red-500">*</span></label>
               <ValidatedNumberInput
                 value={duration}
                 onValueChange={handleDurationChange}
@@ -388,12 +393,12 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
 
           <div className="flex flex-col gap-4">
             <div className="w-full">
-              <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Notes / Description</label>
+              <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">{t('entry.notesDescription')}</label>
               <input
                 type="text"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Additional details about the task..."
+                placeholder={t('entry.notesPlaceholder')}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-praetor outline-none text-sm"
               />
             </div>
@@ -404,7 +409,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                   <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 animate-in fade-in slide-in-from-left-4">
                     <i className="fa-solid fa-triangle-exclamation text-amber-500"></i>
                     <p className="text-[10px] font-bold text-amber-700 uppercase leading-none">
-                      Warning: This entry will exceed your daily goal of {dailyGoal} hours.
+                      {t('entry.warningExceedGoal', { goal: dailyGoal })}
                     </p>
                   </div>
                 )}
@@ -417,7 +422,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors ${makeRecurring ? 'text-praetor' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                       >
                         <i className={`fa-solid fa-repeat ${makeRecurring ? 'fa-spin' : ''}`}></i>
-                        Repeat Task?
+                        {t('entry.repeatTask')}
                       </button>
 
                       {makeRecurring && (
@@ -426,10 +431,10 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                           <div className="min-w-[180px]">
                             <CustomSelect
                               options={[
-                                { id: 'daily', name: 'Daily' },
-                                { id: 'weekly', name: 'Weekly' },
-                                { id: 'monthly', name: 'Monthly' },
-                                { id: 'custom', name: recurrencePattern.startsWith('monthly:') ? getRecurrenceLabel(recurrencePattern) : 'Custom...' }
+                                { id: 'daily', name: t('entry.recurrencePatterns.daily') },
+                                { id: 'weekly', name: t('entry.recurrencePatterns.weekly') },
+                                { id: 'monthly', name: t('entry.recurrencePatterns.monthly') },
+                                { id: 'custom', name: recurrencePattern.startsWith('monthly:') ? getRecurrenceLabel(recurrencePattern) : t('entry.recurrencePatterns.custom') }
                               ]}
                               value={recurrencePattern.startsWith('monthly:') ? 'custom' : recurrencePattern}
                               onChange={handleRecurrenceChange}
@@ -438,7 +443,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                               buttonClassName="bg-white border border-slate-200 text-praetor font-medium py-2 px-2 text-xs"
                             />
                           </div>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-6">Until</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-6">{t('entry.until')}</span>
                           <input
                             type="date"
                             value={recurrenceEndDate}
@@ -460,7 +465,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                 onClick={handleSubmit}
                 className="bg-praetor text-white px-6 py-2.5 rounded-xl hover:bg-slate-700 transition-all shadow-md hover:shadow-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap"
               >
-                <i className="fa-solid fa-check"></i> Log Time
+                <i className="fa-solid fa-check"></i> {t('entry.logTime')}
               </button>
             </div>
           </div>

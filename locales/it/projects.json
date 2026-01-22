@@ -24,7 +24,28 @@
     "clientRequired": "Il cliente è obbligatorio",
     "projectDisabled": "Il progetto è disabilitato",
     "inheritedFromDisabled": "Ereditato da Progetto disabilitato",
-    "createNewProject": "Crea Nuovo Progetto"
+    "createNewProject": "Crea Nuovo Progetto",
+    "projectsDirectory": "Directory Progetti",
+    "projectsDirectoryTitle": "Directory Progetti",
+    "projectDetailsPlaceholder": "Dettagli progetto...",
+    "saveChanges": "Salva Modifiche",
+    "unknown": "Sconosciuto",
+    "disabledLabel": "(DISABILITATO)",
+    "noDescriptionProvided": "Nessuna descrizione fornita.",
+    "statusDisabled": "Disabilitato",
+    "statusInheritedDisable": "Disabilitazione Ereditata",
+    "statusActive": "Attivo",
+    "inheritedFromDisabledClient": "Ereditato da Cliente disabilitato: {{clientName}}",
+    "allClients": "Tutti i Clienti",
+    "searchPlaceholder": "Cerca progetti, descrizioni o clienti...",
+    "filterByClient": "Filtra per Cliente",
+    "tableHeaders": {
+      "client": "Cliente",
+      "projectName": "Nome Progetto",
+      "description": "Descrizione",
+      "status": "Stato",
+      "actions": "Azioni"
+    }
   },
   "tasks": {
     "title": "Attività",

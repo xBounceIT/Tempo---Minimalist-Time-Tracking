@@ -75,7 +75,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
         setErrors({});
 
         const newErrors: Record<string, string> = {};
-        if (!name?.trim()) newErrors.name = 'Unit name is required';
+        if (!name?.trim()) newErrors.name = t('common:validation.unitNameRequired');
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -125,7 +125,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
             setTargetUnit(null);
         } catch (err) {
             console.error("Failed to save assignments", err);
-            alert("Failed to save assignments");
+            alert(t('hr:workUnits.failedToSaveAssignments'));
         }
     };
 
@@ -208,7 +208,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                                     <i className="fa-solid fa-user-tie"></i>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Managers</p>
+                                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{t('hr:workUnits.managers')}</p>
                                     <div className="flex flex-wrap gap-1 mt-1">
                                         {unit.managers && unit.managers.length > 0 ? (
                                             unit.managers.map(m => (
@@ -217,7 +217,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                                                 </span>
                                             ))
                                         ) : (
-                                            <span className="text-sm text-slate-400 italic">No managers assigned</span>
+                                            <span className="text-sm text-slate-400 italic">{t('hr:workUnits.noManagersAssigned')}</span>
                                         )}
                                     </div>
                                 </div>
@@ -229,8 +229,8 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                                         <i className="fa-solid fa-users"></i>
                                     </div>
                                     <div>
-                                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Members</p>
-                                        <p className="text-sm font-bold text-slate-700">{unit.userCount || 0} users</p>
+                                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{t('hr:workUnits.members')}</p>
+                                        <p className="text-sm font-bold text-slate-700">{unit.userCount || 0} {t('hr:workUnits.users')}</p>
                                     </div>
                                 </div>
                                 {userRole === 'admin' && (
@@ -238,7 +238,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                                         onClick={() => openAssignments(unit)}
                                         className="text-xs font-bold text-praetor hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
                                     >
-                                        Manage Members
+                                        {t('hr:workUnits.manageMembers')}
                                     </button>
                                 )}
                             </div>
@@ -271,14 +271,14 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                 <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-200">
                         <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-slate-800">New Work Unit</h3>
+                            <h3 className="text-lg font-bold text-slate-800">{t('hr:workUnits.newWorkUnit')}</h3>
                             <button onClick={() => setIsCreateModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                                 <i className="fa-solid fa-xmark text-xl"></i>
                             </button>
                         </div>
                         <form onSubmit={handleCreate} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Unit Name</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('hr:workUnits.unitName')}</label>
                                 <input
                                     type="text"
                                     value={name}
@@ -293,7 +293,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                             </div>
                             <div>
                                 <CustomSelect
-                                    label="Managers"
+                                    label={t('hr:workUnits.managers')}
                                     options={managerOptions}
                                     value={selectedManagerIds}
                                     onChange={(val) => {
@@ -302,13 +302,13 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                                     }}
                                     isMulti={true}
                                     searchable={true}
-                                    placeholder="Select managers..."
+                                    placeholder={t('hr:workUnits.selectManagers')}
                                     className={errors.managers ? 'border-red-300' : ''}
                                 />
                                 {errors.managers && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.managers}</p>}
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Description</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('hr:workUnits.description')}</label>
                                 <textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
@@ -321,14 +321,14 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                                     onClick={() => setIsCreateModalOpen(false)}
                                     className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
                                 >
-                                    Cancel
+                                    {t('common:buttons.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={selectedManagerIds.length === 0}
                                     className="flex-1 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
                                 >
-                                    Create Unit
+                                    {t('hr:workUnits.createUnit')}
                                 </button>
                             </div>
                         </form>
@@ -341,14 +341,14 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                 <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-200">
                         <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-slate-800">Edit Work Unit</h3>
+                            <h3 className="text-lg font-bold text-slate-800">{t('hr:workUnits.editWorkUnit')}</h3>
                             <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                                 <i className="fa-solid fa-xmark text-xl"></i>
                             </button>
                         </div>
                         <form onSubmit={handleUpdate} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Unit Name</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('hr:workUnits.unitName')}</label>
                                 <input
                                     type="text"
                                     value={name}
@@ -363,7 +363,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                             </div>
                             <div>
                                 <CustomSelect
-                                    label="Managers"
+                                    label={t('hr:workUnits.managers')}
                                     options={managerOptions}
                                     value={selectedManagerIds}
                                     onChange={(val) => {
@@ -372,13 +372,13 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                                     }}
                                     isMulti={true}
                                     searchable={true}
-                                    placeholder="Select managers..."
+                                    placeholder={t('hr:workUnits.selectManagers')}
                                     className={errors.managers ? 'border-red-300' : ''}
                                 />
                                 {errors.managers && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.managers}</p>}
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Description</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('hr:workUnits.description')}</label>
                                 <textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
@@ -391,13 +391,13 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                                     onClick={() => setIsEditModalOpen(false)}
                                     className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
                                 >
-                                    Cancel
+                                    {t('common:buttons.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     className="flex-1 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                                 >
-                                    Save Changes
+                                    {t('hr:workUnits.saveChanges')}
                                 </button>
                             </div>
                         </form>
@@ -422,7 +422,7 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                         <div className="p-4 border-b border-slate-100 shrink-0">
                             <input
                                 type="text"
-                                placeholder="Search users..."
+                                placeholder={t('hr:workUnits.searchUsers')}
                                 value={assignmentSearch}
                                 onChange={(e) => setAssignmentSearch(e.target.value)}
                                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none"
@@ -473,14 +473,14 @@ const WorkUnitsView: React.FC<WorkUnitsViewProps> = ({ workUnits, users, userRol
                                 onClick={() => setIsAssignmentModalOpen(false)}
                                 className="px-6 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-200 rounded-xl transition-colors"
                             >
-                                Cancel
+                                {t('common:buttons.cancel')}
                             </button>
                             <button
                                 onClick={saveAssignments}
                                 disabled={isLoadingAssignments}
                                 className="px-8 py-2.5 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95 disabled:opacity-50"
                             >
-                                Save Assignments
+                                {t('hr:workUnits.saveAssignments')}
                             </button>
                         </div>
                     </div>

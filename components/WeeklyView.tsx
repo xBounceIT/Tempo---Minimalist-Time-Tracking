@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Client, Project, ProjectTask, TimeEntry, UserRole, User } from '../types';
 import CustomSelect from './CustomSelect';
 import ValidatedNumberInput from './ValidatedNumberInput';
@@ -34,6 +35,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
     userRole, currentUser, viewingUserId, availableUsers, onViewUserChange,
     startOfWeek, treatSaturdayAsHoliday
 }) => {
+    const { t } = useTranslation('timesheets');
     const [currentWeekStart, setCurrentWeekStart] = useState(() => {
         const d = new Date();
         const day = d.getDay();
@@ -256,7 +258,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
                             {currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(new Date(currentWeekStart).setDate(currentWeekStart.getDate() + 4)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </h3>
-                        <p className="text-[10px] font-bold text-praetor uppercase">Week View</p>
+                        <p className="text-[10px] font-bold text-praetor uppercase">{t('weekly.weekView')}</p>
                     </div>
                     <button onClick={() => handleWeekChange(1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                         <i className="fa-solid fa-chevron-right"></i>
@@ -282,7 +284,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                             options={availableUsers.map(u => ({ id: u.id, name: u.name }))}
                             value={viewingUserId}
                             onChange={onViewUserChange}
-                            label="Viewing User"
+                            label={t('weekly.viewingUser')}
                             searchable={true}
                         />
                     </div>
@@ -305,7 +307,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                         {day.holidayName && <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" title={day.holidayName}></div>}
                                     </th>
                                 ))}
-                                <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-20 text-right">Total</th>
+                                <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-20 text-right">{t('weekly.total')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -336,7 +338,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                 value={row.projectId}
                                                 onChange={(val) => handleRowInfoChange(rowIndex, 'projectId', val)}
                                                 className="!bg-transparent"
-                                                placeholder="Select project..."
+                                                placeholder={t('weekly.selectProject')}
                                                 onOpen={() => setActiveDropdownRow(rowIndex)}
                                                 onClose={() => setActiveDropdownRow(null)}
                                                 searchable={true}
@@ -351,14 +353,14 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                                 value={row.taskName}
                                                 onChange={(val) => handleRowInfoChange(rowIndex, 'taskName', val)}
                                                 className="!bg-transparent"
-                                                placeholder="Select task..."
+                                                placeholder={t('weekly.selectTask')}
                                                 onOpen={() => setActiveDropdownRow(rowIndex)}
                                                 onClose={() => setActiveDropdownRow(null)}
                                                 searchable={true}
                                             />
                                             <input
                                                 type="text"
-                                                placeholder="Week note..."
+                                                placeholder={t('weekly.weekNote')}
                                                 value={row.weekNote}
                                                 onChange={(e) => handleRowInfoChange(rowIndex, 'weekNote', e.target.value)}
                                                 className="w-full text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:border-praetor focus:ring-1 focus:ring-praetor text-slate-600 h-7"
@@ -397,7 +399,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                                             <button
                                                 onClick={() => deleteRow(rowIndex)}
                                                 className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300"
-                                                title="Delete row"
+                                                title={t('weekly.deleteRow')}
                                             >
                                                 <i className="fa-solid fa-trash-can text-sm"></i>
                                             </button>
@@ -440,7 +442,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                     className={`bg-praetor text-white px-10 py-3 rounded-xl hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-200 font-bold text-sm flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:grayscale-[0.5] ${showSuccess ? 'bg-emerald-600 hover:bg-emerald-600 shadow-emerald-500/20' : ''}`}
                 >
                     {isLoading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : (showSuccess ? <i className="fa-solid fa-check"></i> : <i className="fa-solid fa-cloud-arrow-up"></i>)}
-                    {showSuccess ? 'Success!' : 'Submit Time'}
+                    {showSuccess ? t('weekly.success') : t('weekly.submitTime')}
                 </button>
             </div>
         </div>
