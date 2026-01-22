@@ -64,10 +64,9 @@ i18n
     ns: ['common', 'form', 'layout', 'auth', 'timesheets', 'crm', 'hr', 'projects', 'finances', 'suppliers', 'settings', 'notifications'],
     resources,
     detection: {
-      order: ['querystring', 'localStorage', 'navigator'],
-      caches: ['localStorage'],
-      lookupQuerystring: 'lng',
-      lookupLocalStorage: 'i18nextLng'
+      order: ['querystring', 'navigator'],
+      caches: [],
+      lookupQuerystring: 'lng'
     },
     interpolation: {
       escapeValue: false

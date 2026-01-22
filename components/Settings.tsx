@@ -81,8 +81,15 @@ const Settings: React.FC = () => {
 
   const handleLanguageChange = async (language: 'en' | 'it') => {
     i18n.changeLanguage(language);
+    localStorage.setItem('i18nextLng', language);
     setSettings({ ...settings, language });
-    await handleSave({ preventDefault: () => { } } as React.FormEvent);
+    try {
+      const payload = { fullName: settings.fullName, email: settings.email, language };
+      await api.settings.update(payload);
+      setInitialSettings(payload);
+    } catch (err) {
+      console.error('Failed to update language:', err);
+    }
   };
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {

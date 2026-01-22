@@ -596,6 +596,7 @@ const App: React.FC = () => {
           try {
             const settings = await api.settings.get();
             if (settings.language) {
+              localStorage.setItem('i18nextLng', settings.language);
               i18n.changeLanguage(settings.language);
             }
           } catch (err) {
