@@ -87,7 +87,8 @@ export default async function (fastify, opts) {
                 EXTRACT(EPOCH FROM created_at) * 1000 as "createdAt",
                 EXTRACT(EPOCH FROM updated_at) * 1000 as "updatedAt"
             FROM quotes 
-            ORDER BY created_at DESC`
+            ORDER BY created_at DESC`,
+            []
         );
 
         // Get all quote items
@@ -103,7 +104,8 @@ export default async function (fastify, opts) {
                 discount,
                 note
             FROM quote_items
-            ORDER BY created_at ASC`
+            ORDER BY created_at ASC`,
+            []
         );
 
         // Group items by quote
@@ -139,7 +141,7 @@ export default async function (fastify, opts) {
             return badRequest(reply, 'Items must be a non-empty array');
         }
 
-        const normalizedItems = [];
+        const normalizedItems: any[] = [];
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             const productIdResult = requireNonEmptyString(item.productId, `items[${i}].productId`);
@@ -196,7 +198,7 @@ export default async function (fastify, opts) {
             );
 
             // Insert quote items
-            const createdItems = [];
+            const createdItems: any[] = [];
             for (const item of normalizedItems) {
                 const itemId = 'qi-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 const itemResult = await query(
@@ -379,7 +381,7 @@ export default async function (fastify, opts) {
         }
 
         // If items are provided, update them
-        let updatedItems = [];
+        let updatedItems: any[] = [];
         if (normalizedItems) {
             // Delete existing items
             await query('DELETE FROM quote_items WHERE quote_id = $1', [idResult.value]);
