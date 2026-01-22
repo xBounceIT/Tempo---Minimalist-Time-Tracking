@@ -177,7 +177,8 @@
     "lastWeek": "Settimana Scorsa",
     "thisMonth": "Questo Mese",
     "lastMonth": "Mese Scorso",
-    "none": "--- Nessuno ---"
+    "none": "--- Nessuno ---",
+    "unknownUser": "Utente Sconosciuto"
   },
   "recurring": {
     "title": "Attività Ricorrenti",

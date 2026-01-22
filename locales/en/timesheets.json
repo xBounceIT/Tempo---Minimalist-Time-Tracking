@@ -177,7 +177,8 @@
     "lastWeek": "Last Week",
     "thisMonth": "This Month",
     "lastMonth": "Last Month",
-    "none": "--- None ---"
+    "none": "--- None ---",
+    "unknownUser": "Unknown User"
   },
   "recurring": {
     "title": "Recurring Tasks",

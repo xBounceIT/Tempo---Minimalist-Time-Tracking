@@ -30,11 +30,11 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-bold text-slate-800">Recurring Task Schedule</h3>
-            <p className="text-xs text-slate-500">Manage automated tasks and patterns</p>
+            <h3 className="text-lg font-bold text-slate-800">{t('recurring.recurringTaskSchedule')}</h3>
+            <p className="text-xs text-slate-500">{t('recurring.manageAutomatedTasks')}</p>
           </div>
           <span className="bg-slate-100 text-praetor px-3 py-1 rounded-full text-xs font-bold">
-            {recurringTasks.length} Active
+            {recurringTasks.length} {t('recurring.active')}
           </span>
         </div>
 
@@ -69,7 +69,7 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
                           <span className="text-slate-300">•</span>
                           <span className="text-xs text-slate-500 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project?.color || '#ccc' }}></span>
-                            {project?.name || 'Unknown'}
+                            {project?.name || t('recurring.unknown')}
                           </span>
                         </div>
                       </div>
@@ -93,7 +93,7 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
                       <button
                         onClick={() => setSelectedTask(task)}
                         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                        title="Remove Recurrence"
+                        title={t('recurring.removeRecurrence')}
                       >
                         <i className="fa-solid fa-trash-can"></i>
                       </button>
@@ -111,13 +111,13 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-slate-100">
-                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <i className="fa-solid fa-triangle-exclamation text-amber-500"></i>
-                  {t('entry.stopRecurringTask')}
-                </h3>
-                <p className="text-sm text-slate-500 mt-1">
-                  {t('entry.howHandleEntries')} <strong className="text-slate-800">{selectedTask.name}</strong>?
-                </p>
+              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <i className="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                {t('entry.stopRecurringTask')}
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                {t('entry.howHandleEntries')} <strong className="text-slate-800">{selectedTask.name}</strong>?
+              </p>
             </div>
 
             <div className="p-4 space-y-3">
@@ -126,11 +126,11 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
                 className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all group"
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-slate-800 group-hover:text-praetor">Only Stop Recurrence</span>
+                  <span className="font-bold text-slate-800 group-hover:text-praetor">{t('recurring.stopOnly')}</span>
                   <i className="fa-solid fa-pause text-slate-300 group-hover:text-praetor"></i>
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Keeps all existing history. Just stops the task from repeating in the future.
+                  {t('recurring.stopOnlyDesc')}
                 </p>
               </button>
 
@@ -139,12 +139,12 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
                 className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-red-300 hover:bg-red-50 transition-all group"
               >
                 <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-slate-800 group-hover:text-red-700">{t('recurring.deleteFuture')}</span>
-                    <i className="fa-solid fa-forward text-slate-300 group-hover:text-red-500"></i>
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    {t('recurring.deleteFutureDesc')}
-                  </p>
+                  <span className="font-bold text-slate-800 group-hover:text-red-700">{t('recurring.deleteFuture')}</span>
+                  <i className="fa-solid fa-forward text-slate-300 group-hover:text-red-500"></i>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  {t('recurring.deleteFutureDesc')}
+                </p>
               </button>
 
               <button
@@ -152,12 +152,12 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
                 className="w-full text-left p-4 rounded-xl border border-red-100 bg-red-50/50 hover:bg-red-100 hover:border-red-300 transition-all group"
               >
                 <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-red-700">{t('recurring.deleteAll')}</span>
-                    <i className="fa-solid fa-dumpster-fire text-red-400 group-hover:text-red-600"></i>
-                  </div>
-                  <p className="text-xs text-red-600/70 leading-relaxed">
-                    {t('recurring.deleteAllDesc')}
-                  </p>
+                  <span className="font-bold text-red-700">{t('recurring.deleteAll')}</span>
+                  <i className="fa-solid fa-dumpster-fire text-red-400 group-hover:text-red-600"></i>
+                </div>
+                <p className="text-xs text-red-600/70 leading-relaxed">
+                  {t('recurring.deleteAllDesc')}
+                </p>
               </button>
             </div>
 
@@ -166,7 +166,7 @@ const RecurringManager: React.FC<RecurringManagerProps> = ({ tasks, projects, cl
                 onClick={closeModal}
                 className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
               >
-                  {t('recurring.cancel')}
+                {t('recurring.cancel')}
               </button>
             </div>
           </div>

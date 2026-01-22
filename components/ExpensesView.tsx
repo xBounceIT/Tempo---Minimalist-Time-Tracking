@@ -324,7 +324,7 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expenses, onAddExpense, onU
                                 buttonClassName="text-xs py-1"
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                {t('common.pagination.showing', { start: paginatedExpenses.length > 0 ? startIndex + 1 : 0, end: Math.min(startIndex + rowsPerPage, filteredExpenses.length), total: filteredExpenses.length })}
+                                {t('common:pagination.showing', { start: paginatedExpenses.length > 0 ? startIndex + 1 : 0, end: Math.min(startIndex + rowsPerPage, filteredExpenses.length), total: filteredExpenses.length })}
                             </span>
                         </div>
                         <div className="flex gap-2">

@@ -599,7 +599,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
                 footer={
                     <>
                         <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold text-slate-500">{t('common.pagination.rowsPerPage')}:</span>
+                            <span className="text-xs font-bold text-slate-500">{t('common:pagination.rowsPerPage')}:</span>
                             <CustomSelect
                                 options={[{ id: '10', name: '10' }, { id: '20', name: '20' }, { id: '50', name: '50' }]}
                                 value={rowsPerPage.toString()}
@@ -609,7 +609,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({ invoices, clients, products
                                 buttonClassName="text-xs py-1"
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                {t('common.pagination.showing', { start: paginatedInvoices.length > 0 ? startIndex + 1 : 0, end: Math.min(startIndex + rowsPerPage, filteredInvoices.length), total: filteredInvoices.length })}
+                                {t('common:pagination.showing', { start: paginatedInvoices.length > 0 ? startIndex + 1 : 0, end: Math.min(startIndex + rowsPerPage, filteredInvoices.length), total: filteredInvoices.length })}
                             </span>
                         </div>
                         <div className="flex gap-2">

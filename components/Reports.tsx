@@ -42,7 +42,7 @@ const toLocalISOString = (date: Date) => {
 
 const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, currentUser, startOfWeek, treatSaturdayAsHoliday, dailyGoal, currency }) => {
   const { t } = useTranslation('timesheets');
-  
+
   // --- Dashboard State ---
   const [activeTab, setActiveTab] = useState<'dashboard' | 'detailed'>('dashboard');
 
@@ -320,7 +320,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
   };
 
   const getUserName = (userId: string) => {
-    return users.find(u => u.id === userId)?.name || 'Unknown User';
+    return users.find(u => u.id === userId)?.name || t('reports.unknownUser');
   };
 
   return (
@@ -349,15 +349,15 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <p className="text-sm font-medium text-slate-500 mb-1">Total Tracked</p>
-              <p className="text-3xl font-bold text-slate-900">{totalHours.toFixed(1)} <span className="text-lg font-normal text-slate-400">hrs</span></p>
+              <p className="text-sm font-medium text-slate-500 mb-1">{t('reports.totalTracked')}</p>
+              <p className="text-3xl font-bold text-slate-900">{totalHours.toFixed(1)} <span className="text-lg font-normal text-slate-400">{t('reports.hours')}</span></p>
             </div>
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <p className="text-sm font-medium text-slate-500 mb-1">Tasks Completed</p>
+              <p className="text-sm font-medium text-slate-500 mb-1">{t('reports.tasksCompleted')}</p>
               <p className="text-3xl font-bold text-slate-900">{entries.length}</p>
             </div>
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <p className="text-sm font-medium text-slate-500 mb-1">Most Active Project</p>
+              <p className="text-sm font-medium text-slate-500 mb-1">{t('reports.mostActiveProject')}</p>
               <p className="text-3xl font-bold text-slate-900">
                 {projectData.length > 0 ? [...projectData].sort((a, b) => b.value - a.value)[0].name : 'N/A'}
               </p>
@@ -594,7 +594,7 @@ const Reports: React.FC<ReportsProps> = ({ entries, projects, clients, users, cu
                 className="bg-praetor text-white px-12 py-3 rounded-xl font-bold hover:bg-slate-800 shadow-xl shadow-slate-200 transition-all active:scale-95 flex items-center gap-3"
               >
                 <i className="fa-solid fa-file-invoice"></i>
-                Generate Report
+                {t('reports.generateReport')}
               </button>
             </div>
           </div>

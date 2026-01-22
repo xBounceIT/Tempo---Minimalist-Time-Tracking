@@ -128,7 +128,7 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                                 searchable={false}
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                {t('common.pagination.showing', {
+                                {t('common:pagination.showing', {
                                     start: projectsPage.length > 0 ? startIndex + 1 : 0,
                                     end: Math.min(startIndex + rowsPerPage, filteredProjectsTotal.length),
                                     total: filteredProjectsTotal.length

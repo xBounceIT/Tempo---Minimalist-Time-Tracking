@@ -348,7 +348,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ payments, clients, invoices
                 footer={
                     <>
                         <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold text-slate-500">{t('common.pagination.rowsPerPage')}:</span>
+                            <span className="text-xs font-bold text-slate-500">{t('common:pagination.rowsPerPage')}:</span>
                             <CustomSelect
                                 options={[{ id: '10', name: '10' }, { id: '20', name: '20' }, { id: '50', name: '50' }]}
                                 value={rowsPerPage.toString()}
@@ -358,7 +358,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ payments, clients, invoices
                                 buttonClassName="text-xs py-1"
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                {t('common.pagination.showing', { start: paginatedPayments.length > 0 ? startIndex + 1 : 0, end: Math.min(startIndex + rowsPerPage, filteredPayments.length), total: filteredPayments.length })}
+                                {t('common:pagination.showing', { start: paginatedPayments.length > 0 ? startIndex + 1 : 0, end: Math.min(startIndex + rowsPerPage, filteredPayments.length), total: filteredPayments.length })}
                             </span>
                         </div>
                         <div className="flex gap-2">

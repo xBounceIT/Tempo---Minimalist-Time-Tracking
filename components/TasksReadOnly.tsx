@@ -119,7 +119,7 @@ const TasksReadOnly: React.FC<TasksReadOnlyProps> = ({ tasks, projects, clients 
                 footer={
                     <>
                         <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold text-slate-500">{t('common.pagination.rowsPerPage')}:</span>
+                            <span className="text-xs font-bold text-slate-500">{t('common:pagination.rowsPerPage')}:</span>
                             <CustomSelect
                                 options={[
                                     { id: '5', name: '5' },
@@ -134,10 +134,10 @@ const TasksReadOnly: React.FC<TasksReadOnlyProps> = ({ tasks, projects, clients 
                                 searchable={false}
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                {t('common.pagination.showing', { 
-                                    start: tasksPage.length > 0 ? startIndex + 1 : 0, 
-                                    end: Math.min(startIndex + rowsPerPage, filteredTasksTotal.length), 
-                                    total: filteredTasksTotal.length 
+                                {t('common:pagination.showing', {
+                                    start: tasksPage.length > 0 ? startIndex + 1 : 0,
+                                    end: Math.min(startIndex + rowsPerPage, filteredTasksTotal.length),
+                                    total: filteredTasksTotal.length
                                 })}
                             </span>
                         </div>
