@@ -14,8 +14,7 @@ export async function migrate() {
                 address = 'Via delle Industrie 42, 00100 Roma (RM)',
                 vat_number = 'IT01234567890',
                 tax_code = '01234567890',
-                billing_code = 'KRRH6B9',
-                payment_terms = '30 gg D.F.F.M.'
+                billing_code = 'KRRH6B9'
             WHERE id = 'c1';
 
             UPDATE clients SET
@@ -28,10 +27,9 @@ export async function migrate() {
                 address = 'Via Roma 123, 20100 Milano (MI)',
                 vat_number = NULL,
                 tax_code = 'RSSMRA80A01H501U',
-                billing_code = '0000000',
-                payment_terms = 'Rimessa Diretta'
+                billing_code = '0000000'
             WHERE id = 'c2';
-        `);
+        `, []);
         console.log('Migration completed successfully.');
     } catch (err) {
         console.error('Migration failed:', err);
