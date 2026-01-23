@@ -309,7 +309,17 @@
     "activeSales": "Vendite Attive",
     "history": "Storico",
     "searchSalesOrProducts": "Cerca vendite o prodotti...",
-    "createNewSale": "Crea Nuova Vendita"
+    "createNewSale": "Crea Nuova Vendita",
+    "updateSale": "Aggiorna Vendita",
+    "deleteSaleTitle": "Eliminare Vendita?",
+    "deleteSaleConfirm": "Sei sicuro di voler eliminare questa vendita per {{clientName}}? Questa azione non può essere annullata.",
+    "noActiveSales": "Nessuna vendita attiva trovata.",
+    "specialBidLabel": "Offerta Speciale",
+    "completeSale": "Completa Vendita",
+    "denySale": "Rifiuta Vendita",
+    "restoreSale": "Ripristina Vendita",
+    "deleteSale": "Elimina Vendita",
+    "quoteDetailsReadOnly": "(I dettagli del preventivo sono in sola lettura)"
   },
   "paymentTerms": {
     "immediate": "Immediato",

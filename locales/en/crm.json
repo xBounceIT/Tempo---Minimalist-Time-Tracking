@@ -316,7 +316,17 @@
     "activeSales": "Active Sales",
     "history": "History",
     "searchSalesOrProducts": "Search sales or products...",
-    "createNewSale": "Create New Sale"
+    "createNewSale": "Create New Sale",
+    "updateSale": "Update Sale",
+    "deleteSaleTitle": "Delete Sale?",
+    "deleteSaleConfirm": "Are you sure you want to delete this sale for {{clientName}}? This action cannot be undone.",
+    "noActiveSales": "No active sales found.",
+    "specialBidLabel": "Special Bid",
+    "completeSale": "Complete Sale",
+    "denySale": "Deny Sale",
+    "restoreSale": "Restore Sale",
+    "deleteSale": "Delete Sale",
+    "quoteDetailsReadOnly": "(Quote details are read-only)"
   },
   "paymentTerms": {
     "immediate": "Immediate",
