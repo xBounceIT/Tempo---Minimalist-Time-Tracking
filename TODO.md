@@ -41,7 +41,6 @@
         - La conferma sta per "inviata"? Se si, è possibile cambiare label? (DONE)
         - Un preventivo ha 3 stati: bozza, inviata, accettato/rifiutato (la cancellazione è possibile solo nello stato di bozza) (DONE)
     - Sales
-        - Lo stato di pending a che serve?
         - Gli stati di un offerta sono: bozza, inviata, accettato/rifiutato (la cancellazione è possibile solo nello stato di bozza; la cancellazione della bozza se il preventivo associato è accettato non deve essere possibile)
         - OK si può creare un'offerta senza preventivo ma è possibile creata un'offerta crearlo con una "descrizione" "generato automaticamente dall'offerta xxx" ?   
         - I termini di pagamento possono essere diversi da preventivo, li puoi lasciare modificabili? 

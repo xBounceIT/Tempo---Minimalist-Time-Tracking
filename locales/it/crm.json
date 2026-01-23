@@ -254,6 +254,7 @@
     "orderExpirationDesc": "Ordina per data scadenza (decrescente)",
     "clearExpirationOrder": "Cancella ordinamento scadenza",
     "markAsConfirmed": "Segna come Confermato",
+    "markAsSent": "Segna come Inviato",
     "markAsQuoted": "Segna come Preventivato",
     "cannotRevertLinkedSale": "Impossibile ripristinare: esiste un ordine di vendita collegato",
     "taxableAmount": "Imponibile",

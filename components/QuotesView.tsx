@@ -554,6 +554,18 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    onUpdateQuote(quote.id, { status: 'sent' });
+                                }}
+                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                title={t('crm:quotes.markAsSent')}
+                            >
+                                <i className="fa-solid fa-paper-plane"></i>
+                            </button>
+                        )}
+                        {quote.status === 'draft' && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     if (isDeleteDisabled) return;
                                     confirmDelete(quote);
                                 }}
@@ -840,45 +852,45 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                     <p className="text-red-500 text-[10px] font-bold ml-1 mb-2">{errors.total}</p>
                                                 )}
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                                                {/* Left Column: Detailed Breakdown */}
-                                                <div className="flex flex-col justify-center space-y-3 h-full">
-                                                    <div className="flex justify-between items-center px-2">
-                                                        <span className="text-sm font-bold text-slate-500">{t('crm:quotes.taxableAmount')}:</span>
-                                                        <span className="text-sm font-black text-slate-800">{subtotal.toFixed(2)} {currency}</span>
-                                                    </div>
-
-                                                    {formData.discount! > 0 && (
+                                                    {/* Left Column: Detailed Breakdown */}
+                                                    <div className="flex flex-col justify-center space-y-3 h-full">
                                                         <div className="flex justify-between items-center px-2">
-                                                            <span className="text-sm font-bold text-slate-500">{t('crm:quotes.discountAmount', { discount: formData.discount })}:</span>
-                                                            <span className="text-sm font-black text-amber-600">-{discountAmount.toFixed(2)} {currency}</span>
+                                                            <span className="text-sm font-bold text-slate-500">{t('crm:quotes.taxableAmount')}:</span>
+                                                            <span className="text-sm font-black text-slate-800">{subtotal.toFixed(2)} {currency}</span>
                                                         </div>
-                                                    )}
 
-                                                    {Object.entries(taxGroups).map(([rate, amount]) => (
-                                                        <div key={rate} className="flex justify-between items-center px-2">
-                                                            <span className="text-sm font-bold text-slate-500">{t('crm:quotes.ivaTax', { rate })}:</span>
-                                                            <span className="text-sm font-black text-slate-800">{amount.toFixed(2)} {currency}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
+                                                        {formData.discount! > 0 && (
+                                                            <div className="flex justify-between items-center px-2">
+                                                                <span className="text-sm font-bold text-slate-500">{t('crm:quotes.discountAmount', { discount: formData.discount })}:</span>
+                                                                <span className="text-sm font-black text-amber-600">-{discountAmount.toFixed(2)} {currency}</span>
+                                                            </div>
+                                                        )}
 
-                                                {/* Middle Column: Final Total */}
-                                                <div className="flex flex-col items-center justify-center py-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
-                                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{t('crm:quotes.totalLabel')}:</span>
-                                                    <span className="text-4xl font-black text-praetor leading-none">
-                                                        {total.toFixed(2)}
-                                                        <span className="text-xl ml-1 opacity-60 text-slate-400">{currency}</span>
-                                                    </span>
-                                                </div>
-
-                                                {/* Right Column: Margin */}
-                                                <div className="bg-emerald-50/40 rounded-2xl p-6 flex flex-col items-center justify-center border border-emerald-100/30">
-                                                    <span className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">{t('crm:quotes.marginLabel')}:</span>
-                                                    <div className="text-center">
-                                                        <div className="text-2xl font-black text-emerald-700 leading-none mb-1">{margin.toFixed(2)} {currency}</div>
-                                                        <div className="text-xs font-black text-emerald-500 opacity-60">({marginPercentage.toFixed(1)}%)</div>
+                                                        {Object.entries(taxGroups).map(([rate, amount]) => (
+                                                            <div key={rate} className="flex justify-between items-center px-2">
+                                                                <span className="text-sm font-bold text-slate-500">{t('crm:quotes.ivaTax', { rate })}:</span>
+                                                                <span className="text-sm font-black text-slate-800">{amount.toFixed(2)} {currency}</span>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                </div>
+
+                                                    {/* Middle Column: Final Total */}
+                                                    <div className="flex flex-col items-center justify-center py-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                                                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{t('crm:quotes.totalLabel')}:</span>
+                                                        <span className="text-4xl font-black text-praetor leading-none">
+                                                            {total.toFixed(2)}
+                                                            <span className="text-xl ml-1 opacity-60 text-slate-400">{currency}</span>
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Right Column: Margin */}
+                                                    <div className="bg-emerald-50/40 rounded-2xl p-6 flex flex-col items-center justify-center border border-emerald-100/30">
+                                                        <span className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">{t('crm:quotes.marginLabel')}:</span>
+                                                        <div className="text-center">
+                                                            <div className="text-2xl font-black text-emerald-700 leading-none mb-1">{margin.toFixed(2)} {currency}</div>
+                                                            <div className="text-xs font-black text-emerald-500 opacity-60">({marginPercentage.toFixed(1)}%)</div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </>
                                         );
