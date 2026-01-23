@@ -445,11 +445,13 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <div className="ml-1 space-y-1">
-                                            {showTaxRateWarning && (
-                                                <p className="text-amber-600 text-[10px] font-bold">{t('crm:products.unusualTaxRate')}</p>
-                                            )}
-                                            <label className="text-xs font-bold text-slate-500">{t('crm:products.taxRate')} </label>
+                                        <div className="flex justify-between items-center ml-1 min-h-[16px]">
+                                            <div className="space-y-1">
+                                                {showTaxRateWarning && (
+                                                    <p className="text-amber-600 text-[10px] font-bold">{t('crm:products.unusualTaxRate')}</p>
+                                                )}
+                                                <label className="text-xs font-bold text-slate-500">{t('crm:products.taxRate')} </label>
+                                            </div>
                                         </div>
                                         <ValidatedNumberInput
                                             value={formData.taxRate ?? ''}
