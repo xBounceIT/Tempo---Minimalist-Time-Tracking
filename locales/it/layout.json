@@ -1,6 +1,6 @@
 {
   "modules": {
-    "timesheets": "Timesheet",
+    "timesheets": "Presenze",
     "crm": "CRM",
     "catalog": "Catalogo",
     "hr": "HR",

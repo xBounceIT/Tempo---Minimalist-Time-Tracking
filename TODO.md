@@ -14,17 +14,23 @@
           - Unità di lavoro: pagina per creazione competence center e assegnazione manager dei center e membri
         - Fornitori:
           - Anagrafica
-          - Preventivi: 
+          - Preventivi: preventivi ricevuti da fornitori
         - Finanza
           - Fatture: Gestisci e traccia le fatture vs clienti
           - Pagamenti: Registra e traccia pagamenti clienti
           - Spese: Traccia spese aziendali e costi
           - Reports: Visualizza analitiche finanziarie e insight
-        - Progetti
-        - Presenze
-    - Partendo da questi moduli, possiamo sviluppare una matrice dei sotto menu con una descrizione ad altissimo livello? Questo sarebbe molto utile a me che devo far comprendere ad EF ed EC i flussi  [😄] 
+        - Progetti:
+          - Progetti: Creazione progetti associati a cliente
+          - Attività: Creazione task associate a progetti
+        - Presenze:
+          - Time tracker: il nostro presenze
+          - Progetti: vista read only sui progetti a te assegnati
+          - Attività: vista read only sui task a te assegnati
+          - Attività ricorrenti: vista tabellare delle attività che l'utente indica come ricorrenti in Time Tracker
+          - Report: l'attuale rapporto di presenze
     - Le valute sono in dollari, è possibile mettere €? (DONE)
-    - Quando premi invio chiude, è possibile toglierlo? 
+    - Quando premi invio chiude, è possibile toglierlo? (EH?)
     - per tutti i menu a tendina che dipendono da EC/AF/FR è possibile creare un modulo simil "amministratore" per editarli tutti?
  
 *** CRM

@@ -61,10 +61,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
     { id: 'hr', name: t('modules.hr'), icon: 'fa-user-group', active: false },
     { id: 'projects', name: t('modules.projects'), icon: 'fa-folder-tree', active: false },
     { id: 'finances', name: t('modules.finances'), icon: 'fa-coins', active: false },
-    { id: 'employees', name: 'Employees', icon: 'fa-user-tie', active: false },
     { id: 'suppliers', name: t('modules.suppliers'), icon: 'fa-truck', active: false },
     { id: 'configuration', name: t('modules.configuration'), icon: 'fa-gears', active: false },
-  ], [t]);
+  ], [t]).sort((a, b) => a.name.localeCompare(b.name, i18n.language));
 
   // Compute active module from current route
   const activeModule = modules.find(m => m.id === getModuleFromRoute(activeView)) || modules[0];
@@ -84,9 +83,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange, cur
     if (m.id === 'crm' || m.id === 'catalog' || m.id === 'projects' || m.id === 'finances' || m.id === 'suppliers') {
       return currentUser.role === 'manager';
     }
-
-    // employees is a placeholder for future
-    if (m.id === 'employees') return false;
 
     return true;
   });
