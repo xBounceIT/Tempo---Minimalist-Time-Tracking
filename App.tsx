@@ -435,7 +435,7 @@ const App: React.FC = () => {
     roleMappings: []
   });
   const [generalSettings, setGeneralSettings] = useState({
-    currency: '$',
+    currency: '€',
     dailyLimit: 8,
     startOfWeek: 'Monday' as 'Monday' | 'Sunday',
     treatSaturdayAsHoliday: true,

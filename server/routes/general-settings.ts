@@ -10,7 +10,7 @@ export default async function (fastify, opts) {
         const result = await query('SELECT currency, daily_limit, start_of_week, treat_saturday_as_holiday, enable_ai_insights, gemini_api_key FROM general_settings WHERE id = 1');
         if (result.rows.length === 0) {
             return {
-                currency: 'USD',
+                currency: 'EUR',
                 dailyLimit: 8.00,
                 startOfWeek: 'Monday',
                 treatSaturdayAsHoliday: true,
