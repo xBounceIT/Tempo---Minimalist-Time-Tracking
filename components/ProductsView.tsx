@@ -449,7 +449,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                             {showTaxRateWarning && (
                                                 <p className="text-amber-600 text-[10px] font-bold">{t('crm:products.unusualTaxRate')}</p>
                                             )}
-                                            <label className="text-xs font-bold text-slate-500">{t('crm:products.taxRate')} (%)</label>
+                                            <label className="text-xs font-bold text-slate-500">{t('crm:products.taxRate')} </label>
                                         </div>
                                         <ValidatedNumberInput
                                             value={formData.taxRate ?? ''}
