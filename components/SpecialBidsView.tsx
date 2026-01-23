@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Client, Product, SpecialBid } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
@@ -24,6 +25,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
   onDeleteBid,
   currency
 }) => {
+  const { t } = useTranslation(['crm', 'common']);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBid, setEditingBid] = useState<SpecialBid | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -128,10 +130,10 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
 
     const newErrors: Record<string, string> = {};
     if (!formData.clientId) {
-      newErrors.clientId = 'Client is required';
+      newErrors.clientId = t('specialBids.errors.clientRequired');
     }
     if (!formData.productId) {
-      newErrors.productId = 'Product is required';
+      newErrors.productId = t('specialBids.errors.productRequired');
     }
     const selectedProduct = formData.productId ? products.find(p => p.id === formData.productId) : undefined;
     const originalPrice = selectedProduct ? Number(selectedProduct.costo) : undefined;
@@ -144,16 +146,16 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
       normalizedOriginalPrice === undefined ||
       formData.unitPrice >= normalizedOriginalPrice
     ) {
-      newErrors.unitPrice = 'Special price must be greater than 0 and lower than original price';
+      newErrors.unitPrice = t('specialBids.errors.invalidPrice');
     }
     if (!formData.startDate) {
-      newErrors.dates = 'Start date is required';
+      newErrors.dates = t('specialBids.errors.startDateRequired');
     }
     if (!formData.endDate) {
-      newErrors.dates = 'End date is required';
+      newErrors.dates = t('specialBids.errors.endDateRequired');
     }
     if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
-      newErrors.dates = 'Start date must be before end date';
+      newErrors.dates = t('specialBids.errors.startDateBeforeEndDate');
     }
 
     if (formData.clientId && formData.productId) {
@@ -164,7 +166,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
         isActiveBid(b)
       );
       if (existingBid) {
-        newErrors.productId = 'An active special bid already exists for this client and product';
+        newErrors.productId = t('specialBids.errors.existingBid');
       }
     }
 
@@ -261,7 +263,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
             </div>
             <div>
               <div className="font-bold text-slate-800">{bid.clientName}</div>
-              <div className="text-[10px] font-black text-slate-400 uppercase">Dedicated</div>
+              <div className="text-[10px] font-black text-slate-400 uppercase">{t('specialBids.dedicated')}</div>
             </div>
           </div>
         </td>
@@ -270,8 +272,8 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
         <td className="px-8 py-5">
           <div className={`text-sm ${expired ? 'text-red-600 font-bold' : notStarted ? 'text-amber-600 font-bold' : 'text-slate-600'}`}>
             {new Date(bid.startDate).toLocaleDateString()} - {new Date(bid.endDate).toLocaleDateString()}
-            {expired && <span className="ml-2 text-[10px] font-black">(EXPIRED)</span>}
-            {notStarted && !expired && <span className="ml-2 text-[10px] font-black">(NOT STARTED)</span>}
+            {expired && <span className="ml-2 text-[10px] font-black">({t('specialBids.expired')})</span>}
+            {notStarted && !expired && <span className="ml-2 text-[10px] font-black">({t('specialBids.notStarted')})</span>}
           </div>
         </td>
         <td className="px-8 py-5">
@@ -282,7 +284,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                 openEditModal(bid);
               }}
               className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
-              title="Edit Special Bid"
+              title={t('specialBids.editSpecialBidTooltip')}
             >
               <i className="fa-solid fa-pen-to-square"></i>
             </button>
@@ -292,7 +294,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                 confirmDelete(bid);
               }}
               className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-              title="Delete Special Bid"
+              title={t('specialBids.deleteSpecialBidTooltip')}
             >
               <i className="fa-solid fa-trash-can"></i>
             </button>
@@ -315,7 +317,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
         <div>
           <h5 className="font-bold text-slate-500 line-through">{bid.clientName}</h5>
           <div className="text-xs font-semibold text-slate-500 line-through">{bid.productName}</div>
-          <span className="text-[10px] font-black text-amber-500 uppercase">Expired</span>
+          <span className="text-[10px] font-black text-amber-500 uppercase">{t('specialBids.expired')}</span>
         </div>
       </div>
       <div className="flex items-center gap-6">
@@ -332,7 +334,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
               openEditModal(bid);
             }}
             className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
-            title="Edit Special Bid"
+            title={t('specialBids.editSpecialBidTooltip')}
           >
             <i className="fa-solid fa-pen-to-square"></i>
           </button>
@@ -342,7 +344,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
               confirmDelete(bid);
             }}
             className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title="Delete Special Bid"
+            title={t('specialBids.deleteSpecialBidTooltip')}
           >
             <i className="fa-solid fa-trash-can"></i>
           </button>
@@ -361,7 +363,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                 <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-praetor">
                   <i className={`fa-solid ${editingBid ? 'fa-pen-to-square' : 'fa-plus'}`}></i>
                 </div>
-                {editingBid ? 'Edit Special Bid' : 'Create Special Bid'}
+                {editingBid ? t('specialBids.editSpecialBid') : t('specialBids.createSpecialBid')}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -375,16 +377,16 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
               <div className="space-y-4">
                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                  Special Bid Details
+                  {t('specialBids.specialBidDetails')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Dedicated Client</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('specialBids.dedicatedClient')}</label>
                     <CustomSelect
                       options={activeClients.map(c => ({ id: c.id, name: c.name }))}
                       value={formData.clientId || ''}
                       onChange={handleClientChange}
-                      placeholder="Select a client..."
+                      placeholder={t('specialBids.selectClient')}
                       searchable={true}
                       className={errors.clientId ? 'border-red-300' : ''}
                     />
@@ -393,12 +395,12 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                     )}
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Product (Item)</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('specialBids.productItem')}</label>
                     <CustomSelect
                       options={activeProducts.map(p => ({ id: p.id, name: p.name }))}
                       value={formData.productId || ''}
                       onChange={handleProductChange}
-                      placeholder="Select a product..."
+                      placeholder={t('specialBids.selectProduct')}
                       searchable={true}
                       className={errors.productId ? 'border-red-300' : ''}
                     />
@@ -407,7 +409,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                     )}
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1">Original Price → Special Price ({currency})</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1">{t('specialBids.originalPriceToSpecialPrice', { currency })}</label>
                     <div className="flex items-center gap-3">
                       <div className="flex-1 text-sm px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold">
                         {originalPriceDisplay}
@@ -442,15 +444,15 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
               <div className="space-y-4">
                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                  Validity Period
+                  {t('specialBids.validityPeriod')}
                 </h4>
                 <div className="flex items-center gap-4 text-sm text-slate-600 mb-2">
                   <span className="font-bold">
-                    {formData.startDate ? new Date(formData.startDate).toLocaleDateString() : 'Select start'}
+                    {formData.startDate ? new Date(formData.startDate).toLocaleDateString() : t('specialBids.selectStart')}
                   </span>
                   <i className="fa-solid fa-arrow-right text-slate-400"></i>
                   <span className="font-bold">
-                    {formData.endDate ? new Date(formData.endDate).toLocaleDateString() : 'Select end'}
+                    {formData.endDate ? new Date(formData.endDate).toLocaleDateString() : t('specialBids.selectEnd')}
                   </span>
                 </div>
                 <Calendar
@@ -483,13 +485,13 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                   onClick={() => setIsModalOpen(false)}
                   className="px-8 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
                 >
-                  Cancel
+                  {t('specialBids.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-10 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95"
                 >
-                  {editingBid ? 'Update Bid' : 'Create Bid'}
+                  {editingBid ? t('specialBids.updateBid') : t('specialBids.createBid')}
                 </button>
               </div>
             </form>
@@ -505,9 +507,9 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                 <i className="fa-solid fa-triangle-exclamation text-xl"></i>
               </div>
               <div>
-                <h3 className="text-lg font-black text-slate-800">Delete Special Bid?</h3>
+                <h3 className="text-lg font-black text-slate-800">{t('specialBids.deleteConfirmTitle')}</h3>
                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                  Are you sure you want to delete the bid for <span className="font-bold text-slate-800">{bidToDelete?.clientName}</span>?
+                  {t('specialBids.deleteConfirmMessage', { clientName: bidToDelete?.clientName })}
                 </p>
               </div>
               <div className="flex gap-3 pt-2">
@@ -515,13 +517,13 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                   onClick={() => setIsDeleteConfirmOpen(false)}
                   className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
                 >
-                  Cancel
+                  {t('specialBids.cancel')}
                 </button>
                 <button
                   onClick={handleDelete}
                   className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
                 >
-                  Yes, Delete
+                  {t('specialBids.yesDelete')}
                 </button>
               </div>
             </div>
@@ -531,8 +533,8 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800">Special Bids</h2>
-          <p className="text-slate-500 text-sm">Define special prices for dedicated clients</p>
+          <h2 className="text-2xl font-black text-slate-800">{t('specialBids.title')}</h2>
+          <p className="text-slate-500 text-sm">{t('specialBids.subtitle')}</p>
         </div>
       </div>
 
@@ -541,7 +543,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
           <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <input
             type="text"
-            placeholder="Search clients or products..."
+            placeholder={t('specialBids.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-praetor outline-none shadow-sm placeholder:font-normal"
@@ -549,10 +551,10 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
         </div>
         <div>
           <CustomSelect
-            options={[{ id: 'all', name: 'All Clients' }, ...activeClients.map(c => ({ id: c.id, name: c.name }))]}
+            options={[{ id: 'all', name: t('specialBids.allClients') }, ...activeClients.map(c => ({ id: c.id, name: c.name }))]}
             value={filterClientId}
             onChange={setFilterClientId}
-            placeholder="Filter by Client"
+            placeholder={t('specialBids.filterByClient')}
             searchable={true}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
           />
@@ -565,27 +567,27 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <i className="fa-solid fa-rotate-left"></i>
-            Clear filters
+            {t('specialBids.clearFilters')}
           </button>
         </div>
       </div>
 
       <StandardTable
-        title="Active Special Bids"
+        title={t('specialBids.activeSpecialBids')}
         totalCount={filteredActiveBids.length}
         headerAction={
           <button
             onClick={openAddModal}
             className="bg-praetor text-white px-4 py-2.5 rounded-xl text-sm font-black shadow-xl shadow-slate-200 transition-all hover:bg-slate-700 active:scale-95 flex items-center gap-2"
           >
-            <i className="fa-solid fa-plus"></i> Create Special Bid
+            <i className="fa-solid fa-plus"></i> {t('specialBids.createSpecialBid')}
           </button>
         }
         footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
         footer={
           <>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+              <span className="text-xs font-bold text-slate-500">{t('specialBids.rowsPerPage')}</span>
               <CustomSelect
                 options={[
                   { id: '5', name: '5' },
@@ -600,7 +602,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                 searchable={false}
               />
               <span className="text-xs font-bold text-slate-400 ml-2">
-                Showing {paginatedActiveBids.length > 0 ? activeStartIndex + 1 : 0}-{Math.min(activeStartIndex + rowsPerPage, filteredActiveBids.length)} of {filteredActiveBids.length}
+                {t('specialBids.showing')} {paginatedActiveBids.length > 0 ? activeStartIndex + 1 : 0}-{Math.min(activeStartIndex + rowsPerPage, filteredActiveBids.length)} {t('specialBids.of')} {filteredActiveBids.length}
               </span>
             </div>
 
@@ -640,11 +642,11 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
         <table className="w-full text-left border-collapse">
           <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Product</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Price</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Validity Period</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.client')}</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.product')}</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.unitPrice')}</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.validityPeriod')}</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -655,8 +657,8 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                   <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                     <i className="fa-solid fa-tags text-2xl"></i>
                   </div>
-                  <p className="text-slate-400 text-sm font-bold">No active special bids found.</p>
-                  <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">Create your first special bid</button>
+                  <p className="text-slate-400 text-sm font-bold">{t('specialBids.noActiveSpecialBids')}</p>
+                  <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">{t('specialBids.createYourFirstSpecialBid')}</button>
                 </td>
               </tr>
             )}
@@ -665,7 +667,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
       </StandardTable>
 
       <StandardTable
-        title="Expired Special Bids"
+        title={t('specialBids.expiredSpecialBids')}
         totalCount={filteredExpiredBids.length}
         totalLabel="EXPIRED"
         containerClassName="border-dashed bg-slate-50"
@@ -673,7 +675,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
         footer={
           <>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+              <span className="text-xs font-bold text-slate-500">{t('specialBids.rowsPerPage')}</span>
               <CustomSelect
                 options={[
                   { id: '5', name: '5' },
@@ -688,7 +690,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                 searchable={false}
               />
               <span className="text-xs font-bold text-slate-400 ml-2">
-                Showing {paginatedExpiredBids.length > 0 ? expiredStartIndex + 1 : 0}-{Math.min(expiredStartIndex + rowsPerPage, filteredExpiredBids.length)} of {filteredExpiredBids.length}
+                {t('specialBids.showing')} {paginatedExpiredBids.length > 0 ? expiredStartIndex + 1 : 0}-{Math.min(expiredStartIndex + rowsPerPage, filteredExpiredBids.length)} {t('specialBids.of')} {filteredExpiredBids.length}
               </span>
             </div>
 
@@ -732,7 +734,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                 <i className="fa-solid fa-tags text-2xl"></i>
               </div>
-              <p className="text-slate-400 text-sm font-bold">No expired special bids found.</p>
+              <p className="text-slate-400 text-sm font-bold">{t('specialBids.noExpiredSpecialBids')}</p>
             </div>
           )}
         </div>
