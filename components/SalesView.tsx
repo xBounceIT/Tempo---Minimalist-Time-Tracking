@@ -497,7 +497,7 @@ const SalesView: React.FC<SalesViewProps> = ({ sales, clients, products, special
                                             <div className="col-span-3 text-[10px] font-black text-slate-400 uppercase tracking-wider">Product / Service</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Qty</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Cost</div>
-                                            <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Mol %</div>
+                                            <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">MOL (%)</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Margin</div>
                                             <div className="col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Sale Price</div>
                                         </div>

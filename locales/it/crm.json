@@ -51,7 +51,7 @@
     "productName": "Nome Prodotto",
     "category": "Categoria",
     "cost": "Costo",
-    "molPercentage": "MOL %",
+    "molPercentage": "MOL (%)",
     "salePrice": "Prezzo di Vendita",
     "margin": "Margine",
     "taxRate": "IVA (%)",
