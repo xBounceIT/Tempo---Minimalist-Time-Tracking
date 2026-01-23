@@ -128,10 +128,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
 
     const nextExpirationSort = expirationSort === 'none' ? 'asc' : expirationSort === 'asc' ? 'desc' : 'none';
     const expirationSortTitle = nextExpirationSort === 'asc'
-        ? 'Order by expiration date (ascending)'
+        ? t('crm:quotes.orderExpirationAsc')
         : nextExpirationSort === 'desc'
-            ? 'Order by expiration date (descending)'
-            : 'Clear expiration date ordering';
+            ? t('crm:quotes.orderExpirationDesc')
+            : t('crm:quotes.clearExpirationOrder');
     const expirationSortIndicator = expirationSort === 'asc' ? '↑' : expirationSort === 'desc' ? '↓' : '';
 
     // Form State
@@ -482,8 +482,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
         const confirmTitle = expired
             ? t('crm:quotes.errors.expiredCannotModify')
             : isRevertLocked
-                ? 'Cannot revert: linked sale order exists'
-                : (quote.status === 'quoted' ? 'Mark as Confirmed' : 'Mark as Quoted');
+                ? t('crm:quotes.cannotRevertLinkedSale')
+                : (quote.status === 'quoted' ? t('crm:quotes.markAsConfirmed') : t('crm:quotes.markAsQuoted'));
         const deleteTitle = expired ? t('crm:quotes.errors.expiredCannotDelete') : t('crm:quotes.deleteQuote');
         return (
             <tr
@@ -515,7 +515,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                     {total.toFixed(2)} {currency}
                 </td>
                 <td className="px-8 py-5 text-sm font-semibold text-slate-600">
-                    {quote.paymentTerms === 'immediate' ? 'Immediate' : quote.paymentTerms}
+                    {quote.paymentTerms === 'immediate' ? t('crm:quotes.immediatePayment') : quote.paymentTerms}
                 </td>
                 <td className="px-8 py-5">
                     <div className={`text-sm ${expired ? 'text-red-600 font-bold' : 'text-slate-600'}`}>
@@ -610,15 +610,15 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                             <div className="space-y-4">
                                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                                    Client Information
+                                    {t('crm:quotes.clientInformation')}
                                 </h4>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-500 ml-1">Client</label>
+                                    <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:quotes.client')}</label>
                                     <CustomSelect
                                         options={activeClients.map(c => ({ id: c.id, name: c.name }))}
                                         value={formData.clientId || ''}
                                         onChange={handleClientChange}
-                                        placeholder="Select a client..."
+                                        placeholder={t('crm:quotes.selectAClient')}
                                         searchable={true}
                                         disabled={isReadOnly}
                                         className={errors.clientId ? 'border-red-300' : ''}
@@ -634,7 +634,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                 <div className="flex justify-between items-center">
                                     <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                                         <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                                        Products / Services
+                                        {t('crm:quotes.productsServices')}
                                     </h4>
                                     <button
                                         type="button"
@@ -642,7 +642,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                         disabled={isReadOnly}
                                         className="text-xs font-bold text-praetor hover:text-slate-700 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        <i className="fa-solid fa-plus"></i> Add Product
+                                        <i className="fa-solid fa-plus"></i> {t('crm:quotes.addProduct')}
                                     </button>
                                 </div>
                                 {errors.items && (
@@ -652,13 +652,13 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                 {formData.items && formData.items.length > 0 && (
                                     <div className="flex gap-3 px-3 mb-1 items-center">
                                         <div className="flex-1 grid grid-cols-12 gap-3">
-                                            <div className="col-span-3 text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Special Bid</div>
-                                            <div className="col-span-3 text-[10px] font-black text-slate-400 uppercase tracking-wider">Product / Service</div>
-                                            <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Qty</div>
-                                            <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Cost</div>
+                                            <div className="col-span-3 text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">{t('crm:specialBids.title')}</div>
+                                            <div className="col-span-3 text-[10px] font-black text-slate-400 uppercase tracking-wider">{t('crm:quotes.productsServices')}</div>
+                                            <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">{t('crm:quotes.qty')}</div>
+                                            <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">{t('crm:products.cost')}</div>
                                             <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Mol %</div>
-                                            <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Margin</div>
-                                            <div className="col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Sale Price</div>
+                                            <div className="col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">{t('crm:common.margin')}</div>
+                                            <div className="col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">{t('crm:products.salePrice')}</div>
                                         </div>
                                         <div className="w-10 flex-shrink-0"></div>
                                     </div>
@@ -682,12 +682,12 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                             <div className="col-span-3">
                                                                 <CustomSelect
                                                                     options={[
-                                                                        { id: 'none', name: 'No Special Bid' },
+                                                                        { id: 'none', name: t('crm:quotes.noSpecialBidOption') },
                                                                         ...clientSpecialBids.map(b => ({ id: b.id, name: `${b.clientName} · ${b.productName}` }))
                                                                     ]}
                                                                     value={item.specialBidId || 'none'}
                                                                     onChange={(val) => updateProductRow(index, 'specialBidId', val === 'none' ? '' : val)}
-                                                                    placeholder="Select bid..."
+                                                                    placeholder={t('crm:quotes.selectBid')}
                                                                     displayValue={getBidDisplayValue(item.specialBidId)}
                                                                     searchable={true}
                                                                     disabled={isReadOnly}
@@ -699,7 +699,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                                     options={activeProducts.map(p => ({ id: p.id, name: p.name }))}
                                                                     value={item.productId}
                                                                     onChange={(val) => updateProductRow(index, 'productId', val)}
-                                                                    placeholder="Select product..."
+                                                                    placeholder={t('crm:quotes.selectProduct')}
                                                                     searchable={true}
                                                                     disabled={isReadOnly}
                                                                     buttonClassName="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm"
@@ -710,7 +710,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                                     step="0.01"
                                                                     min="0"
                                                                     required
-                                                                    placeholder="Qty"
+                                                                    placeholder={t('crm:quotes.qty')}
                                                                     value={item.quantity}
                                                                     onValueChange={(value) => {
                                                                         const parsed = parseFloat(value);
@@ -722,7 +722,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                             </div>
                                                             <div className="col-span-1 flex flex-col items-center justify-center gap-1">
                                                                 {selectedBid && (
-                                                                    <span className="px-2 py-0.5 rounded-full bg-praetor text-white text-[8px] font-black uppercase tracking-wider">Bid</span>
+                                                                    <span className="px-2 py-0.5 rounded-full bg-praetor text-white text-[8px] font-black uppercase tracking-wider">{t('crm:quotes.bidBadge')}</span>
                                                                 )}
                                                                 <span className="text-xs font-bold text-slate-600">{cost.toFixed(2)} {currency}</span>
                                                             </div>
@@ -774,11 +774,11 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                             <div className="space-y-4">
                                 <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                                    Quote Details
+                                    {t('crm:quotes.quoteDetails')}
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Payment Terms</label>
+                                        <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:quotes.paymentTerms')}</label>
                                         <CustomSelect
                                             options={PAYMENT_TERMS_OPTIONS}
                                             value={formData.paymentTerms || 'immediate'}
@@ -789,7 +789,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Global Discount (%)</label>
+                                        <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:quotes.globalDiscount')}</label>
                                         <ValidatedNumberInput
                                             step="0.01"
                                             min="0"
@@ -812,7 +812,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Expiration Date</label>
+                                        <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:quotes.expirationDateLabel')}</label>
                                         <input
                                             type="date"
                                             required
@@ -824,7 +824,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     </div>
 
                                     <div className="col-span-full space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">Notes</label>
+                                        <label className="text-xs font-bold text-slate-500 ml-1">{t('crm:quotes.notesLabel')}</label>
                                         <textarea
                                             rows={3}
                                             value={formData.notes}
@@ -852,20 +852,20 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                                 {/* Left Column: Detailed Breakdown */}
                                                 <div className="flex flex-col justify-center space-y-3 h-full">
                                                     <div className="flex justify-between items-center px-2">
-                                                        <span className="text-sm font-bold text-slate-500">Imponibile:</span>
+                                                        <span className="text-sm font-bold text-slate-500">{t('crm:quotes.taxableAmount')}:</span>
                                                         <span className="text-sm font-black text-slate-800">{subtotal.toFixed(2)} {currency}</span>
                                                     </div>
 
                                                     {formData.discount! > 0 && (
                                                         <div className="flex justify-between items-center px-2">
-                                                            <span className="text-sm font-bold text-slate-500">Sconto ({formData.discount}%):</span>
+                                                            <span className="text-sm font-bold text-slate-500">{t('crm:quotes.discountAmount', { discount: formData.discount })}:</span>
                                                             <span className="text-sm font-black text-amber-600">-{discountAmount.toFixed(2)} {currency}</span>
                                                         </div>
                                                     )}
 
                                                     {Object.entries(taxGroups).map(([rate, amount]) => (
                                                         <div key={rate} className="flex justify-between items-center px-2">
-                                                            <span className="text-sm font-bold text-slate-500">IVA ({rate}%):</span>
+                                                            <span className="text-sm font-bold text-slate-500">{t('crm:quotes.ivaTax', { rate })}:</span>
                                                             <span className="text-sm font-black text-slate-800">{amount.toFixed(2)} {currency}</span>
                                                         </div>
                                                     ))}
@@ -873,7 +873,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
 
                                                 {/* Middle Column: Final Total */}
                                                 <div className="flex flex-col items-center justify-center py-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
-                                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Totale:</span>
+                                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{t('crm:quotes.totalLabel')}:</span>
                                                     <span className="text-4xl font-black text-praetor leading-none">
                                                         {total.toFixed(2)}
                                                         <span className="text-xl ml-1 opacity-60 text-slate-400">{currency}</span>
@@ -882,7 +882,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
 
                                                 {/* Right Column: Margin */}
                                                 <div className="bg-emerald-50/40 rounded-2xl p-6 flex flex-col items-center justify-center border border-emerald-100/30">
-                                                    <span className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">Margine:</span>
+                                                    <span className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">{t('crm:quotes.marginLabel')}:</span>
                                                     <div className="text-center">
                                                         <div className="text-2xl font-black text-emerald-700 leading-none mb-1">{margin.toFixed(2)} {currency}</div>
                                                         <div className="text-xs font-black text-emerald-500 opacity-60">({marginPercentage.toFixed(1)}%)</div>
@@ -952,8 +952,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-800">Quotes</h2>
-                    <p className="text-slate-500 text-sm">Manage client quotes and proposals</p>
+                    <h2 className="text-2xl font-black text-slate-800">{t('crm:quotes.quotesTitle')}</h2>
+                    <p className="text-slate-500 text-sm">{t('crm:quotes.quotesSubtitle')}</p>
                 </div>
             </div>
 
@@ -1007,7 +1007,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                         className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <i className="fa-solid fa-rotate-left"></i>
-                        Clear filters
+                        {t('crm:quotes.clearFiltersButton')}
                     </button>
                 </div>
             </div>
@@ -1042,7 +1042,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                 searchable={false}
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                Showing {paginatedActiveQuotes.length > 0 ? activeStartIndex + 1 : 0}-{Math.min(activeStartIndex + rowsPerPage, filteredActiveQuotes.length)} of {filteredActiveQuotes.length}
+                                {t('common:pagination.showing', { start: paginatedActiveQuotes.length > 0 ? activeStartIndex + 1 : 0, end: Math.min(activeStartIndex + rowsPerPage, filteredActiveQuotes.length), total: filteredActiveQuotes.length })}
                             </span>
                         </div>
 
@@ -1082,10 +1082,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Terms</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:quotes.clientColumn')}</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:quotes.statusColumn')}</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:quotes.totalColumn')}</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:quotes.paymentTermsColumn')}</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 <button
                                     type="button"
@@ -1093,7 +1093,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     title={expirationSortTitle}
                                     className="w-full inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none hover:text-slate-600"
                                 >
-                                    Expiration
+                                    {t('crm:quotes.expirationColumn')}
                                     {expirationSortIndicator && <span className="text-[10px]">{expirationSortIndicator}</span>}
                                 </button>
                             </th>
@@ -1108,8 +1108,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                                         <i className="fa-solid fa-file-invoice text-2xl"></i>
                                     </div>
-                                    <p className="text-slate-400 text-sm font-bold">No active quotes found.</p>
-                                    <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">Create your first quote</button>
+                                    <p className="text-slate-400 text-sm font-bold">{t('crm:quotes.noQuotes')}</p>
+                                    <button onClick={openAddModal} className="mt-4 text-praetor text-sm font-black hover:underline">{t('crm:quotes.createYourFirstQuote')}</button>
                                 </td>
                             </tr>
                         )}
@@ -1141,7 +1141,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                 searchable={false}
                             />
                             <span className="text-xs font-bold text-slate-400 ml-2">
-                                Showing {paginatedExpiredQuotes.length > 0 ? expiredStartIndex + 1 : 0}-{Math.min(expiredStartIndex + rowsPerPage, filteredExpiredQuotes.length)} of {filteredExpiredQuotes.length}
+                                {t('common:pagination.showing', { start: paginatedExpiredQuotes.length > 0 ? expiredStartIndex + 1 : 0, end: Math.min(expiredStartIndex + rowsPerPage, filteredExpiredQuotes.length), total: filteredExpiredQuotes.length })}
                             </span>
                         </div>
 
@@ -1181,10 +1181,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</th>
-                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Terms</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:quotes.clientColumn')}</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:quotes.statusColumn')}</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:quotes.totalColumn')}</th>
+                            <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('crm:quotes.paymentTermsColumn')}</th>
                             <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 <button
                                     type="button"
@@ -1192,7 +1192,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     title={expirationSortTitle}
                                     className="w-full inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none hover:text-slate-600"
                                 >
-                                    Expiration
+                                    {t('crm:quotes.expirationColumn')}
                                     {expirationSortIndicator && <span className="text-[10px]">{expirationSortIndicator}</span>}
                                 </button>
                             </th>
@@ -1207,7 +1207,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                                         <i className="fa-solid fa-file-invoice text-2xl"></i>
                                     </div>
-                                    <p className="text-slate-400 text-sm font-bold">No expired quotes found.</p>
+                                    <p className="text-slate-400 text-sm font-bold">{t('crm:quotes.noQuotes')}</p>
                                 </td>
                             </tr>
                         )}
