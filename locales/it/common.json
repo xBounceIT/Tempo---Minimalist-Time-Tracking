@@ -224,5 +224,10 @@
     "noOptions": "Nessuna opzione trovata",
     "selectAll": "Seleziona Tutto",
     "clear": "Cancella"
+  },
+  "notFound": {
+    "title": "Pagina Non Trovata",
+    "message": "La pagina che stai cercando non esiste o è stata spostata. Controlla l'URL o torna alla pagina iniziale.",
+    "return": "Torna alla Home"
   }
 }

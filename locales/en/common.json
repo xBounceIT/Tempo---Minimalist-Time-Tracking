@@ -224,5 +224,10 @@
     "noOptions": "No options found",
     "selectAll": "Select All",
     "clear": "Clear"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "The page you're looking for doesn't exist or has been moved. Please check the URL or navigate back to the home page.",
+    "return": "Return to Home"
   }
 }
