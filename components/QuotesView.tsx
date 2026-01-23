@@ -562,6 +562,30 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                 <i className="fa-solid fa-paper-plane"></i>
                             </button>
                         )}
+                        {quote.status === 'sent' && (
+                            <>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onUpdateQuote(quote.id, { status: 'accepted' });
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                    title={t('crm:quotes.markAsConfirmed')}
+                                >
+                                    <i className="fa-solid fa-check"></i>
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onUpdateQuote(quote.id, { status: 'denied' });
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                    title={t('crm:quotes.markAsDenied')}
+                                >
+                                    <i className="fa-solid fa-xmark"></i>
+                                </button>
+                            </>
+                        )}
                         {quote.status === 'draft' && (
                             <button
                                 onClick={(e) => {

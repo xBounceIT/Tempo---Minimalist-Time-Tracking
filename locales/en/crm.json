@@ -261,6 +261,7 @@
     "clearExpirationOrder": "Clear expiration date ordering",
     "markAsConfirmed": "Mark as Confirmed",
     "markAsSent": "Mark as Sent",
+    "markAsDenied": "Mark as Denied",
     "markAsQuoted": "Mark as Quoted",
     "cannotRevertLinkedSale": "Cannot revert: linked sale order exists",
     "taxableAmount": "Subtotal",
