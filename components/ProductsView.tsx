@@ -425,12 +425,12 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <div className="flex justify-between items-center ml-1 min-h-[16px]">
+                                        <div className="relative ml-1 min-h-[20px] pr-16">
                                             <label className="text-xs font-bold text-slate-500">{t('crm:products.category')}</label>
                                             <button
                                                 type="button"
                                                 onClick={() => setIsAddCategoryModalOpen(true)}
-                                                className="text-[10px] font-black text-praetor hover:text-slate-700 uppercase tracking-tighter flex items-center gap-1"
+                                                className="absolute top-0 right-0 text-[10px] font-black text-praetor hover:text-slate-700 uppercase tracking-tighter flex items-center gap-1"
                                             >
                                                 <i className="fa-solid fa-plus"></i> {t('crm:products.addCategory')}
                                             </button>
@@ -445,7 +445,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <div className="flex justify-between items-center ml-1 min-h-[16px]">
+                                        <div className="relative ml-1 min-h-[20px] pr-16">
                                             <div className="space-y-1">
                                                 {showTaxRateWarning && (
                                                     <p className="text-amber-600 text-[10px] font-bold">{t('crm:products.unusualTaxRate')}</p>
