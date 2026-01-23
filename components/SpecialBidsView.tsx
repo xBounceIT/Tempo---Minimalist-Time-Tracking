@@ -646,7 +646,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.product')}</th>
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.unitPrice')}</th>
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.validityPeriod')}</th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('labels.actions')}</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('common:labels.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
