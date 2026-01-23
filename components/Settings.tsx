@@ -9,7 +9,7 @@ import i18n from '../i18n';
 export interface UserSettings {
   fullName: string;
   email: string;
-  language?: 'en' | 'it';
+  language?: 'en' | 'it' | 'auto';
 }
 
 const Settings: React.FC = () => {
@@ -18,7 +18,7 @@ const Settings: React.FC = () => {
   const [settings, setSettings] = useState<UserSettings>({
     fullName: '',
     email: '',
-    language: 'en',
+    language: 'auto',
   });
   const [initialSettings, setInitialSettings] = useState<UserSettings | null>(null);
 
@@ -49,7 +49,7 @@ const Settings: React.FC = () => {
         const profile = {
           fullName: data.fullName,
           email: data.email,
-          language: data.language || 'en'
+          language: data.language || 'auto'
         };
         setSettings(profile);
         setInitialSettings(profile);
@@ -79,9 +79,18 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleLanguageChange = async (language: 'en' | 'it') => {
-    i18n.changeLanguage(language);
-    localStorage.setItem('i18nextLng', language);
+  const handleLanguageChange = async (language: 'en' | 'it' | 'auto') => {
+    if (language === 'auto') {
+      // Clear the stored language and let i18n detect from browser
+      localStorage.removeItem('i18nextLng');
+      // Detect browser language and use it (fallback to 'en')
+      const browserLang = navigator.language.split('-')[0];
+      const detectedLang = ['en', 'it'].includes(browserLang) ? browserLang : 'en';
+      i18n.changeLanguage(detectedLang);
+    } else {
+      i18n.changeLanguage(language);
+      localStorage.setItem('i18nextLng', language);
+    }
     setSettings({ ...settings, language });
     try {
       const payload = { fullName: settings.fullName, email: settings.email, language };
@@ -241,7 +250,27 @@ const Settings: React.FC = () => {
             <h3 className="font-bold text-slate-800">{t('language.title')}</h3>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <button
+                onClick={() => handleLanguageChange('auto')}
+                className={`relative p-4 rounded-xl border-2 transition-all text-left flex items-start gap-4 group ${settings.language === 'auto' ? 'border-praetor bg-slate-50' : 'border-slate-100 hover:border-slate-200'}`}
+              >
+                <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0 shadow-sm flex items-center justify-center overflow-hidden relative">
+                  <i className={`fa-solid fa-globe text-xl ${settings.language === 'auto' ? 'text-praetor' : 'text-slate-400'}`}></i>
+                  {settings.language === 'auto' && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-praetor rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                      <i className="fa-solid fa-check text-white text-[8px]"></i>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800 mb-1">{t('language.auto')}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {t('language.autoDesc')}
+                  </p>
+                </div>
+              </button>
+
               <button
                 onClick={() => handleLanguageChange('en')}
                 className={`relative p-4 rounded-xl border-2 transition-all text-left flex items-start gap-4 group ${settings.language === 'en' ? 'border-praetor bg-slate-50' : 'border-slate-100 hover:border-slate-200'}`}

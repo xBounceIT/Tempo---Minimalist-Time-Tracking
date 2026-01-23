@@ -15,7 +15,7 @@ export interface User {
 export interface UserSettings {
   fullName: string;
   email: string;
-  language?: 'en' | 'it';
+  language?: 'en' | 'it' | 'auto';
 }
 
 export interface GeneralSettings {

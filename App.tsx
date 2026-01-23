@@ -600,8 +600,16 @@ const App: React.FC = () => {
           try {
             const settings = await api.settings.get();
             if (settings.language) {
-              localStorage.setItem('i18nextLng', settings.language);
-              i18n.changeLanguage(settings.language);
+              if (settings.language === 'auto') {
+                // Clear stored language, let i18n detect from browser
+                localStorage.removeItem('i18nextLng');
+                const browserLang = navigator.language.split('-')[0];
+                const detectedLang = ['en', 'it'].includes(browserLang) ? browserLang : 'en';
+                i18n.changeLanguage(detectedLang);
+              } else {
+                localStorage.setItem('i18nextLng', settings.language);
+                i18n.changeLanguage(settings.language);
+              }
             }
           } catch (err) {
             // Settings might not exist yet, that's okay

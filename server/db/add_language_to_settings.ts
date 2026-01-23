@@ -1,7 +1,7 @@
 import { query } from './index.ts';
 
 const migration = `
-ALTER TABLE settings ADD COLUMN IF NOT EXISTS language VARCHAR(10) DEFAULT 'en' CHECK (language IN ('en', 'it'));
+ALTER TABLE settings ADD COLUMN IF NOT EXISTS language VARCHAR(10) DEFAULT 'auto' CHECK (language IN ('en', 'it', 'auto'));
 `;
 
 

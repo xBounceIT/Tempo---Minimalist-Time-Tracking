@@ -9,6 +9,8 @@
   },
   "language": {
     "title": "Lingua / Language",
+    "auto": "Automatico (Browser)",
+    "autoDesc": "Rileva automaticamente la lingua dalle impostazioni del browser",
     "english": "English",
     "englishDesc": "Interfaccia in inglese",
     "italian": "Italiano",

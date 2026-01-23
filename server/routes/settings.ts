@@ -27,7 +27,7 @@ export default async function (fastify, opts) {
             return {
                 fullName: s.full_name,
                 email: s.email,
-                language: s.language || 'en'
+                language: s.language || 'auto'
             };
         }
 
@@ -35,7 +35,7 @@ export default async function (fastify, opts) {
         return {
             fullName: s.full_name,
             email: s.email,
-            language: s.language || 'en'
+            language: s.language || 'auto'
         };
     });
 
@@ -51,8 +51,8 @@ export default async function (fastify, opts) {
         if (!emailResult.ok) return badRequest(reply, emailResult.message);
 
         // Validate language if provided
-        if (language !== undefined && language !== null && language !== 'en' && language !== 'it') {
-            return badRequest(reply, 'Language must be either "en" or "it"');
+        if (language !== undefined && language !== null && language !== 'en' && language !== 'it' && language !== 'auto') {
+            return badRequest(reply, 'Language must be "en", "it", or "auto"');
         }
 
         const result = await query(
@@ -64,14 +64,14 @@ export default async function (fastify, opts) {
          language = COALESCE($4, settings.language),
          updated_at = CURRENT_TIMESTAMP
        RETURNING full_name, email, language`,
-            [request.user.id, fullNameResult.value, emailResult.value, language || 'en']
+            [request.user.id, fullNameResult.value, emailResult.value, language || 'auto']
         );
 
         const s = result.rows[0];
         return {
             fullName: s.full_name,
             email: s.email,
-            language: s.language || 'en'
+            language: s.language || 'auto'
         };
     });
 
@@ -89,7 +89,7 @@ export default async function (fastify, opts) {
         if (newPasswordResult.value.length < 8) {
             return badRequest(reply, 'New password must be at least 8 characters long');
         }
-        
+
         // Get user's current password hash
         const userRes = await query('SELECT password_hash FROM users WHERE id = $1', [request.user.id]);
         if (userRes.rows.length === 0) {
