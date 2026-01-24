@@ -212,7 +212,8 @@
     "allSuppliers": "Tutti i Fornitori",
     "active": "Attivo",
     "disabled": "Disabilitato",
-    "all": "Tutti"
+    "all": "Tutti",
+    "allClients": "Tutti i Clienti"
   },
   "table": {
     "total": "totale"

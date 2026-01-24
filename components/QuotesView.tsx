@@ -1013,7 +1013,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                 </div>
                 <div>
                     <CustomSelect
-                        options={[{ id: 'all', name: t('common:filters.all') }, ...activeClients.map(c => ({ id: c.id, name: c.name }))]}
+                        options={[{ id: 'all', name: t('common:filters.allClients') }, ...activeClients.map(c => ({ id: c.id, name: c.name }))]}
                         value={filterClientId}
                         onChange={setFilterClientId}
                         placeholder={t('crm:quotes.filterByClient')}

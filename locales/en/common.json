@@ -212,7 +212,8 @@
     "allSuppliers": "All Suppliers",
     "active": "Active",
     "disabled": "Disabled",
-    "all": "All"
+    "all": "All",
+    "allClients": "All Clients"
   },
   "table": {
     "total": "total"
