@@ -82,6 +82,7 @@
     "noUsersFound": "Nessun utente trovato.",
     "inheritedFromDisabledProject": "Ereditato da Progetto disabilitato: {{projectName}}",
     "createNewTask": "Crea Nuova Attività",
-    "tasksDirectoryWithCount": "Archivio Attività ({{count}})"
+    "searchPlaceholder": "Cerca attività, descrizioni o progetti...",
+    "tasksDirectory": "Archivio Attività"
   }
 }

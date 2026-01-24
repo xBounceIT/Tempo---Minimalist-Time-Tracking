@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Client } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
+import StatusBadge from './StatusBadge';
 
 interface ClientsViewProps {
   clients: Client[];
@@ -689,39 +690,42 @@ const ClientsView: React.FC<ClientsViewProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEditModal(c);
-                    }}
-                    className="p-2.5 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-xl transition-all"
-                    title={t('crm:clients.editClient')}
-                  >
-                    <i className="fa-solid fa-pen-to-square"></i>
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onUpdateClient(c.id, { isDisabled: true });
-                    }}
-                    className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
-                    title={t('crm:clients.isDisabled')}
-                  >
-                    <i className="fa-solid fa-ban"></i>
-                  </button>
-                  {userRole === 'admin' && (
+                <div className="flex items-center gap-3">
+                  <StatusBadge type="active" label={t('projects:projects.statusActive')} />
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        confirmDelete(c);
+                        openEditModal(c);
                       }}
-                      className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                      title={t('common:buttons.delete')}
+                      className="p-2.5 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-xl transition-all"
+                      title={t('crm:clients.editClient')}
                     >
-                      <i className="fa-solid fa-trash-can"></i>
+                      <i className="fa-solid fa-pen-to-square"></i>
                     </button>
-                  )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUpdateClient(c.id, { isDisabled: true });
+                      }}
+                      className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
+                      title={t('crm:clients.isDisabled')}
+                    >
+                      <i className="fa-solid fa-ban"></i>
+                    </button>
+                    {userRole === 'admin' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          confirmDelete(c);
+                        }}
+                        className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                        title={t('common:buttons.delete')}
+                      >
+                        <i className="fa-solid fa-trash-can"></i>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

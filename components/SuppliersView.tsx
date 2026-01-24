@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Supplier } from '../types';
 import CustomSelect from './CustomSelect';
+import StatusBadge from './StatusBadge';
 
 interface SuppliersViewProps {
   suppliers: Supplier[];
@@ -430,37 +431,40 @@ const SuppliersView: React.FC<SuppliersViewProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEditModal(s);
-                    }}
-                    className="p-2.5 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-xl transition-all"
-                    title={t('suppliers.editSupplier')}
-                  >
-                    <i className="fa-solid fa-pen-to-square"></i>
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onUpdateSupplier(s.id, { isDisabled: true });
-                    }}
-                    className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
-                    title={t('suppliers.isDisabled')}
-                  >
-                    <i className="fa-solid fa-ban"></i>
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      confirmDelete(s);
-                    }}
-                    className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                    title={t('common.delete')}
-                  >
-                    <i className="fa-solid fa-trash-can"></i>
-                  </button>
+                <div className="flex items-center gap-3">
+                  <StatusBadge type="active" label={t('common.active')} />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditModal(s);
+                      }}
+                      className="p-2.5 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-xl transition-all"
+                      title={t('suppliers.editSupplier')}
+                    >
+                      <i className="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUpdateSupplier(s.id, { isDisabled: true });
+                      }}
+                      className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
+                      title={t('suppliers.isDisabled')}
+                    >
+                      <i className="fa-solid fa-ban"></i>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmDelete(s);
+                      }}
+                      className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                      title={t('common.delete')}
+                    >
+                      <i className="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -564,9 +568,7 @@ const SuppliersView: React.FC<SuppliersViewProps> = ({
                   </div>
                   <div>
                     <h5 className="font-bold text-slate-500 line-through">{s.name}</h5>
-                    <span className="text-[10px] font-black text-amber-500 uppercase">
-                      {t('common.disabled')}
-                    </span>
+                    <StatusBadge type="disabled" label={t('common.disabled')} />
                   </div>
                 </div>
                 <div className="flex gap-2">

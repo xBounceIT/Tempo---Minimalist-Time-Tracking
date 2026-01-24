@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ProjectTask, Project, Client, UserRole, User } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
+import StatusBadge from './StatusBadge';
 import { tasksApi } from '../services/api';
 
 interface TasksViewProps {
@@ -438,9 +439,17 @@ const TasksView: React.FC<TasksViewProps> = ({
                               isCurrentlyDisabled ? 'text-red-500/70' : 'text-emerald-500/70'
                             }`}
                           >
-                            {isCurrentlyDisabled
-                              ? t('projects.statusDisabled')
-                              : t('projects.statusActive')}
+                            {isCurrentlyDisabled ? (
+                              <StatusBadge
+                                type={isInheritedDisabled ? 'inherited' : 'disabled'}
+                                label={t('projects.statusDisabled', { ns: 'projects' })}
+                              />
+                            ) : (
+                              <StatusBadge
+                                type="active"
+                                label={t('projects.statusActive', { ns: 'projects' })}
+                              />
+                            )}
                           </p>
                         </div>
                       </div>
@@ -553,7 +562,7 @@ const TasksView: React.FC<TasksViewProps> = ({
       </div>
 
       <StandardTable
-        title={t('tasks.tasksDirectoryWithCount', { count: filteredTasks.length })}
+        title={t('tasks.tasksDirectory')}
         totalCount={filteredTasks.length}
         headerAction={
           isManagement && (
@@ -660,20 +669,15 @@ const TasksView: React.FC<TasksViewProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center">
-                          <i className="fa-solid fa-check-double text-xs"></i>
-                        </div>
-                        <span
-                          className={`text-sm font-bold ${
-                            isEffectivelyDisabled
-                              ? 'text-slate-500 line-through decoration-slate-300'
-                              : 'text-slate-800'
-                          }`}
-                        >
-                          {task.name}
-                        </span>
-                      </div>
+                      <span
+                        className={`text-sm font-bold ${
+                          isEffectivelyDisabled
+                            ? 'text-slate-500 line-through decoration-slate-300'
+                            : 'text-slate-800'
+                        }`}
+                      >
+                        {task.name}
+                      </span>
                     </td>
                     <td className="px-6 py-5">
                       <p className="text-xs text-slate-500 max-w-md line-clamp-2">
@@ -686,20 +690,17 @@ const TasksView: React.FC<TasksViewProps> = ({
                     </td>
                     <td className="px-6 py-5">
                       {task.isDisabled ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 text-[10px] font-black uppercase">
-                          <i className="fa-solid fa-ban"></i>
-                          {t('projects.statusDisabled')}
-                        </span>
+                        <StatusBadge
+                          type="disabled"
+                          label={t('projects:projects.statusDisabled')}
+                        />
                       ) : isInheritedDisabled ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-500 border border-amber-100 text-[10px] font-black uppercase">
-                          <i className="fa-solid fa-triangle-exclamation"></i>
-                          {t('projects.statusInheritedDisable')}
-                        </span>
+                        <StatusBadge
+                          type="inherited"
+                          label={t('projects:projects.statusInheritedDisable')}
+                        />
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black uppercase">
-                          <i className="fa-solid fa-check"></i>
-                          {t('projects.statusActive')}
-                        </span>
+                        <StatusBadge type="active" label={t('projects:projects.statusActive')} />
                       )}
                     </td>
                     <td className="px-6 py-5 text-right">

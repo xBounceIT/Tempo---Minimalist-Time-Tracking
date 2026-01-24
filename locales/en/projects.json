@@ -82,6 +82,7 @@
     "noUsersFound": "No users found.",
     "inheritedFromDisabledProject": "Inherited from disabled Project: {{projectName}}",
     "createNewTask": "Create New Task",
-    "tasksDirectoryWithCount": "Tasks Directory ({{count}})"
+    "searchPlaceholder": "Search tasks, descriptions, or projects...",
+    "tasksDirectory": "Tasks Directory"
   }
 }

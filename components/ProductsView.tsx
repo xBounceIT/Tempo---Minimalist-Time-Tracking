@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Product, Supplier } from '../types';
 import CustomSelect, { Option } from './CustomSelect';
 import StandardTable from './StandardTable';
+import StatusBadge from './StatusBadge';
 import ValidatedNumberInput from './ValidatedNumberInput';
 import { parseNumberInputValue } from '../utils/numbers';
 
@@ -1069,13 +1070,16 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                   </div>
                 </td>
                 <td className="px-4 py-5">
-                  <span
-                    className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${p.type === 'service' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}
-                  >
-                    {p.type === 'service'
-                      ? t('crm:products.typeService')
-                      : t('crm:products.typeItem')}
-                  </span>
+                  <div className="flex flex-col gap-1.5">
+                    <span
+                      className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${p.type === 'service' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}
+                    >
+                      {p.type === 'service'
+                        ? t('crm:products.typeService')
+                        : t('crm:products.typeItem')}
+                    </span>
+                    <StatusBadge type="active" label={t('common:labels.active')} />
+                  </div>
                 </td>
                 <td className="px-6 py-5 text-sm font-semibold text-slate-500">
                   {Number(p.costo).toFixed(2)} {currency} /{' '}
@@ -1236,9 +1240,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                   </div>
                   <div>
                     <h5 className="font-bold text-slate-500 line-through">{p.name}</h5>
-                    <span className="text-[10px] font-black text-amber-500 uppercase">
-                      {t('crm:products.disabled')}
-                    </span>
+                    <StatusBadge type="disabled" label={t('crm:products.disabled')} />
                   </div>
                 </div>
                 <div className="flex gap-2">

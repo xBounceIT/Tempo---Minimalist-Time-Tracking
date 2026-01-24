@@ -214,6 +214,9 @@
     "active": "Attivo",
     "disabled": "Disabilitato",
     "all": "Tutti",
+    "allProjects": "Tutti i Progetti",
+    "clearFilters": "Cancella filtri",
+    "filterByProject": "Filtra per Progetto",
     "allClients": "Tutti i Clienti"
   },
   "table": {

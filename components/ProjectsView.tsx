@@ -4,6 +4,7 @@ import { Project, Client, UserRole } from '../types';
 import { COLORS } from '../constants';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
+import StatusBadge from './StatusBadge';
 
 interface ProjectsViewProps {
   projects: Project[];
@@ -605,9 +606,14 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[10px] font-black text-emerald-500 uppercase">
-                        {t('projects:projects.statusActive')}
-                      </span>
+                      {isClientDisabled ? (
+                        <StatusBadge
+                          type="inherited"
+                          label={t('projects:projects.statusInheritedDisable')}
+                        />
+                      ) : (
+                        <StatusBadge type="active" label={t('projects:projects.statusActive')} />
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       {isManagement && (
@@ -788,9 +794,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[10px] font-black text-amber-500 uppercase">
-                        {t('projects:projects.statusDisabled')}
-                      </span>
+                      <StatusBadge type="disabled" label={t('projects:projects.statusDisabled')} />
                     </td>
                     <td className="px-6 py-4 text-right">
                       {isManagement && (
