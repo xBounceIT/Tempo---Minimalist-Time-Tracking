@@ -83,6 +83,7 @@
     "inheritedFromDisabledProject": "Inherited from disabled Project: {{projectName}}",
     "createNewTask": "Create New Task",
     "searchPlaceholder": "Search tasks, descriptions, or projects...",
-    "tasksDirectory": "Tasks Directory"
+    "tasksDirectory": "Tasks Directory",
+    "disabledTasks": "Disabled Tasks"
   }
 }

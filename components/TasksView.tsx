@@ -97,15 +97,24 @@ const TasksView: React.FC<TasksViewProps> = ({
     [normalizedSearch, filterProjectId],
   );
 
+  const checkInheritedDisabled = useCallback(
+    (task: ProjectTask) => {
+      const project = projects.find((p) => p.id === task.projectId);
+      const client = clients.find((c) => c.id === project?.clientId);
+      return project?.isDisabled || false || client?.isDisabled || false;
+    },
+    [projects, clients],
+  );
+
   const activeTasksTotal = useMemo(() => {
-    return tasks.filter((t) => !t.isDisabled).filter(matchesFilters);
-  }, [tasks, matchesFilters]);
+    return tasks.filter((t) => !t.isDisabled && !checkInheritedDisabled(t)).filter(matchesFilters);
+  }, [tasks, matchesFilters, checkInheritedDisabled]);
 
   const disabledTasksTotal = useMemo(() => {
-    return tasks.filter((t) => t.isDisabled).filter(matchesFilters);
-  }, [tasks, matchesFilters]);
+    return tasks.filter((t) => t.isDisabled || checkInheritedDisabled(t)).filter(matchesFilters);
+  }, [tasks, matchesFilters, checkInheritedDisabled]);
 
-  const hasAnyDisabledTasks = tasks.some((t) => t.isDisabled);
+  const hasAnyDisabledTasks = tasks.some((t) => t.isDisabled || checkInheritedDisabled(t));
 
   // Pagination Logic
   const totalPages = Math.ceil(activeTasksTotal.length / rowsPerPage);
@@ -853,9 +862,9 @@ const TasksView: React.FC<TasksViewProps> = ({
 
       {hasAnyDisabledTasks && (
         <StandardTable
-          title={t('projects:projects.disabledProjects').replace('Projects', 'Tasks')} // Assuming a simple replacement or use a generic key
+          title={t('tasks.disabledTasks')}
           totalCount={disabledTasksTotal.length}
-          totalLabel="DISABLED"
+          totalLabel="TOTAL"
           containerClassName="border-dashed bg-slate-50"
           footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
           footer={
@@ -951,12 +960,16 @@ const TasksView: React.FC<TasksViewProps> = ({
                 const client = clients.find((c) => c.id === project?.clientId);
 
                 const isProjectDisabled = project?.isDisabled || false;
+                const isClientDisabled = client?.isDisabled || false;
+                const isInheritedDisabled = isProjectDisabled || isClientDisabled;
 
                 return (
                   <tr
                     key={task.id}
                     onClick={() => isManagement && openEditModal(task)}
-                    className={`group hover:bg-slate-100 transition-colors opacity-70 grayscale hover:grayscale-0 ${isManagement ? 'cursor-pointer' : 'cursor-default'}`}
+                    className={`group hover:bg-slate-100 transition-colors opacity-70 grayscale hover:grayscale-0 ${
+                      isManagement ? 'cursor-pointer' : 'cursor-default'
+                    }`}
                   >
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1.5">
@@ -1000,7 +1013,17 @@ const TasksView: React.FC<TasksViewProps> = ({
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <StatusBadge type="disabled" label={t('projects:projects.statusDisabled')} />
+                      {isInheritedDisabled ? (
+                        <StatusBadge
+                          type="inherited"
+                          label={t('projects:projects.statusInheritedDisable')}
+                        />
+                      ) : (
+                        <StatusBadge
+                          type="disabled"
+                          label={t('projects:projects.statusDisabled')}
+                        />
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       {isManagement && (
@@ -1025,15 +1048,17 @@ const TasksView: React.FC<TasksViewProps> = ({
                           >
                             <i className="fa-solid fa-pen-to-square"></i>
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onUpdateTask(task.id, { isDisabled: false });
-                            }}
-                            className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
-                          >
-                            <i className="fa-solid fa-rotate-left"></i>
-                          </button>
+                          {!isInheritedDisabled && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUpdateTask(task.id, { isDisabled: false });
+                              }}
+                              className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
+                            >
+                              <i className="fa-solid fa-rotate-left"></i>
+                            </button>
+                          )}
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
