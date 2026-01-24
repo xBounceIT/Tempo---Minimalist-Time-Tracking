@@ -304,54 +304,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
     );
   };
 
-  const renderExpiredBidRow = (bid: SpecialBid) => (
-    <div
-      key={bid.id}
-      onClick={() => openEditModal(bid)}
-      className="p-6 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 active:bg-slate-100 active:scale-[0.98] transition-all flex items-center justify-between gap-4 cursor-pointer select-none"
-    >
-      <div className="flex gap-4 items-center">
-        <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center">
-          <i className="fa-solid fa-handshake"></i>
-        </div>
-        <div>
-          <h5 className="font-bold text-slate-500 line-through">{bid.clientName}</h5>
-          <div className="text-xs font-semibold text-slate-500 line-through">{bid.productName}</div>
-          <span className="text-[10px] font-black text-amber-500 uppercase">{t('specialBids.expired')}</span>
-        </div>
-      </div>
-      <div className="flex items-center gap-6">
-        <div className="text-right">
-          <div className="text-sm font-bold text-slate-500">{Number(bid.unitPrice).toFixed(2)} {currency}</div>
-          <div className="text-xs text-slate-400">
-            {new Date(bid.startDate).toLocaleDateString()} - {new Date(bid.endDate).toLocaleDateString()}
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              openEditModal(bid);
-            }}
-            className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
-            title={t('specialBids.editSpecialBidTooltip')}
-          >
-            <i className="fa-solid fa-pen-to-square"></i>
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              confirmDelete(bid);
-            }}
-            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title={t('specialBids.deleteSpecialBidTooltip')}
-          >
-            <i className="fa-solid fa-trash-can"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -669,7 +622,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
       <StandardTable
         title={t('specialBids.expiredSpecialBids')}
         totalCount={filteredExpiredBids.length}
-        totalLabel={t('specialBids.expired')}
+        totalLabel={t('common:labels.total')}
         containerClassName="border-dashed bg-slate-50"
         footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
         footer={
@@ -727,17 +680,52 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
           </>
         }
       >
-        <div className="divide-y divide-slate-100">
-          {paginatedExpiredBids.map(renderExpiredBidRow)}
-          {filteredExpiredBids.length === 0 && (
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
-                <i className="fa-solid fa-tags text-2xl"></i>
-              </div>
-              <p className="text-slate-400 text-sm font-bold">{t('specialBids.noExpiredSpecialBids')}</p>
-            </div>
-          )}
-        </div>
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-slate-50 border-b border-slate-100">
+            <tr>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.client')}</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.product')}</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('common:labels.status')}</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('specialBids.unitPrice')}</th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('quotes.expirationDate')}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {paginatedExpiredBids.map(bid => (
+              <tr key={bid.id} className="opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all group">
+                <td className="px-8 py-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center text-sm">
+                      <i className="fa-solid fa-handshake"></i>
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-500 line-through">{bid.clientName}</div>
+                      <div className="text-[10px] font-black text-slate-400 uppercase">{t('specialBids.dedicated')}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-8 py-5 text-sm font-bold text-slate-500 line-through">{bid.productName}</td>
+                <td className="px-8 py-5">
+                  <span className="text-[10px] font-black text-amber-500 uppercase">{t('specialBids.expired')}</span>
+                </td>
+                <td className="px-8 py-5 text-sm font-bold text-slate-500">{Number(bid.unitPrice).toFixed(2)} {currency}</td>
+                <td className="px-8 py-5 text-sm font-bold text-slate-500">
+                  {new Date(bid.endDate).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+            {filteredExpiredBids.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-12 text-center">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
+                    <i className="fa-solid fa-tags text-2xl"></i>
+                  </div>
+                  <p className="text-slate-400 text-sm font-bold">{t('specialBids.noExpiredSpecialBids')}</p>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </StandardTable>
     </div>
   );
