@@ -434,11 +434,24 @@ CREATE TABLE IF NOT EXISTS sales (
     client_name VARCHAR(255) NOT NULL,
     payment_terms VARCHAR(20) NOT NULL DEFAULT 'immediate',
     discount DECIMAL(5, 2) NOT NULL DEFAULT 0,
-    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'cancelled')),
+    status VARCHAR(20) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'sent', 'confirmed', 'denied')),
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Migration: Update sales status check constraint to allow new statuses
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'sales_status_check'
+    ) THEN
+        ALTER TABLE sales DROP CONSTRAINT sales_status_check;
+        ALTER TABLE sales ADD CONSTRAINT sales_status_check CHECK (status IN ('draft', 'sent', 'confirmed', 'denied', 'pending', 'completed', 'cancelled'));
+    END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_sales_client_id ON sales(client_id);
 CREATE INDEX IF NOT EXISTS idx_sales_status ON sales(status);
