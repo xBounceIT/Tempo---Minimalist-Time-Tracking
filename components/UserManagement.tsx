@@ -464,6 +464,20 @@ const UserManagement: React.FC<UserManagementProps> = ({
       return true;
     });
 
+    // Debug logging
+    console.log('UserManagement Debug:', {
+      clientsCount: clients.length,
+      projectsCount: projects.length,
+      tasksCount: tasks.length,
+      visibleClientsCount: visibleClients.length,
+      visibleProjectsCount: visibleProjects.length,
+      visibleTasksCount: visibleTasks.length,
+      filterClientId,
+      filterProjectId,
+      clientSearch,
+      assignments,
+    });
+
     return { visibleClients, visibleProjects, visibleTasks };
   };
 
