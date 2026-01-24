@@ -3,7 +3,7 @@
  * Returns { ok, value, message } objects for type-safe validation
  */
 
-import { FastifyReply } from 'fastify';
+import type { FastifyReply } from 'fastify';
 
 /**
  * Check if value is a non-empty string after trimming
