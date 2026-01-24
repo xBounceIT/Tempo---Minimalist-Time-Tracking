@@ -1644,6 +1644,7 @@ const App: React.FC = () => {
                 onAddProduct={addProduct}
                 onUpdateProduct={handleUpdateProduct}
                 onDeleteProduct={handleDeleteProduct}
+                currency={generalSettings.currency}
               />
             )}
 
