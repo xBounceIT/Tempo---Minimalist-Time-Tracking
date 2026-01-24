@@ -596,12 +596,12 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <div className="relative ml-1 min-h-[20px] pr-16">
+                                        <div className="flex items-center justify-between ml-1 min-h-[20px]">
                                             <label className="text-xs font-bold text-slate-500">{t('crm:products.category')}</label>
                                             <button
                                                 type="button"
                                                 onClick={() => setIsAddCategoryModalOpen(true)}
-                                                className="absolute top-0 right-0 text-[10px] font-black text-praetor hover:text-slate-700 uppercase tracking-tighter flex items-center gap-1"
+                                                className="text-[10px] font-black text-praetor hover:text-slate-700 uppercase tracking-tighter flex items-center gap-1"
                                             >
                                                 <i className="fa-solid fa-plus"></i> {t('crm:products.addCategory')}
                                             </button>
@@ -616,13 +616,13 @@ const ProductsView: React.FC<ProductsViewProps> = ({ products, suppliers, onAddP
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <div className="relative ml-1 min-h-[20px] pr-16">
+                                        <div className="flex items-center justify-between ml-1 min-h-[20px]">
                                             <label className="text-xs font-bold text-slate-500">{t('crm:products.subcategory')}</label>
                                             <button
                                                 type="button"
                                                 onClick={() => setIsAddSubcategoryModalOpen(true)}
                                                 disabled={!formData.category} // Disable if no category selected
-                                                className={`absolute top-0 right-0 text-[10px] font-black uppercase tracking-tighter flex items-center gap-1 ${!formData.category ? 'text-slate-300 cursor-not-allowed' : 'text-praetor hover:text-slate-700'}`}
+                                                className={`text-[10px] font-black uppercase tracking-tighter flex items-center gap-1 ${!formData.category ? 'text-slate-300 cursor-not-allowed' : 'text-praetor hover:text-slate-700'}`}
                                             >
                                                 <i className="fa-solid fa-plus"></i> {t('crm:products.addSubcategory')}
                                             </button>
