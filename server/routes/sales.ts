@@ -556,12 +556,18 @@ export default async function (fastify, _opts) {
         [idResult.value],
       );
 
-      // Get the sale year from created_at
-      const saleYear = new Date(saleResult.rows[0].createdAt).getFullYear();
+      // Get the client code for project naming
+      const clientResult = await query(`SELECT client_code FROM clients WHERE id = $1`, [
+        saleResult.rows[0].clientId,
+      ]);
+      const clientCode = clientResult.rows[0]?.client_code || saleResult.rows[0].clientId;
+
+      // Get the sale year from created_at (createdAt is returned as a numeric string from EXTRACT)
+      const saleYear = new Date(Number(saleResult.rows[0].createdAt)).getFullYear();
 
       // Create a project for each sale item
       for (const saleItem of saleItemsResult.rows) {
-        const projectName = `${saleResult.rows[0].clientName}_${saleItem.product_name}_${saleYear}`;
+        const projectName = `${clientCode}_${saleItem.product_name}_${saleYear}`;
 
         // Check if project with this exact name already exists for this client
         const existingProject = await query(
