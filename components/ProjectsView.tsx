@@ -62,16 +62,6 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
     closeModal();
   };
 
-  const openCreateModal = () => {
-    setEditingProject(null);
-    setName('');
-    setClientId('');
-    setDescription('');
-    setColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
-    setErrors({});
-    setIsModalOpen(true);
-  };
-
   const startEditing = (project: Project) => {
     setEditingProject(project);
     setName(project.name);

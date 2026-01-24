@@ -269,7 +269,6 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
   const renderBidRow = (bid: SpecialBid) => {
     const expired = isExpired(bid.endDate);
     const notStarted = isNotStarted(bid.startDate);
-    const isActive = !expired && !notStarted;
 
     return (
       <tr

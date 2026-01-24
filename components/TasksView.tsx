@@ -56,14 +56,6 @@ const TasksView: React.FC<TasksViewProps> = ({
     }
   };
 
-  const openCreateModal = () => {
-    setEditingTask(null);
-    setName('');
-    setProjectId('');
-    setDescription('');
-    setIsModalOpen(true);
-  };
-
   const startEditing = (task: ProjectTask) => {
     setEditingTask(task);
     setName(task.name);

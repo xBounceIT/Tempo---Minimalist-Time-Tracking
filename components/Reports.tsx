@@ -427,7 +427,7 @@ const Reports: React.FC<ReportsProps> = ({
                         formatter={(
                           value: number | string | Array<number | string> | undefined,
                           _name: string | undefined,
-                          item: any, // Leaving as any to avoid strict Recharts type issues which can be complex
+                          item: { payload?: { isHoliday?: boolean } },
                         ) => {
                           if (item && item.payload && item.payload.isHoliday) {
                             return ['N/A', 'Hours'];

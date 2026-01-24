@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Client, Project, ProjectTask, TimeEntry, UserRole, User } from '../types';
 import CustomSelect from './CustomSelect';
@@ -73,19 +73,27 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
     });
   }, [currentWeekStart, treatSaturdayAsHoliday]);
 
-  const [rows, setRows] = useState<any[]>([]);
+  type RowData = {
+    clientId: string;
+    projectId: string;
+    taskName: string;
+    days: Record<string, { duration: number; note: string; id?: string }>;
+    weekNote: string;
+  };
+  const [rows, setRows] = useState<RowData[]>([]);
+  const [prevInitialRows, setPrevInitialRows] = useState<RowData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [activeDropdownRow, setActiveDropdownRow] = useState<number | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Initialize rows from existing entries in this week
-  useEffect(() => {
+  // Initialize rows from existing entries in this week using useMemo
+  const initialRows = useMemo(() => {
     const weekDates = weekDays.map((d) => d.dateStr);
     const weekEntries = entries.filter((e) => weekDates.includes(e.date));
 
     // Group by client/project/task
-    const groups: { [key: string]: any } = {};
+    const groups: Record<string, RowData> = {};
     weekEntries.forEach((e) => {
       const key = `${e.clientId}-${e.projectId}-${e.task}`;
       if (!groups[key]) {
@@ -96,17 +104,17 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
           days: {
             [e.date]: { duration: e.duration, note: e.notes || '', id: e.id },
           },
-          weekNote: '', // We'll infer this or let user set it
+          weekNote: '',
         };
       } else {
         groups[key].days[e.date] = { duration: e.duration, note: e.notes || '', id: e.id };
       }
     });
 
-    const initialRows = Object.values(groups);
+    const result = Object.values(groups);
     // Add one empty row for new entries
-    if (initialRows.length === 0) {
-      initialRows.push({
+    if (result.length === 0) {
+      result.push({
         clientId: clients[0]?.id || '',
         projectId: projects.find((p) => p.clientId === (clients[0]?.id || ''))?.id || '',
         taskName: '',
@@ -114,9 +122,16 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
         weekNote: '',
       });
     }
+    return result;
+  }, [entries, clients, projects, weekDays]);
+
+  // Update rows when initialRows changes
+  // Update rows when initialRows changes (pattern: adjust state during render)
+  if (initialRows !== prevInitialRows) {
+    setPrevInitialRows(initialRows);
     setRows(initialRows);
     setHasChanges(false);
-  }, [entries, currentWeekStart, clients, projects, weekDays]);
+  }
 
   const handleWeekChange = (offset: number) => {
     const newStart = new Date(currentWeekStart);
@@ -150,7 +165,11 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
     setHasChanges(true);
   };
 
-  const handleRowInfoChange = (rowIndex: number, field: string, value: string) => {
+  const handleRowInfoChange = (
+    rowIndex: number,
+    field: Exclude<keyof RowData, 'days'>,
+    value: string,
+  ) => {
     const newRows = [...rows];
     newRows[rowIndex][field] = value;
 
@@ -203,13 +222,13 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    const entriesToAdd: Omit<TimeEntry, 'id' | 'createdAt' | 'userId' | 'hourlyCost'>[] = [];
+    const entriesToAdd: Omit<TimeEntry, 'id' | 'createdAt' | 'userId'>[] = [];
 
     rows.forEach((row) => {
       const client = clients.find((c) => c.id === row.clientId);
       const project = projects.find((p) => p.id === row.projectId);
 
-      Object.entries(row.days).forEach(([dateStr, data]: [string, any]) => {
+      Object.entries(row.days).forEach(([dateStr, data]) => {
         if (data.duration > 0) {
           // If it has an ID, it's an update, but user request implies mirror Anuko which has a Submit for bulk.
           // For simplicity, we'll only ADD new ones here or we'd need bit more complex logic.
@@ -224,6 +243,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
               task: row.taskName,
               duration: data.duration,
               notes: data.note || row.weekNote, // Use individual note or fallback to week note
+              hourlyCost: 0,
             });
           } else {
             // Handle update if needed? User didn't explicitly ask for editing existing in weekly view,
@@ -243,7 +263,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
     });
 
     if (entriesToAdd.length > 0) {
-      await onAddBulkEntries(entriesToAdd as any);
+      await onAddBulkEntries(entriesToAdd);
     }
     setIsLoading(false);
     setHasChanges(false);
@@ -254,10 +274,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
   const dayTotals = useMemo(() => {
     const totals: { [key: string]: number } = {};
     weekDays.forEach((d) => {
-      totals[d.dateStr] = rows.reduce(
-        (sum: number, row: any) => sum + (row.days[d.dateStr]?.duration || 0),
-        0,
-      ) as number;
+      totals[d.dateStr] = rows.reduce((sum, row) => sum + (row.days[d.dateStr]?.duration || 0), 0);
     });
     return totals;
   }, [rows, weekDays]);
@@ -463,12 +480,9 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                   <td className="px-4 py-3 text-right">
                     <div className="flex flex-col items-end gap-2">
                       <span className="text-sm font-black text-slate-800">
-                        {(
-                          Object.values(row.days).reduce(
-                            (sum: number, d: any) => sum + (d.duration || 0),
-                            0,
-                          ) as number
-                        ).toFixed(1)}
+                        {Object.values(row.days)
+                          .reduce((sum, d) => sum + (d.duration || 0), 0)
+                          .toFixed(1)}
                       </span>
                       <button
                         onClick={() => deleteRow(rowIndex)}

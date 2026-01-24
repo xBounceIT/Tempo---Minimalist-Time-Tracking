@@ -35,7 +35,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
   onDeleteQuote,
   onCreateSale,
   quoteFilterId,
-  quoteIdsWithSales,
+
   currency,
 }) => {
   const { t } = useTranslation(['crm', 'common', 'form']);
@@ -366,7 +366,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     setFormData({ ...formData, items: newItems });
   };
 
-  const updateProductRow = (index: number, field: keyof QuoteItem, value: any) => {
+  const updateProductRow = (index: number, field: keyof QuoteItem, value: string | number) => {
     if (isReadOnly) return;
     const newItems = [...(formData.items || [])];
     newItems[index] = { ...newItems[index], [field]: value };
@@ -545,8 +545,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
   const renderQuoteRow = (quote: Quote) => {
     const { total } = calculateTotals(quote.items, quote.discount);
     const expired = isQuoteExpired(quote);
-    const isRevertLocked = quoteIdsWithSales?.has(quote.id);
-    const isConfirmDisabled = expired || isRevertLocked;
+
     const isDeleteDisabled = expired || quote.status !== 'draft';
     const getStatusBadgeClass = (status: string) => {
       switch (status) {
@@ -834,7 +833,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                                     updateProductRow(
                                       index,
                                       'specialBidId',
-                                      val === 'none' ? '' : val,
+                                      val === 'none' ? '' : (val as string),
                                     )
                                   }
                                   placeholder={t('crm:quotes.selectBid')}
@@ -848,7 +847,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                                 <CustomSelect
                                   options={activeProducts.map((p) => ({ id: p.id, name: p.name }))}
                                   value={item.productId}
-                                  onChange={(val) => updateProductRow(index, 'productId', val)}
+                                  onChange={(val) =>
+                                    updateProductRow(index, 'productId', val as string)
+                                  }
                                   placeholder={t('crm:quotes.selectProduct')}
                                   searchable={true}
                                   disabled={isReadOnly}
@@ -946,7 +947,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                     <CustomSelect
                       options={PAYMENT_TERMS_OPTIONS}
                       value={formData.paymentTerms || 'immediate'}
-                      onChange={(val) => setFormData({ ...formData, paymentTerms: val as any })}
+                      onChange={(val) =>
+                        setFormData({ ...formData, paymentTerms: val as Quote['paymentTerms'] })
+                      }
                       searchable={false}
                       disabled={isReadOnly}
                     />
@@ -1017,7 +1020,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                     const {
                       subtotal,
                       discountAmount,
-                      totalTax,
+
                       total,
                       margin,
                       marginPercentage,

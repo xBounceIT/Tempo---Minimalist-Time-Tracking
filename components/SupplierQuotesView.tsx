@@ -259,7 +259,11 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
     setFormData({ ...formData, items: newItems });
   };
 
-  const updateProductRow = (index: number, field: keyof SupplierQuoteItem, value: any) => {
+  const updateProductRow = (
+    index: number,
+    field: keyof SupplierQuoteItem,
+    value: string | number,
+  ) => {
     const newItems = [...(formData.items || [])];
     newItems[index] = { ...newItems[index], [field]: value };
 
@@ -456,7 +460,9 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                             <CustomSelect
                               options={activeProducts.map((p) => ({ id: p.id, name: p.name }))}
                               value={item.productId}
-                              onChange={(val) => updateProductRow(index, 'productId', val)}
+                              onChange={(val) =>
+                                updateProductRow(index, 'productId', val as string)
+                              }
                               placeholder="Select product..."
                               searchable={true}
                               buttonClassName="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm"
@@ -558,7 +564,12 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                     <CustomSelect
                       options={PAYMENT_TERMS_OPTIONS}
                       value={formData.paymentTerms || 'immediate'}
-                      onChange={(val) => setFormData({ ...formData, paymentTerms: val as any })}
+                      onChange={(val) =>
+                        setFormData({
+                          ...formData,
+                          paymentTerms: val as SupplierQuote['paymentTerms'],
+                        })
+                      }
                       searchable={false}
                     />
                   </div>
@@ -588,7 +599,9 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
                     <CustomSelect
                       options={STATUS_OPTIONS}
                       value={formData.status || 'received'}
-                      onChange={(val) => setFormData({ ...formData, status: val as any })}
+                      onChange={(val) =>
+                        setFormData({ ...formData, status: val as SupplierQuote['status'] })
+                      }
                       searchable={false}
                     />
                   </div>
@@ -622,8 +635,10 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
               {formData.items && formData.items.length > 0 && (
                 <div className="pt-8 border-t border-slate-100">
                   {(() => {
-                    const { subtotal, discountAmount, totalTax, total, taxGroups } =
-                      calculateTotals(formData.items, formData.discount || 0);
+                    const { subtotal, discountAmount, total, taxGroups } = calculateTotals(
+                      formData.items,
+                      formData.discount || 0,
+                    );
                     return (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
                         <div className="flex flex-col justify-center space-y-3 h-full">

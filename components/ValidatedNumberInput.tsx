@@ -1,10 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 const numberInputPattern = /^[0-9]*([.,][0-9]*)?$/;
 
 const normalizeNumberInput = (value: string) => value.replace(',', '.');
-
-import { parseNumberInputValue } from '../utils/numbers';
 
 type ValidatedNumberInputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -16,16 +14,17 @@ type ValidatedNumberInputProps = Omit<
 
 const ValidatedNumberInput = React.forwardRef<HTMLInputElement, ValidatedNumberInputProps>(
   ({ value, onValueChange, onKeyDown, onFocus, onBlur, ...rest }, ref) => {
-    const [displayValue, setDisplayValue] = useState<string>(
+    const [internalValue, setInternalValue] = useState<string>(
       value === undefined || value === null ? '' : String(value),
     );
-    const isFocusedRef = useRef(false);
+    const [isFocused, setIsFocused] = useState(false);
 
-    useEffect(() => {
-      if (!isFocusedRef.current) {
-        setDisplayValue(value === undefined || value === null ? '' : String(value));
-      }
-    }, [value]);
+    // Derive display value from props when not focused
+    const displayValue = isFocused
+      ? internalValue
+      : value === undefined || value === null
+        ? ''
+        : String(value);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.ctrlKey || event.metaKey) {
@@ -70,18 +69,19 @@ const ValidatedNumberInput = React.forwardRef<HTMLInputElement, ValidatedNumberI
       const rawValue = event.target.value;
       if (rawValue !== '' && !numberInputPattern.test(rawValue)) return;
       const normalizedValue = normalizeNumberInput(rawValue);
-      setDisplayValue(normalizedValue);
+      setInternalValue(normalizedValue);
       onValueChange(normalizedValue);
     };
 
     const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-      isFocusedRef.current = true;
+      setIsFocused(true);
+      setInternalValue(value === undefined || value === null ? '' : String(value));
       onFocus?.(event);
     };
 
     const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-      isFocusedRef.current = false;
-      setDisplayValue(value === undefined || value === null ? '' : String(value));
+      setIsFocused(false);
+      setInternalValue(value === undefined || value === null ? '' : String(value));
       onBlur?.(event);
     };
 

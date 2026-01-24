@@ -15,7 +15,7 @@ const SessionTimeoutHandler: React.FC<SessionTimeoutHandlerProps> = ({
 }) => {
   const { t } = useTranslation('auth');
   const [showWarning, setShowWarning] = useState(false);
-  const [lastActivity, setLastActivity] = useState(Date.now());
+  const [, setLastActivity] = useState(Date.now());
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const warningTimerRef = useRef<NodeJS.Timeout | null>(null);

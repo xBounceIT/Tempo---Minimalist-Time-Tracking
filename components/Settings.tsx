@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import CustomSelect from './CustomSelect';
 import api from '../services/api';
 import { getTheme, applyTheme, Theme } from '../utils/theme';
 import { useTranslation } from 'react-i18next';
@@ -127,9 +126,9 @@ const Settings: React.FC = () => {
       setNewPassword('');
       setConfirmPassword('');
       setTimeout(() => setPasswordSuccess(false), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to update password:', err);
-      setPasswordError(err.message || 'Failed to update password');
+      setPasswordError((err as Error).message || 'Failed to update password');
     } finally {
       setIsSavingPassword(false);
     }

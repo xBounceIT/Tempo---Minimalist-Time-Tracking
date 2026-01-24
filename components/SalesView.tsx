@@ -6,7 +6,7 @@ import StandardTable from './StandardTable';
 import ValidatedNumberInput from './ValidatedNumberInput';
 import { parseNumberInputValue } from '../utils/numbers';
 
-const getPaymentTermsOptions = (t: any) => [
+const getPaymentTermsOptions = (t: (key: string) => string) => [
   { id: 'immediate', name: t('crm:paymentTerms.immediate') },
   { id: '15gg', name: t('crm:paymentTerms.15gg') },
   { id: '21gg', name: t('crm:paymentTerms.21gg') },
@@ -20,7 +20,7 @@ const getPaymentTermsOptions = (t: any) => [
   { id: '365gg', name: t('crm:paymentTerms.365gg') },
 ];
 
-const getStatusOptions = (t: any) => [
+const getStatusOptions = (t: (key: string) => string) => [
   { id: 'draft', name: t('crm:sales.statusDraft') },
   { id: 'sent', name: t('crm:sales.statusSent') },
   { id: 'confirmed', name: t('crm:sales.statusConfirmed') },
@@ -44,7 +44,7 @@ const calcProductSalePrice = (costo: number, molPercentage: number) => {
   return costo / (1 - molPercentage / 100);
 };
 
-const getSaleStatusLabel = (status: Sale['status'], t: any) => {
+const getSaleStatusLabel = (status: Sale['status'], t: (key: string) => string) => {
   if (status === 'sent') return t('crm:sales.statusSent');
   if (status === 'confirmed') return t('crm:sales.statusConfirmed');
   if (status === 'denied') return t('crm:sales.statusDenied');
@@ -305,7 +305,7 @@ const SalesView: React.FC<SalesViewProps> = ({
     setFormData({ ...formData, items: newItems });
   };
 
-  const updateProductRow = (index: number, field: keyof SaleItem, value: any) => {
+  const updateProductRow = (index: number, field: keyof SaleItem, value: string | number) => {
     const newItems = [...(formData.items || [])];
     newItems[index] = { ...newItems[index], [field]: value };
 
@@ -703,7 +703,9 @@ const SalesView: React.FC<SalesViewProps> = ({
                     <CustomSelect
                       options={getPaymentTermsOptions(t)}
                       value={formData.paymentTerms || 'immediate'}
-                      onChange={(val) => setFormData({ ...formData, paymentTerms: val as any })}
+                      onChange={(val) =>
+                        setFormData({ ...formData, paymentTerms: val as Sale['paymentTerms'] })
+                      }
                       searchable={false}
                       disabled={isReadOnly}
                     />
@@ -741,7 +743,9 @@ const SalesView: React.FC<SalesViewProps> = ({
                     <CustomSelect
                       options={getStatusOptions(t)}
                       value={formData.status || 'pending'}
-                      onChange={(val) => setFormData({ ...formData, status: val as any })}
+                      onChange={(val) =>
+                        setFormData({ ...formData, status: val as Sale['status'] })
+                      }
                       searchable={false}
                     />
                   </div>
@@ -769,7 +773,7 @@ const SalesView: React.FC<SalesViewProps> = ({
                     const {
                       subtotal,
                       discountAmount,
-                      totalTax,
+
                       total,
                       margin,
                       marginPercentage,

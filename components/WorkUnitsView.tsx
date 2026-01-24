@@ -4,12 +4,18 @@ import { User, WorkUnit } from '../types';
 import CustomSelect from './CustomSelect';
 import { workUnitsApi } from '../services/api';
 
+interface WorkUnitPayload {
+  name: string;
+  managerIds: string[];
+  description: string;
+}
+
 interface WorkUnitsViewProps {
   workUnits: WorkUnit[];
   users: User[];
   userRole: string;
-  onAddWorkUnit: (data: any) => Promise<void>;
-  onUpdateWorkUnit: (id: string, updates: any) => Promise<void>;
+  onAddWorkUnit: (data: WorkUnitPayload) => Promise<void>;
+  onUpdateWorkUnit: (id: string, updates: WorkUnitPayload) => Promise<void>;
   onDeleteWorkUnit: (id: string) => Promise<void>;
   refreshWorkUnits: () => Promise<void>;
 }
