@@ -15,7 +15,7 @@
 - Introdotto un modale per l'aggiunta di sottocategorie, migliorando la gestione delle categorie.
 - Aggiunti controlli pre commit di linting con husky
 - Aggiunto ESLint
-- Aggiunta generazione progetto per ciascuna voce quando una vendita viene accettata. La nomenclatura del progetto è $CLIENTE_$PRODOTTO\_$ANNO
+- Aggiunta generazione progetto per ciascuna voce quando una vendita viene accettata. La nomenclatura del progetto è $ID_CLIENTE_$PRODOTTO\_$ANNO
 
 ## 24/01/2026 - Sicurezza
 
