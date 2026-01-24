@@ -216,7 +216,7 @@
     "quoteDeleted": "Preventivo eliminato",
     "convertToSale": "Converti in Vendita",
     "convertConfirm": "Convertire questo preventivo in una vendita?",
-    "readOnlyStatus": "I preventivi {{status}} sono in sola lettura",
+    "readOnlyStatus": "I preventivi in stato {{status}} sono in sola lettura",
     "linkedSales": "Vendite Collegate",
     "deleteConfirm": "Sei sicuro di voler eliminare questo preventivo?",
     "activeQuotes": "Preventivi Attivi",
