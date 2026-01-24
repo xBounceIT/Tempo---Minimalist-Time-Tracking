@@ -284,7 +284,11 @@
     "totalColumn": "Total",
     "paymentTermsColumn": "Payment Terms",
     "expirationColumn": "Expiration",
-    "actionsColumn": "Actions"
+    "actionsColumn": "Actions",
+    "itemsCount": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
+    "expiredLabel": "(EXPIRED)",
+    "rowsPerPage": "Rows per page:"
   },
   "sales": {
     "title": "Sales",

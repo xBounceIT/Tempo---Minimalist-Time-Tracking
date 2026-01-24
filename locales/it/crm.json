@@ -278,7 +278,11 @@
     "totalColumn": "Totale",
     "paymentTermsColumn": "Termini di Pagamento",
     "expirationColumn": "Scadenza",
-    "actionsColumn": "Azioni"
+    "actionsColumn": "Azioni",
+    "itemsCount": "{{count}} articolo",
+    "itemsCount_other": "{{count}} articoli",
+    "expiredLabel": "(SCADUTO)",
+    "rowsPerPage": "Righe per pagina:"
   },
   "sales": {
     "title": "Vendite",

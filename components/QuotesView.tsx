@@ -490,6 +490,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                 default: return 'bg-amber-100 text-amber-700';
             }
         };
+        const getStatusLabel = (status: string) => {
+            const option = STATUS_OPTIONS.find(o => o.id === status);
+            return option ? option.name.toUpperCase() : status.toUpperCase();
+        };
         const deleteTitle = expired ? t('crm:quotes.errors.expiredCannotDelete') : t('crm:quotes.deleteQuote');
         return (
             <tr
@@ -505,13 +509,13 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                         <div>
                             <div className="text-[10px] font-black text-slate-400 tracking-wider">ID {quote.id}</div>
                             <div className="font-bold text-slate-800">{quote.clientName}</div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase">{quote.items.length} item{quote.items.length !== 1 ? 's' : ''}</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase">{t('crm:quotes.itemsCount', { count: quote.items.length })}</div>
                         </div>
                     </div>
                 </td>
                 <td className="px-8 py-5">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black ${getStatusBadgeClass(quote.status)}`}>
-                        {quote.status.toUpperCase()}
+                        {getStatusLabel(quote.status)}
                     </span>
                 </td>
                 <td className="px-8 py-5 text-sm font-bold text-slate-700">
@@ -523,7 +527,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                 <td className="px-8 py-5">
                     <div className={`text-sm ${expired ? 'text-red-600 font-bold' : 'text-slate-600'}`}>
                         {new Date(quote.expirationDate).toLocaleDateString()}
-                        {expired && <span className="ml-2 text-[10px] font-black">(EXPIRED)</span>}
+                        {expired && <span className="ml-2 text-[10px] font-black">{t('crm:quotes.expiredLabel')}</span>}
                     </div>
                 </td>
                 <td className="px-8 py-5">
@@ -1054,7 +1058,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                 footer={
                     <>
                         <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold text-slate-500">Rows per page:</span>
+                            <span className="text-xs font-bold text-slate-500">{t('crm:quotes.rowsPerPage')}</span>
                             <CustomSelect
                                 options={[
                                     { id: '5', name: '5' },

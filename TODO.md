@@ -6,7 +6,6 @@
           - Clienti: Anagrafica Clienti
           - Preventivi: nostri da fare vs Clienti
           - Vendite: ordini di vendita
-            - Ieri se ho sentito bene il flusso è da cambiare perchè deve essere Preventivo -> Offerta -> Vendita giusto? In caso qui ci sarà anche Offerte
         - Catalogo
           - Prodotti: catalogo dei beni (es. licenze office) e servizi (es. consulenza) che proponiamo ai clienti
         - HR:
