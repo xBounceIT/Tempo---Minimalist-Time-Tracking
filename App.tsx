@@ -826,12 +826,19 @@ const App: React.FC = () => {
           }
           case 'hr': {
             if (currentUser.role !== 'admin' && currentUser.role !== 'manager') return;
-            const [usersData, workUnitsData] = await Promise.all([
-              api.users.list(),
-              api.workUnits.list(),
-            ]);
+            const [usersData, workUnitsData, clientsData, projectsData, tasksData] =
+              await Promise.all([
+                api.users.list(),
+                api.workUnits.list(),
+                api.clients.list(),
+                api.projects.list(),
+                api.tasks.list(),
+              ]);
             setUsers(usersData);
             setWorkUnits(workUnitsData);
+            setClients(clientsData);
+            setProjects(projectsData);
+            setProjectTasks(tasksData);
             await loadGeneralSettings();
             break;
           }
