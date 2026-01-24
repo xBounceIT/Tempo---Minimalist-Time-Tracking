@@ -1,6 +1,12 @@
 import { query } from '../db/index.ts';
 import { authenticateToken, requireRole } from '../middleware/auth.ts';
-import { requireNonEmptyString, optionalEmail, badRequest } from '../utils/validation.ts';
+import {
+  requireNonEmptyString,
+  optionalEmail,
+  badRequest,
+  validateClientIdentifier,
+  optionalNonEmptyString,
+} from '../utils/validation.ts';
 
 export default async function (fastify, _opts) {
   // GET / - List all clients
@@ -77,7 +83,7 @@ export default async function (fastify, _opts) {
       const nameResult = requireNonEmptyString(name, 'name');
       if (!nameResult.ok) return badRequest(reply, nameResult.message);
 
-      const clientCodeResult = requireNonEmptyString(clientCode, 'clientCode');
+      const clientCodeResult = validateClientIdentifier(clientCode, 'clientCode');
       if (!clientCodeResult.ok) return badRequest(reply, clientCodeResult.message);
 
       const vatNumberResult = optionalNonEmptyString(vatNumber, 'vatNumber');
@@ -192,7 +198,7 @@ export default async function (fastify, _opts) {
 
       let clientCodeValue: string | null = null;
       if (hasClientCode) {
-        const clientCodeResult = requireNonEmptyString(clientCode, 'clientCode');
+        const clientCodeResult = validateClientIdentifier(clientCode, 'clientCode');
         if (!clientCodeResult.ok) return badRequest(reply, clientCodeResult.message);
         clientCodeValue = clientCodeResult.value;
       }

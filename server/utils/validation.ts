@@ -485,3 +485,26 @@ export function validateHexColor(
   }
   return result;
 }
+
+/**
+ * Validate client identifier (alphanumeric, -, _ only)
+ */
+export function validateClientIdentifier(
+  value: unknown,
+  fieldName: string = 'id',
+): { ok: true; value: string } | { ok: false; message: string } {
+  const result = isNonEmptyString(value);
+  if (!result.ok) {
+    return { ok: false, message: `${fieldName} must be a non-empty string` };
+  }
+
+  const regex = /^[a-zA-Z0-9_-]+$/;
+  if (!regex.test(result.value)) {
+    return {
+      ok: false,
+      message: `${fieldName} can only contain letters, numbers, dashes (-), and underscores (_)`,
+    };
+  }
+
+  return result;
+}
