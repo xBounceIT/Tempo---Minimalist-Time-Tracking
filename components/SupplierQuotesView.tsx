@@ -96,6 +96,16 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
     setCurrentPage(1);
   }, [searchTerm, filterSupplierId, filterStatus, expirationSort]);
 
+  const hasActiveFilters =
+    searchTerm.trim() !== '' || filterSupplierId !== 'all' || filterStatus !== 'all';
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setFilterSupplierId('all');
+    setFilterStatus('all');
+    setCurrentPage(1);
+  };
+
   const toggleExpirationSort = () => {
     setExpirationSort((prev) => (prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'));
   };
@@ -756,7 +766,7 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="relative group">
           <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-praetor transition-colors"></i>
           <input
@@ -792,6 +802,17 @@ const SupplierQuotesView: React.FC<SupplierQuotesViewProps> = ({
             searchable={false}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
           />
+        </div>
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            disabled={!hasActiveFilters}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i className="fa-solid fa-rotate-left"></i>
+            {t('common.clearFilters')}
+          </button>
         </div>
       </div>
 
