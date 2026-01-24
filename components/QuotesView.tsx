@@ -54,6 +54,11 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
     const [quoteToDelete, setQuoteToDelete] = useState<Quote | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
+    const getStatusLabel = (status: string) => {
+        const option = STATUS_OPTIONS.find(o => o.id === status);
+        return option ? option.name : status;
+    };
+
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const [expiredPage, setExpiredPage] = useState(1);
@@ -490,10 +495,6 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                 default: return 'bg-amber-100 text-amber-700';
             }
         };
-        const getStatusLabel = (status: string) => {
-            const option = STATUS_OPTIONS.find(o => o.id === status);
-            return option ? option.name.toUpperCase() : status.toUpperCase();
-        };
         const deleteTitle = expired ? t('crm:quotes.errors.expiredCannotDelete') : t('crm:quotes.deleteQuote');
         return (
             <tr
@@ -515,7 +516,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                 </td>
                 <td className="px-8 py-5">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black ${getStatusBadgeClass(quote.status)}`}>
-                        {getStatusLabel(quote.status)}
+                        {getStatusLabel(quote.status).toUpperCase()}
                     </span>
                 </td>
                 <td className="px-8 py-5 text-sm font-bold text-slate-700">
@@ -634,7 +635,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                         <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
                             {isReadOnly && (
                                 <div className="px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-xs font-bold">
-                                    {t('crm:quotes.readOnlyConfirmed')}
+                                    {t('crm:quotes.readOnlyStatus', { status: getStatusLabel(editingQuote?.status || '') })}
                                 </div>
                             )}
                             {/* Client Selection */}
@@ -939,7 +940,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({ quotes, clients, products, spec
                                     disabled={isReadOnly}
                                     className="px-10 py-3 bg-praetor text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {isReadOnly ? t('crm:quotes.confirmedQuote') : (editingQuote ? t('crm:quotes.updateQuote') : t('crm:quotes.createQuote'))}
+                                    {isReadOnly ? t('crm:quotes.statusQuote', { status: getStatusLabel(editingQuote?.status || '') }) : (editingQuote ? t('crm:quotes.updateQuote') : t('crm:quotes.createQuote'))}
                                 </button>
                             </div>
                         </form>
