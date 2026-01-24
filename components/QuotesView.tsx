@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Quote, QuoteItem, Client, Product, SpecialBid } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
-import ValidatedNumberInput, { parseNumberInputValue } from './ValidatedNumberInput';
+import ValidatedNumberInput from './ValidatedNumberInput';
+import { parseNumberInputValue } from '../utils/numbers';
 
 interface QuotesViewProps {
   quotes: Quote[];
@@ -735,7 +736,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                   <CustomSelect
                     options={activeClients.map((c) => ({ id: c.id, name: c.name }))}
                     value={formData.clientId || ''}
-                    onChange={handleClientChange}
+                    onChange={(val) => handleClientChange(val as string)}
                     placeholder={t('crm:quotes.selectAClient')}
                     searchable={true}
                     disabled={isReadOnly}
@@ -1184,7 +1185,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
           <CustomSelect
             options={quoteIdOptions}
             value={filterQuoteId}
-            onChange={setFilterQuoteId}
+            onChange={(val) => setFilterQuoteId(val as string)}
             placeholder={t('crm:quotes.filterByQuoteId')}
             searchable={true}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
@@ -1197,7 +1198,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
               ...activeClients.map((c) => ({ id: c.id, name: c.name })),
             ]}
             value={filterClientId}
-            onChange={setFilterClientId}
+            onChange={(val) => setFilterClientId(val as string)}
             placeholder={t('crm:quotes.filterByClient')}
             searchable={true}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
@@ -1207,7 +1208,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
           <CustomSelect
             options={[{ id: 'all', name: t('crm:quotes.allStatuses') }, ...STATUS_OPTIONS]}
             value={filterStatus}
-            onChange={setFilterStatus}
+            onChange={(val) => setFilterStatus(val as string)}
             placeholder={t('crm:quotes.filterByStatus')}
             searchable={false}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
@@ -1252,7 +1253,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                   { id: '50', name: '50' },
                 ]}
                 value={rowsPerPage.toString()}
-                onChange={(val) => handleRowsPerPageChange(val)}
+                onChange={(val) => handleRowsPerPageChange(val as string)}
                 className="w-20"
                 buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                 searchable={false}
@@ -1375,7 +1376,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                   { id: '50', name: '50' },
                 ]}
                 value={rowsPerPage.toString()}
-                onChange={(val) => handleRowsPerPageChange(val)}
+                onChange={(val) => handleRowsPerPageChange(val as string)}
                 className="w-20"
                 buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                 searchable={false}

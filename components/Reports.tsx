@@ -61,8 +61,6 @@ const Reports: React.FC<ReportsProps> = ({
     if (activeTab === 'dashboard') {
       const timer = setTimeout(() => setChartsVisible(true), 100);
       return () => clearTimeout(timer);
-    } else {
-      setChartsVisible(false);
     }
   }, [activeTab]);
 
@@ -356,13 +354,19 @@ const Reports: React.FC<ReportsProps> = ({
           }`}
         ></div>
         <button
-          onClick={() => setActiveTab('dashboard')}
+          onClick={() => {
+            setChartsVisible(false);
+            setActiveTab('dashboard');
+          }}
           className={`relative z-10 w-full py-2 text-sm font-bold transition-colors duration-300 ${activeTab === 'dashboard' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
         >
           {t('reports.dashboard')}
         </button>
         <button
-          onClick={() => setActiveTab('detailed')}
+          onClick={() => {
+            setChartsVisible(false);
+            setActiveTab('detailed');
+          }}
           className={`relative z-10 w-full py-2 text-sm font-bold transition-colors duration-300 ${activeTab === 'detailed' ? 'text-praetor' : 'text-slate-500 hover:text-slate-700'}`}
         >
           {t('reports.detailedReport')}
@@ -420,7 +424,11 @@ const Reports: React.FC<ReportsProps> = ({
                           border: 'none',
                           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                         }}
-                        formatter={(value: any, name: string, item: any) => {
+                        formatter={(
+                          value: number | string | Array<number | string> | undefined,
+                          _name: string | undefined,
+                          item: any, // Leaving as any to avoid strict Recharts type issues which can be complex
+                        ) => {
                           if (item && item.payload && item.payload.isHoliday) {
                             return ['N/A', 'Hours'];
                           }
@@ -491,7 +499,7 @@ const Reports: React.FC<ReportsProps> = ({
                     label={t('reports.selection')}
                     options={PERIOD_OPTIONS}
                     value={period}
-                    onChange={handlePeriodChange}
+                    onChange={(val) => handlePeriodChange(val as string)}
                     searchable={true}
                   />
                   <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
@@ -539,7 +547,7 @@ const Reports: React.FC<ReportsProps> = ({
                           label={t('reports.user')}
                           options={userOptions}
                           value={filterUser}
-                          onChange={setFilterUser}
+                          onChange={(val) => setFilterUser(val as string)}
                           searchable={true}
                         />
                       )}
@@ -547,14 +555,14 @@ const Reports: React.FC<ReportsProps> = ({
                         label={t('reports.client')}
                         options={clientOptions}
                         value={filterClient}
-                        onChange={handleClientChange}
+                        onChange={(val) => handleClientChange(val as string)}
                         searchable={true}
                       />
                       <CustomSelect
                         label={t('reports.project')}
                         options={projectOptions}
                         value={filterProject}
-                        onChange={handleProjectChange}
+                        onChange={(val) => handleProjectChange(val as string)}
                         searchable={true}
                       />
                     </div>
@@ -563,7 +571,7 @@ const Reports: React.FC<ReportsProps> = ({
                         label={t('reports.task')}
                         options={taskOptions}
                         value={filterTask}
-                        onChange={setFilterTask}
+                        onChange={(val) => setFilterTask(val as string)}
                         searchable={true}
                       />
                       <div>

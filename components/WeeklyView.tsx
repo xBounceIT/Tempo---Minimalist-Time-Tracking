@@ -35,14 +35,11 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
   projects,
   projectTasks,
   onAddBulkEntries,
-  onDeleteEntry,
+
   onUpdateEntry,
-  userRole,
-  currentUser,
   viewingUserId,
   availableUsers,
   onViewUserChange,
-  startOfWeek,
   treatSaturdayAsHoliday,
 }) => {
   const { t } = useTranslation('timesheets');
@@ -74,7 +71,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
         holidayName,
       };
     });
-  }, [currentWeekStart]);
+  }, [currentWeekStart, treatSaturdayAsHoliday]);
 
   const [rows, setRows] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -316,7 +313,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
             <CustomSelect
               options={availableUsers.map((u) => ({ id: u.id, name: u.name }))}
               value={viewingUserId}
-              onChange={onViewUserChange}
+              onChange={(val) => onViewUserChange(val as string)}
               label={t('weekly.viewingUser')}
               searchable={true}
             />
@@ -381,7 +378,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                       <CustomSelect
                         options={clients.map((c) => ({ id: c.id, name: c.name }))}
                         value={row.clientId}
-                        onChange={(val) => handleRowInfoChange(rowIndex, 'clientId', val)}
+                        onChange={(val) => handleRowInfoChange(rowIndex, 'clientId', val as string)}
                         className="!bg-transparent"
                         onOpen={() => setActiveDropdownRow(rowIndex)}
                         onClose={() => setActiveDropdownRow(null)}
@@ -397,7 +394,9 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                           .filter((p) => p.clientId === row.clientId)
                           .map((p) => ({ id: p.id, name: p.name }))}
                         value={row.projectId}
-                        onChange={(val) => handleRowInfoChange(rowIndex, 'projectId', val)}
+                        onChange={(val) =>
+                          handleRowInfoChange(rowIndex, 'projectId', val as string)
+                        }
                         className="!bg-transparent"
                         placeholder={t('weekly.selectProject')}
                         onOpen={() => setActiveDropdownRow(rowIndex)}
@@ -414,7 +413,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                           .filter((t) => t.projectId === row.projectId)
                           .map((t) => ({ id: t.name, name: t.name }))}
                         value={row.taskName}
-                        onChange={(val) => handleRowInfoChange(rowIndex, 'taskName', val)}
+                        onChange={(val) => handleRowInfoChange(rowIndex, 'taskName', val as string)}
                         className="!bg-transparent"
                         placeholder={t('weekly.selectTask')}
                         onOpen={() => setActiveDropdownRow(rowIndex)}

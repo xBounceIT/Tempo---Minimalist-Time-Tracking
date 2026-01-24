@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Product, Supplier } from '../types';
 import CustomSelect, { Option } from './CustomSelect';
 import StandardTable from './StandardTable';
-import ValidatedNumberInput, { parseNumberInputValue } from './ValidatedNumberInput';
+import ValidatedNumberInput from './ValidatedNumberInput';
+import { parseNumberInputValue } from '../utils/numbers';
 
 interface ProductsViewProps {
   products: Product[];
@@ -292,21 +293,27 @@ const ProductsView: React.FC<ProductsViewProps> = ({
     setDisabledCurrentPage(1);
   };
 
-  const matchesProductFilters = (product: Product) => {
-    const matchesSearch =
-      normalizedSearch === '' ||
-      product.name.toLowerCase().includes(normalizedSearch) ||
-      (product.category ?? '').toLowerCase().includes(normalizedSearch) ||
-      (product.supplierName ?? '').toLowerCase().includes(normalizedSearch);
+  const matchesProductFilters = React.useCallback(
+    (product: Product) => {
+      const matchesSearch =
+        normalizedSearch === '' ||
+        product.name.toLowerCase().includes(normalizedSearch) ||
+        (product.category ?? '').toLowerCase().includes(normalizedSearch) ||
+        (product.supplierName ?? '').toLowerCase().includes(normalizedSearch);
 
-    const matchesCategory = filterCategory === 'all' || (product.category ?? '') === filterCategory;
-    const matchesType = filterType === 'all' || product.type === (filterType as Product['type']);
-    const matchesSupplier =
-      filterSupplierId === 'all' ||
-      (filterSupplierId === 'none' ? !product.supplierId : product.supplierId === filterSupplierId);
+      const matchesCategory =
+        filterCategory === 'all' || (product.category ?? '') === filterCategory;
+      const matchesType = filterType === 'all' || product.type === (filterType as Product['type']);
+      const matchesSupplier =
+        filterSupplierId === 'all' ||
+        (filterSupplierId === 'none'
+          ? !product.supplierId
+          : product.supplierId === filterSupplierId);
 
-    return matchesSearch && matchesCategory && matchesType && matchesSupplier;
-  };
+      return matchesSearch && matchesCategory && matchesType && matchesSupplier;
+    },
+    [normalizedSearch, filterCategory, filterType, filterSupplierId],
+  );
 
   const filteredActiveProductsTotal = React.useMemo(() => {
     return products.filter((p) => !p.isDisabled).filter(matchesProductFilters);
@@ -342,6 +349,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
       .map((p) => p.category!);
 
     return Array.from(new Set([...defaults, ...used])).sort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.type, products]);
 
   const categoryOptions: Option[] = availableCategories.map((c) => ({ id: c, name: c }));
@@ -360,11 +368,6 @@ const ProductsView: React.FC<ProductsViewProps> = ({
   }, [formData.category, products]);
 
   const subcategoryOptions: Option[] = availableSubcategories.map((s) => ({ id: s, name: s }));
-
-  const unitOptions: Option[] = [
-    { id: 'unit', name: t('crm:products.unit') },
-    { id: 'hours', name: t('crm:products.hours') },
-  ];
 
   const typeOptions: Option[] = [
     { id: 'supply', name: t('crm:products.typeSupply') },
@@ -410,7 +413,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
   ];
 
   const handleTypeChange = (val: string) => {
-    const type = val as any;
+    const type = val as Product['type'];
     let unit = 'unit';
     if (type === 'service' || type === 'consulting') {
       // Default to hours or unit? "Service" logic usually hours, Consulting usually days/hours, Supply units.
@@ -422,7 +425,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
     setFormData({
       ...formData,
       type,
-      costUnit: unit as any,
+      costUnit: unit as Product['costUnit'],
       category: '', // Reset category as it depends on type
       subcategory: '', // Reset subcategory as it depends on category
     });
@@ -626,7 +629,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                     <CustomSelect
                       options={typeOptions}
                       value={formData.type || 'supply'}
-                      onChange={handleTypeChange}
+                      onChange={(val) => handleTypeChange(val as string)}
                       searchable={false}
                       buttonClassName={
                         errors.type
@@ -656,7 +659,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                       options={categoryOptions}
                       value={formData.category || ''}
                       onChange={(val) =>
-                        setFormData({ ...formData, category: val, subcategory: '' })
+                        setFormData({ ...formData, category: val as string, subcategory: '' })
                       }
                       placeholder={t('crm:products.selectOption')}
                       searchable={true}
@@ -680,7 +683,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                     <CustomSelect
                       options={subcategoryOptions}
                       value={formData.subcategory || ''}
-                      onChange={(val) => setFormData({ ...formData, subcategory: val })}
+                      onChange={(val) => setFormData({ ...formData, subcategory: val as string })}
                       placeholder={
                         !formData.category
                           ? t('crm:products.selectCategoryFirst')
@@ -751,7 +754,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                     <CustomSelect
                       options={supplierOptions}
                       value={formData.supplierId || ''}
-                      onChange={(val) => setFormData({ ...formData, supplierId: val })}
+                      onChange={(val) => setFormData({ ...formData, supplierId: val as string })}
                       placeholder={t('crm:products.selectOption')}
                       searchable={true}
                     />
@@ -901,7 +904,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
           <CustomSelect
             options={filterCategoryOptions}
             value={filterCategory}
-            onChange={setFilterCategory}
+            onChange={(val) => setFilterCategory(val as string)}
             placeholder={t('crm:products.filterByCategory')}
             searchable={true}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
@@ -911,7 +914,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
           <CustomSelect
             options={filterTypeOptions}
             value={filterType}
-            onChange={setFilterType}
+            onChange={(val) => setFilterType(val as string)}
             placeholder={t('crm:products.filterByType')}
             searchable={false}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
@@ -921,7 +924,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
           <CustomSelect
             options={filterSupplierOptions}
             value={filterSupplierId}
-            onChange={setFilterSupplierId}
+            onChange={(val) => setFilterSupplierId(val as string)}
             placeholder={t('crm:products.filterBySupplier')}
             searchable={true}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
@@ -966,7 +969,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                   { id: '50', name: '50' },
                 ]}
                 value={rowsPerPage.toString()}
-                onChange={(val) => handleRowsPerPageChange(val)}
+                onChange={(val) => handleRowsPerPageChange(val as string)}
                 className="w-20"
                 buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                 searchable={false}
@@ -1168,7 +1171,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                     { id: '50', name: '50' },
                   ]}
                   value={disabledRowsPerPage.toString()}
-                  onChange={(val) => handleDisabledRowsPerPageChange(val)}
+                  onChange={(val) => handleDisabledRowsPerPageChange(val as string)}
                   className="w-20"
                   buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                   searchable={false}

@@ -11,6 +11,7 @@ interface TasksViewProps {
   clients: Client[];
   role: UserRole;
   users: User[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onAddTask: (name: string, projectId: string, recurringConfig?: any, description?: string) => void;
   onUpdateTask: (id: string, updates: Partial<ProjectTask>) => void;
   onDeleteTask: (id: string) => void;
@@ -321,7 +322,7 @@ const TasksView: React.FC<TasksViewProps> = ({
                   label={t('tasks.project')}
                   options={projectOptions}
                   value={projectId}
-                  onChange={setProjectId}
+                  onChange={(val) => setProjectId(val as string)}
                   placeholder={t('projects.selectProject')}
                   searchable={true}
                 />
@@ -445,7 +446,7 @@ const TasksView: React.FC<TasksViewProps> = ({
                 label={t('tasks.project')}
                 options={projectOptions}
                 value={projectId}
-                onChange={setProjectId}
+                onChange={(val) => setProjectId(val as string)}
                 placeholder={t('projects.selectProject')}
                 searchable={true}
               />

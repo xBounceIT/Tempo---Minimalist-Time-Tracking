@@ -10,11 +10,11 @@ interface TimeEntryFormProps {
   clients: Client[];
   projects: Project[];
   projectTasks: ProjectTask[];
-  onAdd: (entry: Omit<TimeEntry, 'id' | 'createdAt' | 'userId'>) => void;
+  onAdd: (entry: Omit<TimeEntry, 'id' | 'createdAt' | 'userId' | 'hourlyCost'>) => void;
   selectedDate: string;
   onMakeRecurring?: (
     taskId: string,
-    pattern: 'daily' | 'weekly' | 'monthly',
+    pattern: 'daily' | 'weekly' | 'monthly' | string,
     startDate?: string,
     endDate?: string,
     duration?: number,
@@ -70,10 +70,10 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
 
   // Pivot back to manual mode if AI is disabled
   useEffect(() => {
-    if (!enableAiInsights && isSmartMode) {
+    if (!enableAiInsights) {
       setIsSmartMode(false);
     }
-  }, [enableAiInsights, isSmartMode]);
+  }, [enableAiInsights]);
 
   // Manual fields
   const [date, setDate] = useState(selectedDate || new Date().toISOString().split('T')[0]);
@@ -108,9 +108,10 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
 
   // Sync internal date when calendar selection changes
   useEffect(() => {
-    if (selectedDate) {
+    if (selectedDate && selectedDate !== date) {
       setDate(selectedDate);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
   // Init client selection when clients load
@@ -118,7 +119,8 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
     if (!selectedClientId && clients.length > 0) {
       setSelectedClientId(clients[0].id);
     }
-  }, [clients, selectedClientId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clients]);
 
   // Filter projects when client changes
   const filteredProjects = projects.filter((p) => p.clientId === selectedClientId);
@@ -129,20 +131,26 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
   // Auto-select first project/task when lists change
   useEffect(() => {
     if (filteredProjects.length > 0) {
-      setSelectedProjectId(filteredProjects[0].id);
-    } else {
+      if (selectedProjectId !== filteredProjects[0].id) {
+        setSelectedProjectId(filteredProjects[0].id);
+      }
+    } else if (selectedProjectId !== '') {
       setSelectedProjectId('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClientId, projects]);
 
   useEffect(() => {
     if (filteredTasks.length > 0) {
-      setSelectedTaskName(filteredTasks[0].name);
-      setSelectedTaskId(filteredTasks[0].id);
-    } else {
+      if (selectedTaskId !== filteredTasks[0].id) {
+        setSelectedTaskName(filteredTasks[0].name);
+        setSelectedTaskId(filteredTasks[0].id);
+      }
+    } else if (selectedTaskId !== '') {
       setSelectedTaskName('');
       setSelectedTaskId('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId, projectTasks]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -212,7 +220,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
     if (val === 'custom') {
       setIsCustomRepeatModalOpen(true);
     } else {
-      setRecurrencePattern(val as any);
+      setRecurrencePattern(val as 'daily' | 'weekly' | 'monthly' | string);
     }
   };
 
@@ -287,7 +295,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
       opts.push({ id: 'custom', name: t('entry.customTask') });
     }
     return opts;
-  }, [filteredTasks, canCreateCustomTask]);
+  }, [filteredTasks, canCreateCustomTask, t]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
@@ -365,7 +373,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                 options={clientOptions}
                 value={selectedClientId}
                 onChange={(val) => {
-                  setSelectedClientId(val);
+                  setSelectedClientId(val as string);
                   if (errors.clientId) setErrors({ ...errors, clientId: '' });
                 }}
                 searchable={true}
@@ -381,7 +389,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                 options={projectOptions}
                 value={selectedProjectId}
                 onChange={(val) => {
-                  setSelectedProjectId(val);
+                  setSelectedProjectId(val as string);
                   if (errors.projectId) setErrors({ ...errors, projectId: '' });
                 }}
                 placeholder={
@@ -399,7 +407,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                 label={t('entry.task')}
                 options={taskOptions}
                 value={selectedTaskId || (selectedTaskName === 'custom' ? 'custom' : '')}
-                onChange={handleTaskChange}
+                onChange={(val) => handleTaskChange(val as string)}
                 placeholder={
                   filteredTasks.length === 0 && !canCreateCustomTask
                     ? t('entry.noTasks')
@@ -503,7 +511,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({
                                   ? 'custom'
                                   : recurrencePattern
                               }
-                              onChange={handleRecurrenceChange}
+                              onChange={(val) => handleRecurrenceChange(val as string)}
                               className="text-xs"
                               placeholder="Pattern..."
                               buttonClassName="bg-white border border-slate-200 text-praetor font-medium py-2 px-2 text-xs"

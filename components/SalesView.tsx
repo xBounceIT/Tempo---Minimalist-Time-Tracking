@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Sale, SaleItem, Client, Product, SpecialBid } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
-import ValidatedNumberInput, { parseNumberInputValue } from './ValidatedNumberInput';
+import ValidatedNumberInput from './ValidatedNumberInput';
+import { parseNumberInputValue } from '../utils/numbers';
 
 const getPaymentTermsOptions = (t: any) => [
   { id: 'immediate', name: t('crm:paymentTerms.immediate') },
@@ -422,7 +423,7 @@ const SalesView: React.FC<SalesViewProps> = ({
   };
 
   const isLinkedQuote = Boolean(formData.linkedQuoteId);
-  const isReadOnly = isLinkedQuote || (editingSale && editingSale.status !== 'draft');
+  const isReadOnly = Boolean(isLinkedQuote || (editingSale && editingSale.status !== 'draft'));
 
   // Pagination Logic
   const totalPages = Math.ceil(activeSales.length / rowsPerPage);
@@ -501,7 +502,7 @@ const SalesView: React.FC<SalesViewProps> = ({
                   <CustomSelect
                     options={activeClients.map((c) => ({ id: c.id, name: c.name }))}
                     value={formData.clientId || ''}
-                    onChange={handleClientChange}
+                    onChange={(val) => handleClientChange(val as string)}
                     placeholder={t('crm:quotes.selectAClient')}
                     searchable={true}
                     disabled={isReadOnly}
@@ -598,7 +599,7 @@ const SalesView: React.FC<SalesViewProps> = ({
                                     updateProductRow(
                                       index,
                                       'specialBidId',
-                                      val === 'none' ? '' : val,
+                                      val === 'none' ? '' : (val as string),
                                     )
                                   }
                                   placeholder={t('crm:quotes.selectBid')}
@@ -612,7 +613,9 @@ const SalesView: React.FC<SalesViewProps> = ({
                                 <CustomSelect
                                   options={activeProducts.map((p) => ({ id: p.id, name: p.name }))}
                                   value={item.productId}
-                                  onChange={(val) => updateProductRow(index, 'productId', val)}
+                                  onChange={(val) =>
+                                    updateProductRow(index, 'productId', val as string)
+                                  }
                                   placeholder={t('crm:quotes.selectProduct')}
                                   searchable={true}
                                   disabled={isReadOnly}
@@ -922,7 +925,7 @@ const SalesView: React.FC<SalesViewProps> = ({
               ...activeClients.map((c) => ({ id: c.id, name: c.name })),
             ]}
             value={filterClientId}
-            onChange={setFilterClientId}
+            onChange={(val) => setFilterClientId(val as string)}
             placeholder={t('crm:quotes.filterByClient')}
             searchable={true}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
@@ -932,7 +935,7 @@ const SalesView: React.FC<SalesViewProps> = ({
           <CustomSelect
             options={[{ id: 'all', name: t('crm:quotes.allStatuses') }, ...getStatusOptions(t)]}
             value={filterStatus}
-            onChange={setFilterStatus}
+            onChange={(val) => setFilterStatus(val as string)}
             placeholder={t('crm:quotes.filterByStatus')}
             searchable={false}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
@@ -978,7 +981,7 @@ const SalesView: React.FC<SalesViewProps> = ({
                   { id: '50', name: '50' },
                 ]}
                 value={rowsPerPage.toString()}
-                onChange={(val) => handleRowsPerPageChange(val)}
+                onChange={(val) => handleRowsPerPageChange(val as string)}
                 className="w-20"
                 buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                 searchable={false}
@@ -1208,7 +1211,7 @@ const SalesView: React.FC<SalesViewProps> = ({
                     { id: '50', name: '50' },
                   ]}
                   value={historyRowsPerPage.toString()}
-                  onChange={(val) => handleHistoryRowsPerPageChange(val)}
+                  onChange={(val) => handleHistoryRowsPerPageChange(val as string)}
                   className="w-20"
                   buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                   searchable={false}

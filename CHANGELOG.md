@@ -13,7 +13,8 @@
 - Aggiornato il componente ProductsView per gestire i nuovi campi e modificata la gestione dei tipi per includere “fornitura” e “consulenza”.
 - Implementata la gestione degli errori per le operazioni asincrone sui prodotti e aggiunta la gestione dello stato degli errori del server.
 - Introdotto un modale per l'aggiunta di sottocategorie, migliorando la gestione delle categorie.
-- Aggiunti controlli pre commit di linting
+- Aggiunti controlli pre commit di linting con husky
+- Aggiunto ESLint
 
 ## 24/01/2026 - Sicurezza
 

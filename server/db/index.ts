@@ -25,6 +25,7 @@ pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const query = (text: string, params?: any[]) => pool.query(text, params);
 
 export default pool;

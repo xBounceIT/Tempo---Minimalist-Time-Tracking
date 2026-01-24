@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Client, Product, SpecialBid } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
-import ValidatedNumberInput, { parseNumberInputValue } from './ValidatedNumberInput';
+import ValidatedNumberInput from './ValidatedNumberInput';
+import { parseNumberInputValue } from '../utils/numbers';
 import Calendar from './Calendar';
 
 interface SpecialBidsViewProps {
@@ -378,7 +379,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                     <CustomSelect
                       options={activeClients.map((c) => ({ id: c.id, name: c.name }))}
                       value={formData.clientId || ''}
-                      onChange={handleClientChange}
+                      onChange={(val) => handleClientChange(val as string)}
                       placeholder={t('specialBids.selectClient')}
                       searchable={true}
                       className={errors.clientId ? 'border-red-300' : ''}
@@ -394,7 +395,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                     <CustomSelect
                       options={activeProducts.map((p) => ({ id: p.id, name: p.name }))}
                       value={formData.productId || ''}
-                      onChange={handleProductChange}
+                      onChange={(val) => handleProductChange(val as string)}
                       placeholder={t('specialBids.selectProduct')}
                       searchable={true}
                       className={errors.productId ? 'border-red-300' : ''}
@@ -559,7 +560,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
               ...activeClients.map((c) => ({ id: c.id, name: c.name })),
             ]}
             value={filterClientId}
-            onChange={setFilterClientId}
+            onChange={(val) => setFilterClientId(val as string)}
             placeholder={t('specialBids.filterByClient')}
             searchable={true}
             buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
@@ -604,7 +605,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                   { id: '50', name: '50' },
                 ]}
                 value={rowsPerPage.toString()}
-                onChange={(val) => handleRowsPerPageChange(val)}
+                onChange={(val) => handleRowsPerPageChange(val as string)}
                 className="w-20"
                 buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                 searchable={false}
@@ -718,7 +719,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                   { id: '50', name: '50' },
                 ]}
                 value={rowsPerPage.toString()}
-                onChange={(val) => handleRowsPerPageChange(val)}
+                onChange={(val) => handleRowsPerPageChange(val as string)}
                 className="w-20"
                 buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                 searchable={false}
