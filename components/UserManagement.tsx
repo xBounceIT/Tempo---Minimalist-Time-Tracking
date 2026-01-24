@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { User, UserRole, Client, Project, ProjectTask } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
-import StatusBadge from './StatusBadge';
+
 import ValidatedNumberInput from './ValidatedNumberInput';
 import { usersApi } from '../services/api';
 
@@ -777,7 +777,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                   { id: '50', name: '50' },
                 ]}
                 value={activeRowsPerPage.toString()}
-                onChange={(val) => handleActiveRowsPerPageChange(val)}
+                onChange={(val) => handleActiveRowsPerPageChange(val as string)}
                 className="w-20"
                 buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                 searchable={false}
@@ -1015,7 +1015,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                     { id: '50', name: '50' },
                   ]}
                   value={disabledRowsPerPage.toString()}
-                  onChange={(val) => handleDisabledRowsPerPageChange(val)}
+                  onChange={(val) => handleDisabledRowsPerPageChange(val as string)}
                   className="w-20"
                   buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
                   searchable={false}
@@ -1254,7 +1254,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                     <CustomSelect
                       options={clientFilterOptions}
                       value={filterClientId}
-                      onChange={setFilterClientId}
+                      onChange={(val) => setFilterClientId(val as string)}
                       placeholder={t('hr:workforce.filterByClient')}
                       searchable={true}
                       buttonClassName="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm"
@@ -1262,7 +1262,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                     <CustomSelect
                       options={projectFilterOptions}
                       value={filterProjectId}
-                      onChange={setFilterProjectId}
+                      onChange={(val) => setFilterProjectId(val as string)}
                       placeholder={t('hr:workforce.filterByProject')}
                       searchable={true}
                       buttonClassName="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm"
