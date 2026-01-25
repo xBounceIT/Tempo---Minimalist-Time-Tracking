@@ -500,10 +500,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
   const hasSaleForQuote = (quote: Quote) => Boolean(quoteIdsWithSales?.has(quote.id));
   const getSaleStatusForQuote = (quote: Quote) => quoteSaleStatuses?.[quote.id];
   const isQuoteHistory = (quote: Quote) =>
-    quote.status === 'accepted' ||
-    quote.status === 'denied' ||
-    isQuoteExpired(quote) ||
-    (hasSaleForQuote(quote) && getSaleStatusForQuote(quote) !== 'draft');
+    quote.status === 'denied' || isQuoteExpired(quote) || hasSaleForQuote(quote);
   const sortedQuotes = useMemo(() => {
     if (expirationSort === 'none') return filteredQuotes;
     const direction = expirationSort === 'asc' ? 1 : -1;

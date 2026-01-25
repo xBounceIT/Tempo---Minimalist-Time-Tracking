@@ -352,6 +352,24 @@ export default async function (fastify, _opts) {
     }
 
     const effectiveDiscount = discountValue ?? existingDiscount;
+    const isRestore = status === 'quoted' && isExpiredOverride === false;
+
+    if (isRestore) {
+      const nonDraftSalesResult = await query(
+        'SELECT id FROM sales WHERE linked_quote_id = $1 AND status <> $2 LIMIT 1',
+        [idResult.value, 'draft'],
+      );
+      if (nonDraftSalesResult.rows.length > 0) {
+        return reply.code(409).send({
+          error: 'Restore is only possible when linked sale orders are in draft status',
+        });
+      }
+
+      await query('DELETE FROM sales WHERE linked_quote_id = $1 AND status = $2 RETURNING id', [
+        idResult.value,
+        'draft',
+      ]);
+    }
 
     if (status === 'quoted') {
       const linkedSaleResult = await query(

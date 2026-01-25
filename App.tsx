@@ -1494,7 +1494,13 @@ const App: React.FC = () => {
 
   const handleUpdateQuote = async (id: string, updates: Partial<Quote>) => {
     try {
-      const isRestore = updates.status === 'draft' && updates.isExpired === false;
+      const currentQuote = quotes.find((quote) => quote.id === id);
+      const isRestore = Boolean(
+        updates.status === 'draft' &&
+        updates.isExpired === false &&
+        currentQuote &&
+        (currentQuote.status !== 'draft' || currentQuote.isExpired),
+      );
       if (isRestore) {
         const linkedSales = sales.filter((sale) => sale.linkedQuoteId === id);
         if (linkedSales.length > 0) {
