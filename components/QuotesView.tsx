@@ -290,7 +290,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({
         const applicableBid = activeSpecialBids.find(
           (b) => b.clientId === clientId && b.productId === item.productId,
         );
-        const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+        const molSource = applicableBid?.molPercentage ?? product.molPercentage;
+        const mol = molSource ? Number(molSource) : 0;
         const cost = applicableBid ? Number(applicableBid.unitPrice) : Number(product.costo);
 
         return {
@@ -365,7 +366,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({
         if (applicableBid) {
           newItems[index].specialBidId = applicableBid.id;
           // Bid price is the new COST. Calculate sale price based on this cost and margin.
-          const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+          const molSource = applicableBid.molPercentage ?? product.molPercentage;
+          const mol = molSource ? Number(molSource) : 0;
           console.log(`[SpecialBid] Bid: ${applicableBid.unitPrice}, Mol: ${mol}`);
           newItems[index].unitPrice = calcProductSalePrice(Number(applicableBid.unitPrice), mol);
         } else {
@@ -396,7 +398,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({
           newItems[index].productId = bid.productId;
           newItems[index].productName = product.name;
           // Bid selected: Use bid price as COST
-          const mol = product.molPercentage ? Number(product.molPercentage) : 0;
+          const molSource = bid.molPercentage ?? product.molPercentage;
+          const mol = molSource ? Number(molSource) : 0;
           newItems[index].unitPrice = calcProductSalePrice(Number(bid.unitPrice), mol);
         }
       }
@@ -883,9 +886,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                           ? Number(selectedProduct.costo)
                           : 0;
 
-                      const molPercentage = selectedProduct
-                        ? Number(selectedProduct.molPercentage)
-                        : 0;
+                      const molSource =
+                        selectedBid?.molPercentage ?? selectedProduct?.molPercentage;
+                      const molPercentage = molSource ? Number(molSource) : 0;
                       const margin = Number(item.unitPrice || 0) - cost;
                       return (
                         <div key={item.id} className="bg-slate-50 p-3 rounded-xl space-y-2">
