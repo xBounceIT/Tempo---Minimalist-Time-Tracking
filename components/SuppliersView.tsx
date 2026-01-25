@@ -17,7 +17,7 @@ const SuppliersView: React.FC<SuppliersViewProps> = ({
   onUpdateSupplier,
   onDeleteSupplier,
 }) => {
-  const { t } = useTranslation('suppliers');
+  const { t } = useTranslation(['suppliers', 'common']);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
