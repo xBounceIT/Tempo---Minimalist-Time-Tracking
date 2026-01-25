@@ -1497,6 +1497,13 @@ const App: React.FC = () => {
     try {
       const updated = await api.sales.update(id, updates);
       setSales(sales.map((s) => (s.id === id ? updated : s)));
+
+      // When a sale is confirmed, projects are auto-created on the backend
+      // Refresh the projects list to reflect the new projects
+      if (updates.status === 'confirmed') {
+        const projectsData = await api.projects.list();
+        setProjects(projectsData);
+      }
     } catch (err) {
       console.error('Failed to update sale:', err);
     }
