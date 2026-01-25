@@ -167,6 +167,15 @@ try {
     } catch (err) {
       console.error('Failed to run manager assignments migration:', err);
     }
+
+    // Run migration to update currency precision
+    try {
+      const { migrate: updateCurrencyPrecision } =
+        await import('./db/update_currency_precision.ts');
+      await updateCurrencyPrecision();
+    } catch (err) {
+      console.error('Failed to run currency precision update migration:', err);
+    }
   } else {
     console.warn('Schema file not found at:', schemaPath);
   }
