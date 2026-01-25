@@ -940,12 +940,15 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                         ? (item.specialBidUnitPrice ?? selectedBid?.unitPrice ?? 0)
                         : (item.productCost ?? selectedProduct?.costo ?? 0);
 
+                      const molSource = item.specialBidId
+                        ? (item.specialBidMolPercentage ?? selectedBid?.molPercentage)
+                        : (item.productMolPercentage ?? selectedProduct?.molPercentage);
+                      const molPercentage = molSource ? Number(molSource) : 0;
                       const quantity = Number(item.quantity || 0);
                       const lineCost = cost * quantity;
-                      const lineSalePrice = Number(item.unitPrice || 0) * quantity;
+                      const unitSalePrice = calcProductSalePrice(cost, molPercentage);
+                      const lineSalePrice = unitSalePrice * quantity;
                       const lineMargin = lineSalePrice - lineCost;
-                      const molPercentage =
-                        lineSalePrice > 0 ? (lineMargin / lineSalePrice) * 100 : 0;
                       return (
                         <div key={item.id} className="bg-slate-50 p-3 rounded-xl space-y-2">
                           <div className="flex gap-3 items-center">
