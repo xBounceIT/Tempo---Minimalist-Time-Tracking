@@ -64,5 +64,18 @@
     "specialBids": "Special Bids",
     "suppliers": "Suppliers",
     "supplierQuotes": "Supplier Quotes"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "noNotifications": "No notifications",
+    "markAllAsRead": "Mark all as read",
+    "newProjects": "{{count}} new projects available",
+    "newProject": "1 new project available",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago",
+    "showProjects": "Show projects",
+    "hideProjects": "Hide projects"
   }
 }

@@ -64,5 +64,18 @@
     "specialBids": "Special Bid",
     "suppliers": "Fornitori",
     "supplierQuotes": "Preventivi Fornitore"
+  },
+  "notifications": {
+    "title": "Notifiche",
+    "noNotifications": "Nessuna notifica",
+    "markAllAsRead": "Segna tutte come lette",
+    "newProjects": "{{count}} nuovi progetti disponibili",
+    "newProject": "1 nuovo progetto disponibile",
+    "justNow": "Proprio ora",
+    "minutesAgo": "{{count}} min fa",
+    "hoursAgo": "{{count}}h fa",
+    "daysAgo": "{{count}}g fa",
+    "showProjects": "Mostra progetti",
+    "hideProjects": "Nascondi progetti"
   }
 }

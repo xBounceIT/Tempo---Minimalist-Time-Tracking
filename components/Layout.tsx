@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, User } from '../types';
+import { View, User, Notification } from '../types';
+import NotificationBell from './NotificationBell';
 
 interface Module {
   id: string;
@@ -41,6 +42,10 @@ interface LayoutProps {
   currentUser: User;
   onLogout: () => void;
   isNotFound?: boolean;
+  notifications?: Notification[];
+  unreadNotificationCount?: number;
+  onMarkNotificationAsRead?: (id: string) => void;
+  onMarkAllNotificationsAsRead?: () => void;
 }
 
 const Layout: React.FC<LayoutProps> = ({
@@ -50,6 +55,10 @@ const Layout: React.FC<LayoutProps> = ({
   currentUser,
   onLogout,
   isNotFound,
+  notifications = [],
+  unreadNotificationCount = 0,
+  onMarkNotificationAsRead,
+  onMarkAllNotificationsAsRead,
 }) => {
   const { t, i18n } = useTranslation(['layout', 'hr']);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -569,6 +578,18 @@ const Layout: React.FC<LayoutProps> = ({
                 day: 'numeric',
               })}
             </span>
+
+            {/* Notification Bell - only for managers */}
+            {currentUser.role === 'manager' &&
+              onMarkNotificationAsRead &&
+              onMarkAllNotificationsAsRead && (
+                <NotificationBell
+                  notifications={notifications}
+                  unreadCount={unreadNotificationCount}
+                  onMarkAsRead={onMarkNotificationAsRead}
+                  onMarkAllAsRead={onMarkAllNotificationsAsRead}
+                />
+              )}
 
             <div className="relative" ref={menuRef}>
               <button

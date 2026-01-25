@@ -17,6 +17,22 @@ export interface UserSettings {
   language?: 'en' | 'it' | 'auto';
 }
 
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'new_projects' | string;
+  title: string;
+  message?: string;
+  data?: {
+    projectNames?: string[];
+    saleId?: string;
+    clientName?: string;
+    [key: string]: unknown;
+  };
+  isRead: boolean;
+  createdAt: number;
+}
+
 export interface GeneralSettings {
   currency: string;
   dailyLimit: number;

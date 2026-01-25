@@ -628,3 +628,18 @@ BEGIN
         EXECUTE 'ALTER TABLE payments ADD CONSTRAINT ' || quote_ident(r.constraint_name) || ' FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE';
     END LOOP;
 END $$;
+
+-- Notifications table for in-app notifications
+CREATE TABLE IF NOT EXISTS notifications (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT,
+    data JSONB,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id, is_read) WHERE is_read = FALSE;

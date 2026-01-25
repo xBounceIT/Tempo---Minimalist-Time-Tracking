@@ -73,6 +73,7 @@ import type {
   SupplierQuote,
   SupplierQuoteItem,
   SpecialBid,
+  Notification,
 } from '../types';
 
 // Normalization Helpers
@@ -598,6 +599,20 @@ export const specialBidsApi = {
   delete: (id: string): Promise<void> => fetchApi(`/special-bids/${id}`, { method: 'DELETE' }),
 };
 
+// Notifications API
+export const notificationsApi = {
+  list: (): Promise<{ notifications: Notification[]; unreadCount: number }> =>
+    fetchApi('/notifications'),
+
+  markAsRead: (id: string): Promise<{ success: boolean }> =>
+    fetchApi(`/notifications/${id}/read`, { method: 'PUT' }),
+
+  markAllAsRead: (): Promise<{ success: boolean }> =>
+    fetchApi('/notifications/read-all', { method: 'PUT' }),
+
+  delete: (id: string): Promise<void> => fetchApi(`/notifications/${id}`, { method: 'DELETE' }),
+};
+
 export default {
   auth: authApi,
   users: usersApi,
@@ -614,6 +629,7 @@ export default {
   suppliers: suppliersApi,
   supplierQuotes: supplierQuotesApi,
   specialBids: specialBidsApi,
+  notifications: notificationsApi,
   workUnits: workUnitsApi,
   settings: settingsApi,
   ldap: ldapApi,

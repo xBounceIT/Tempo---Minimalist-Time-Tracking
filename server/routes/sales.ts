@@ -591,6 +591,38 @@ export default async function (fastify, _opts) {
           );
         }
       }
+
+      // Create notifications for all managers except the one who confirmed the sale
+      const projectNames = saleItemsResult.rows.map(
+        (item) => `${clientCode}_${item.product_id}_${saleYear}`,
+      );
+
+      // Get all managers except the current user
+      const managersResult = await query(
+        `SELECT id FROM users WHERE role = 'manager' AND id != $1 AND is_disabled = FALSE`,
+        [request.user.id],
+      );
+
+      // Create a notification for each manager
+      for (const manager of managersResult.rows) {
+        const notificationId = 'n-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        await query(
+          `INSERT INTO notifications (id, user_id, type, title, message, data)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [
+            notificationId,
+            manager.id,
+            'new_projects',
+            `${projectNames.length} new project${projectNames.length > 1 ? 's' : ''} available`,
+            `New projects created from sale confirmation`,
+            JSON.stringify({
+              projectNames,
+              saleId: idResult.value,
+              clientName: saleResult.rows[0].clientName,
+            }),
+          ],
+        );
+      }
     }
 
     return {

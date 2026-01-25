@@ -17,6 +17,8 @@
 - Aggiunta auto assegnazione dei manager a tutti i clienti, progetti e task
 - Aggiornata vista assegnazione clienti, progetti e task
 - Allineato stile pagina Prodoti e Task con pagine piu recenti
+- Aggiunto sistema di notifiche
+- Aggiunta notifica creazione progetti a manager
 
 ## 20260125 - Sicurezza
 
