@@ -261,7 +261,9 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
       : '--';
 
   const activeClients = clients.filter((c) => !c.isDisabled);
-  const activeProducts = products.filter((p) => !p.isDisabled && p.type === 'item');
+  const activeProducts = products.filter(
+    (p) => !p.isDisabled && (p.type === 'item' || p.type === 'supply'),
+  );
 
   const activeTotalPages = Math.ceil(filteredActiveBids.length / rowsPerPage);
   const activeStartIndex = (currentPage - 1) * rowsPerPage;
