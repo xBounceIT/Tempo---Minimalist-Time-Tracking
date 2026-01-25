@@ -4,6 +4,7 @@ import { Quote, QuoteItem, Client, Product, SpecialBid } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
 import ValidatedNumberInput from './ValidatedNumberInput';
+import StatusBadge, { StatusType } from './StatusBadge';
 import { parseNumberInputValue } from '../utils/numbers';
 
 interface QuotesViewProps {
@@ -547,20 +548,6 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     const expired = isQuoteExpired(quote);
 
     const isDeleteDisabled = expired || quote.status !== 'draft';
-    const getStatusBadgeClass = (status: string) => {
-      switch (status) {
-        case 'draft':
-          return 'bg-amber-100 text-amber-700';
-        case 'sent':
-          return 'bg-blue-100 text-blue-700';
-        case 'accepted':
-          return 'bg-emerald-100 text-emerald-700';
-        case 'denied':
-          return 'bg-red-100 text-red-700';
-        default:
-          return 'bg-amber-100 text-amber-700';
-      }
-    };
     const deleteTitle = expired
       ? t('crm:quotes.errors.expiredCannotDelete')
       : t('crm:quotes.deleteQuote');
@@ -587,11 +574,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({
           </div>
         </td>
         <td className="px-8 py-5">
-          <span
-            className={`px-3 py-1 rounded-full text-[10px] font-black ${getStatusBadgeClass(quote.status)}`}
-          >
-            {getStatusLabel(quote.status).toUpperCase()}
-          </span>
+          <StatusBadge
+            type={expired ? 'expired' : (quote.status as StatusType)}
+            label={getStatusLabel(quote.status)}
+          />
         </td>
         <td className="px-8 py-5 text-sm font-bold text-slate-700">
           {total.toFixed(2)} {currency}
@@ -716,10 +702,16 @@ const QuotesView: React.FC<QuotesViewProps> = ({
 
             <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
               {isReadOnly && (
-                <div className="px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-xs font-bold">
-                  {t('crm:quotes.readOnlyStatus', {
-                    status: getStatusLabel(editingQuote?.status || ''),
-                  })}
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50">
+                  <span className="text-amber-700 text-xs font-bold">
+                    {t('crm:quotes.readOnlyStatus', {
+                      status: '',
+                    }).replace(': {{status}}', ':')}
+                  </span>
+                  <StatusBadge
+                    type={editingQuote?.status as StatusType}
+                    label={getStatusLabel(editingQuote?.status || '')}
+                  />
                 </div>
               )}
               {/* Client Selection */}

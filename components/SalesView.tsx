@@ -4,6 +4,7 @@ import { Sale, SaleItem, Client, Product, SpecialBid } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
 import ValidatedNumberInput from './ValidatedNumberInput';
+import StatusBadge, { StatusType } from './StatusBadge';
 import { parseNumberInputValue } from '../utils/numbers';
 
 const getPaymentTermsOptions = (t: (key: string) => string) => [
@@ -49,13 +50,6 @@ const getSaleStatusLabel = (status: Sale['status'], t: (key: string) => string) 
   if (status === 'confirmed') return t('crm:sales.statusConfirmed');
   if (status === 'denied') return t('crm:sales.statusDenied');
   return t('crm:sales.statusDraft');
-};
-
-const getSaleStatusBadgeClass = (status: Sale['status']) => {
-  if (status === 'sent') return 'bg-blue-100 text-blue-700';
-  if (status === 'confirmed') return 'bg-emerald-100 text-emerald-700';
-  if (status === 'denied') return 'bg-red-100 text-red-700';
-  return 'bg-amber-100 text-amber-700';
 };
 
 const SalesView: React.FC<SalesViewProps> = ({
@@ -458,6 +452,19 @@ const SalesView: React.FC<SalesViewProps> = ({
             </div>
 
             <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
+              {editingSale && editingSale.status !== 'draft' && (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50">
+                  <span className="text-amber-700 text-xs font-bold">
+                    {t('crm:quotes.readOnlyStatus', {
+                      status: '',
+                    }).replace(': {{status}}', ':')}
+                  </span>
+                  <StatusBadge
+                    type={editingSale.status as StatusType}
+                    label={getSaleStatusLabel(editingSale.status, t)}
+                  />
+                </div>
+              )}
               {/* Linked Quote Info */}
               {formData.linkedQuoteId && (
                 <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-center justify-between">
@@ -1067,11 +1074,10 @@ const SalesView: React.FC<SalesViewProps> = ({
                     </div>
                   </td>
                   <td className="px-8 py-5">
-                    <span
-                      className={`px-3 py-1 rounded-full text-[10px] font-black ${getSaleStatusBadgeClass(sale.status)}`}
-                    >
-                      {getSaleStatusLabel(sale.status, t).toUpperCase()}
-                    </span>
+                    <StatusBadge
+                      type={sale.status as StatusType}
+                      label={getSaleStatusLabel(sale.status, t)}
+                    />
                   </td>
                   <td className="px-8 py-5 text-sm font-bold text-slate-700">
                     {total.toFixed(2)} {currency}
@@ -1307,11 +1313,10 @@ const SalesView: React.FC<SalesViewProps> = ({
                       </div>
                     </td>
                     <td className="px-8 py-5">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-black ${getSaleStatusBadgeClass(sale.status)}`}
-                      >
-                        {getSaleStatusLabel(sale.status, t).toUpperCase()}
-                      </span>
+                      <StatusBadge
+                        type={sale.status as StatusType}
+                        label={getSaleStatusLabel(sale.status, t)}
+                      />
                     </td>
                     <td className="px-8 py-5 text-sm font-bold text-slate-700">
                       {total.toFixed(2)} {currency}
@@ -1327,7 +1332,7 @@ const SalesView: React.FC<SalesViewProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              onViewQuote(sale.linkedQuoteId);
+                              if (sale.linkedQuoteId) onViewQuote(sale.linkedQuoteId);
                             }}
                             className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
                             title={t('crm:quotes.viewQuote')}
