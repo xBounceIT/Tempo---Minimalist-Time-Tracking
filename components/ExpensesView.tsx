@@ -105,9 +105,12 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
-    if (!formData.description) newErrors.description = t('expenses.description') + ' is required';
-    if (!formData.amount || formData.amount <= 0) newErrors.amount = 'Valid amount is required';
-    if (!formData.expenseDate) newErrors.expenseDate = 'Date is required';
+    if (!formData.description)
+      newErrors.description = t('common:validation.required', { field: t('expenses.description') });
+    if (!formData.amount || formData.amount <= 0)
+      newErrors.amount = t('common:validation.validAmountRequired');
+    if (!formData.expenseDate)
+      newErrors.expenseDate = t('common:validation.required', { field: t('expenses.expenseDate') });
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);

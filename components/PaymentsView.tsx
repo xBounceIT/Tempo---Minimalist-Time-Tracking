@@ -4,6 +4,7 @@ import { Payment, Client, Invoice } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
 import ValidatedNumberInput from './ValidatedNumberInput';
+import StatusBadge, { StatusType } from './StatusBadge';
 
 interface PaymentsViewProps {
   payments: Payment[];
@@ -112,7 +113,8 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.clientId) newErrors.clientId = t('payments.client') + ' is required';
-    if (!formData.amount || formData.amount <= 0) newErrors.amount = 'Valid amount is required';
+    if (!formData.amount || formData.amount <= 0)
+      newErrors.amount = t('payments.validAmountRequired');
     if (!formData.paymentDate) newErrors.paymentDate = t('payments.paymentDate') + ' is required';
 
     if (Object.keys(newErrors).length > 0) {
@@ -289,7 +291,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="Transaction ID / Check #"
+                  placeholder={t('payments.referencePlaceholder')}
                   value={formData.reference || ''}
                   onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
                   className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none"
@@ -304,7 +306,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
                   rows={3}
                   value={formData.notes || ''}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="Additional notes..."
+                  placeholder={t('payments.notesPlaceholder')}
                   className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none resize-none"
                 />
               </div>
@@ -497,7 +499,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
                     {new Date(payment.paymentDate).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-800">
-                    {client?.name || 'Unknown'}
+                    {client?.name || t('payments.unknownClient')}
                   </td>
                   <td className="px-6 py-4">
                     {invoice ? (
@@ -513,9 +515,24 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
                   <td className="px-6 py-4 font-bold text-emerald-600">
                     {payment.amount.toFixed(2)} {currency}
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600 capitalize">
-                    {paymentMethodOptions.find((opt) => opt.id === payment.paymentMethod)?.name ||
-                      payment.paymentMethod}
+                  <td className="px-6 py-4">
+                    <StatusBadge
+                      type={
+                        (
+                          {
+                            bank_transfer: 'sent',
+                            credit_card: 'accepted',
+                            cash: 'paid',
+                            check: 'pending',
+                            other: 'draft',
+                          } as Record<string, StatusType>
+                        )[payment.paymentMethod] || 'draft'
+                      }
+                      label={
+                        paymentMethodOptions.find((opt) => opt.id === payment.paymentMethod)
+                          ?.name || payment.paymentMethod
+                      }
+                    />
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-500 font-mono">
                     {payment.reference || '-'}

@@ -10,7 +10,10 @@ export type StatusType =
   | 'sent'
   | 'accepted'
   | 'denied'
-  | 'confirmed';
+  | 'confirmed'
+  | 'paid'
+  | 'overdue'
+  | 'cancelled';
 
 interface StatusBadgeProps {
   type: StatusType;
@@ -59,6 +62,18 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ type, label, className = '' }
     confirmed: {
       container: 'bg-emerald-50 text-emerald-700 border-emerald-100',
       icon: 'fa-circle-check',
+    },
+    paid: {
+      container: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+      icon: 'fa-circle-check',
+    },
+    overdue: {
+      container: 'bg-red-50 text-red-700 border-red-100',
+      icon: 'fa-clock',
+    },
+    cancelled: {
+      container: 'bg-slate-50 text-slate-500 border-slate-100',
+      icon: 'fa-ban',
     },
   };
 

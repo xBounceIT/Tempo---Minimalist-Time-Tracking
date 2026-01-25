@@ -80,7 +80,11 @@
       "other": "Other"
     },
     "unlinked": "Unlinked",
-    "noInvoice": "No Invoice"
+    "noInvoice": "No Invoice",
+    "referencePlaceholder": "Transaction ID / Check #",
+    "notesPlaceholder": "Additional notes...",
+    "validAmountRequired": "Valid amount is required",
+    "unknownClient": "Unknown"
   },
   "expenses": {
     "title": "Expenses",

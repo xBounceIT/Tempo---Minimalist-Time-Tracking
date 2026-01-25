@@ -4,6 +4,7 @@ import { Invoice, InvoiceItem, Client, Product, Sale } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
 import ValidatedNumberInput from './ValidatedNumberInput';
+import StatusBadge, { StatusType } from './StatusBadge';
 
 interface InvoicesViewProps {
   invoices: Invoice[];
@@ -714,7 +715,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <i className="fa-solid fa-rotate-left"></i>
-            {t('common.labels.clearFilters')}
+            {t('common:labels.clearFilters')}
           </button>
         </div>
       </div>
@@ -782,13 +783,13 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({
                 {t('invoices.client')}
               </th>
               <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {t('common.labels.date')}
+                {t('common:labels.date')}
               </th>
               <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 {t('invoices.dueDate')}
               </th>
               <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {t('common.labels.amount')}
+                {t('common:labels.amount')}
               </th>
               <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 {t('invoices.balance')}
@@ -797,7 +798,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({
                 {t('invoices.status')}
               </th>
               <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
-                {t('common.more')}
+                {t('common:common.more')}
               </th>
             </tr>
           </thead>
@@ -827,22 +828,13 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({
                     {balance.toFixed(2)} {currency}
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
-                        invoice.status === 'paid'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : invoice.status === 'overdue'
-                            ? 'bg-red-100 text-red-700'
-                            : invoice.status === 'sent'
-                              ? 'bg-blue-100 text-blue-700'
-                              : invoice.status === 'cancelled'
-                                ? 'bg-slate-100 text-slate-500'
-                                : 'bg-amber-100 text-amber-700'
-                      }`}
-                    >
-                      {statusOptions.find((opt) => opt.id === invoice.status)?.name ||
-                        invoice.status}
-                    </span>
+                    <StatusBadge
+                      type={invoice.status as StatusType}
+                      label={
+                        statusOptions.find((opt) => opt.id === invoice.status)?.name ||
+                        invoice.status
+                      }
+                    />
                   </td>
                   <td className="px-6 py-4 text-right">
                     <button
@@ -870,7 +862,7 @@ const InvoicesView: React.FC<InvoicesViewProps> = ({
             {paginatedInvoices.length === 0 && (
               <tr>
                 <td colSpan={8} className="p-12 text-center text-slate-400 text-sm font-bold">
-                  {t('common.emptyStates.noResults')}
+                  {t('common:emptyStates.noResults')}
                 </td>
               </tr>
             )}

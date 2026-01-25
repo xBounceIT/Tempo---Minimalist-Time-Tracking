@@ -80,7 +80,11 @@
       "other": "Altro"
     },
     "unlinked": "Non collegato",
-    "noInvoice": "Nessuna Fattura"
+    "noInvoice": "Nessuna Fattura",
+    "referencePlaceholder": "ID Transazione / N. Assegno",
+    "notesPlaceholder": "Note aggiuntive...",
+    "validAmountRequired": "Importo valido richiesto",
+    "unknownClient": "Sconosciuto"
   },
   "expenses": {
     "title": "Spese",
