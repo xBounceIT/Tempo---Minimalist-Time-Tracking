@@ -61,17 +61,18 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
       const isSunday = d.getDay() === 0;
       const isSaturday = d.getDay() === 6;
       const isForbidden = isSunday || (treatSaturdayAsHoliday && isSaturday) || !!holidayName;
+      const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][d.getDay()];
 
       return {
         dateStr,
-        dayName: d.toLocaleDateString('it-IT', { weekday: 'short' }).replace('.', ''),
+        dayName: t(`weekly.days.${dayKey}`),
         dayNum: d.getDate(),
         isToday: dateStr === toLocalISOString(new Date()),
         isForbidden,
         holidayName,
       };
     });
-  }, [currentWeekStart, treatSaturdayAsHoliday]);
+  }, [currentWeekStart, treatSaturdayAsHoliday, t]);
 
   type RowData = {
     clientId: string;
@@ -319,9 +320,9 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
               start.setHours(0, 0, 0, 0);
               setCurrentWeekStart(start);
             }}
-            className="text-[10px] font-bold text-slate-400 hover:text-praetor uppercase tracking-widest ml-2"
+            className="text-[10px] font-bold text-white bg-praetor hover:bg-praetor/90 uppercase tracking-widest ml-2 px-3 py-1.5 rounded-full transition-colors"
           >
-            Go to Today
+            {t('weekly.goToToday')}
           </button>
         </div>
 
@@ -346,14 +347,14 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
           <table className="w-full text-left border-collapse min-w-[800px] isolate">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-40">
-                  Client
+                <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-32">
+                  {t('weekly.client')}
                 </th>
-                <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-40">
-                  Project
+                <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-32">
+                  {t('weekly.project')}
                 </th>
-                <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-48">
-                  Task
+                <th className="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter w-36">
+                  {t('weekly.task')}
                 </th>
                 {weekDays.map((day) => (
                   <th
@@ -391,7 +392,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                   style={{ zIndex: activeDropdownRow === rowIndex ? 50 : 0, position: 'relative' }}
                 >
                   <td className="px-4 py-4">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 w-32">
                       <CustomSelect
                         options={clients.map((c) => ({ id: c.id, name: c.name }))}
                         value={row.clientId}
@@ -405,7 +406,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 w-32">
                       <CustomSelect
                         options={projects
                           .filter((p) => p.clientId === row.clientId)
@@ -424,7 +425,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 w-36">
                       <CustomSelect
                         options={projectTasks
                           .filter((t) => t.projectId === row.projectId)
