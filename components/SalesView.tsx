@@ -456,13 +456,9 @@ const SalesView: React.FC<SalesViewProps> = ({
                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50">
                   <span className="text-amber-700 text-xs font-bold">
                     {t('crm:quotes.readOnlyStatus', {
-                      status: '',
-                    }).replace(': {{status}}', ':')}
+                      status: getSaleStatusLabel(editingSale.status, t),
+                    })}
                   </span>
-                  <StatusBadge
-                    type={editingSale.status as StatusType}
-                    label={getSaleStatusLabel(editingSale.status, t)}
-                  />
                 </div>
               )}
               {/* Linked Quote Info */}
@@ -1297,7 +1293,7 @@ const SalesView: React.FC<SalesViewProps> = ({
                   <tr
                     key={sale.id}
                     onClick={() => openEditModal(sale)}
-                    className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                    className="transition-colors group cursor-pointer bg-slate-50 text-slate-400"
                   >
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
@@ -1305,7 +1301,7 @@ const SalesView: React.FC<SalesViewProps> = ({
                           <i className="fa-solid fa-cart-shopping"></i>
                         </div>
                         <div>
-                          <div className="font-bold text-slate-800">{sale.clientName}</div>
+                          <div className="font-bold text-slate-400">{sale.clientName}</div>
                           <div className="text-[10px] font-black text-slate-400 uppercase">
                             {sale.items.length} item{sale.items.length !== 1 ? 's' : ''}
                           </div>
@@ -1313,15 +1309,17 @@ const SalesView: React.FC<SalesViewProps> = ({
                       </div>
                     </td>
                     <td className="px-8 py-5">
-                      <StatusBadge
-                        type={sale.status as StatusType}
-                        label={getSaleStatusLabel(sale.status, t)}
-                      />
+                      <div className="opacity-60">
+                        <StatusBadge
+                          type={sale.status as StatusType}
+                          label={getSaleStatusLabel(sale.status, t)}
+                        />
+                      </div>
                     </td>
-                    <td className="px-8 py-5 text-sm font-bold text-slate-700">
+                    <td className="px-8 py-5 text-sm font-bold text-slate-400">
                       {total.toFixed(2)} {currency}
                     </td>
-                    <td className="px-8 py-5 text-sm font-semibold text-slate-600">
+                    <td className="px-8 py-5 text-sm font-semibold text-slate-400">
                       {sale.paymentTerms === 'immediate'
                         ? t('crm:paymentTerms.immediate')
                         : sale.paymentTerms}
