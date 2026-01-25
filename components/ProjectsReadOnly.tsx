@@ -47,6 +47,12 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
   const filteredProjectsTotal = React.useMemo(() => {
     return projects.filter((project) => {
       const client = clientLookup.get(project.clientId);
+
+      // Filter out disabled entries
+      const isClientDisabled = client?.isDisabled || false;
+      const isEffectivelyDisabled = project.isDisabled || isClientDisabled;
+      if (isEffectivelyDisabled) return false;
+
       const clientName = client?.name ?? '';
       const matchesSearch =
         normalizedSearch === '' ||
@@ -183,35 +189,24 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
               <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
                 {t('projects.description')}
               </th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                {t('projects.status')}
-              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredProjectsTotal.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">
+                <td colSpan={3} className="px-6 py-12 text-center text-slate-400 italic">
                   {t('projects.noProjectsFound')}
                 </td>
               </tr>
             ) : (
               projectsPage.map((project) => {
                 const client = clientLookup.get(project.clientId);
-                const isClientDisabled = client?.isDisabled || false;
-                const isEffectivelyDisabled = project.isDisabled || isClientDisabled;
 
                 return (
-                  <tr
-                    key={project.id}
-                    className={`group hover:bg-slate-50 transition-colors ${isEffectivelyDisabled ? 'opacity-60 grayscale bg-slate-50/50' : ''}`}
-                  >
+                  <tr key={project.id} className="group hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
-                      <span
-                        className={`text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${isClientDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-praetor'}`}
-                      >
+                      <span className="text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 text-praetor">
                         {client?.name || t('projects.unknown')}
-                        {isClientDisabled && <span className="ml-1 text-[8px]">(DISABLED)</span>}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -220,32 +215,13 @@ const ProjectsReadOnly: React.FC<ProjectsReadOnlyProps> = ({ projects, clients }
                           className="w-2.5 h-2.5 rounded-full"
                           style={{ backgroundColor: project.color }}
                         ></div>
-                        <span
-                          className={`text-sm font-bold ${isEffectivelyDisabled ? 'text-slate-500 line-through decoration-slate-300' : 'text-slate-800'}`}
-                        >
-                          {project.name}
-                        </span>
+                        <span className="text-sm font-bold text-slate-800">{project.name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-xs text-slate-500 max-w-md italic">
                         {project.description || t('projects.noDescription')}
                       </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      {project.isDisabled ? (
-                        <span className="text-[10px] font-black text-amber-500 uppercase">
-                          {t('projects.disabled')}
-                        </span>
-                      ) : isClientDisabled ? (
-                        <span className="text-[10px] font-black text-amber-400 uppercase">
-                          {t('projects.inheritedDisable')}
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-black text-emerald-500 uppercase">
-                          {t('projects.active')}
-                        </span>
-                      )}
                     </td>
                   </tr>
                 );
