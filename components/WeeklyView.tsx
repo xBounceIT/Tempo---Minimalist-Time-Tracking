@@ -42,7 +42,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
   onViewUserChange,
   treatSaturdayAsHoliday,
 }) => {
-  const { t } = useTranslation('timesheets');
+  const { t, i18n } = useTranslation('timesheets');
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const d = new Date();
     const day = d.getDay();
@@ -298,10 +298,18 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
           </button>
           <div className="text-center min-w-[200px]">
             <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
-              {currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} -{' '}
+              {currentWeekStart.toLocaleDateString(i18n.language, {
+                month: 'short',
+                day: 'numeric',
+              })}{' '}
+              -{' '}
               {new Date(
                 new Date(currentWeekStart).setDate(currentWeekStart.getDate() + 4),
-              ).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              ).toLocaleDateString(i18n.language, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </h3>
             <p className="text-[10px] font-bold text-praetor uppercase">{t('weekly.weekView')}</p>
           </div>
@@ -504,7 +512,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                     onClick={addRow}
                     className="text-xs font-bold text-praetor bg-transparent px-4 py-2 rounded-lg flex items-center gap-2 uppercase tracking-widest transition-all duration-300 ease-in-out"
                   >
-                    <i className="fa-solid fa-plus"></i> Add Row
+                    <i className="fa-solid fa-plus"></i> {t('weekly.addRow')}
                   </button>
                 </td>
                 {weekDays.map((day) => (
