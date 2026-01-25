@@ -413,7 +413,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
             onClick={openAddModal}
             className="bg-praetor text-white px-4 py-2.5 rounded-xl text-sm font-black shadow-xl shadow-slate-200 hover:bg-slate-700 flex items-center gap-2"
           >
-            <i className="fa-solid fa-plus"></i> {t('payments.recordPayment')}
+            <i className="fa-solid fa-plus"></i> {t('payments.addPayment')}
           </button>
         }
         footer={
