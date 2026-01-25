@@ -35,8 +35,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
   onUpdateQuote,
   onDeleteQuote,
   onCreateSale,
-  quoteFilterId,
-
+  quoteIdsWithSales,
   currency,
 }) => {
   const { t } = useTranslation(['crm', 'common', 'form']);
@@ -81,7 +80,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [expiredPage, setExpiredPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(() => {
     const saved = localStorage.getItem('praetor_quotes_rowsPerPage');
     return saved ? parseInt(saved, 10) : 5;
@@ -92,27 +91,14 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     setRowsPerPage(value);
     localStorage.setItem('praetor_quotes_rowsPerPage', value.toString());
     setCurrentPage(1); // Reset to first page
-    setExpiredPage(1);
+    setHistoryPage(1);
   };
 
   // Filter State
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClientId, setFilterClientId] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [filterQuoteId, setFilterQuoteId] = useState('all');
   const [expirationSort, setExpirationSort] = useState<'none' | 'asc' | 'desc'>('none');
-
-  React.useEffect(() => {
-    setFilterQuoteId(quoteFilterId || 'all');
-  }, [quoteFilterId]);
-
-  const quoteIdOptions = useMemo(
-    () => [
-      { id: 'all', name: t('crm:quotes.activeQuotes') },
-      ...quotes.map((quote) => ({ id: quote.id, name: `${quote.id} · ${quote.clientName}` })),
-    ],
-    [quotes, t],
-  );
 
   // Filter Logic
   const filteredQuotes = useMemo(() => {
@@ -126,34 +112,26 @@ const QuotesView: React.FC<QuotesViewProps> = ({
 
       const matchesClient = filterClientId === 'all' || quote.clientId === filterClientId;
       const matchesStatus = filterStatus === 'all' || quote.status === filterStatus;
-      const matchesQuoteId = filterQuoteId === 'all' || quote.id === filterQuoteId;
 
-      return (
-        matchesQuoteId &&
-        (filterQuoteId === 'all' ? matchesSearch && matchesClient && matchesStatus : true)
-      );
+      return matchesSearch && matchesClient && matchesStatus;
     });
-  }, [quotes, searchTerm, filterClientId, filterStatus, filterQuoteId]);
+  }, [quotes, searchTerm, filterClientId, filterStatus]);
 
   // Reset page on filter change
   React.useEffect(() => {
     setCurrentPage(1);
-    setExpiredPage(1);
-  }, [searchTerm, filterClientId, filterStatus, filterQuoteId, expirationSort]);
+    setHistoryPage(1);
+  }, [searchTerm, filterClientId, filterStatus, expirationSort]);
 
   const hasActiveFilters =
-    searchTerm.trim() !== '' ||
-    filterClientId !== 'all' ||
-    filterStatus !== 'all' ||
-    filterQuoteId !== 'all';
+    searchTerm.trim() !== '' || filterClientId !== 'all' || filterStatus !== 'all';
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setFilterClientId('all');
     setFilterStatus('all');
-    setFilterQuoteId('all');
     setCurrentPage(1);
-    setExpiredPage(1);
+    setHistoryPage(1);
   };
 
   const toggleExpirationSort = () => {
@@ -516,6 +494,12 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     quote.status !== 'accepted' &&
     quote.status !== 'denied' &&
     (quote.isExpired ?? isExpired(quote.expirationDate));
+  const hasSaleForQuote = (quote: Quote) => Boolean(quoteIdsWithSales?.has(quote.id));
+  const isQuoteHistory = (quote: Quote) =>
+    quote.status === 'accepted' ||
+    quote.status === 'denied' ||
+    isQuoteExpired(quote) ||
+    hasSaleForQuote(quote);
   const sortedQuotes = useMemo(() => {
     if (expirationSort === 'none') return filteredQuotes;
     const direction = expirationSort === 'asc' ? 1 : -1;
@@ -525,8 +509,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({
         direction,
     );
   }, [filteredQuotes, expirationSort]);
-  const filteredActiveQuotes = sortedQuotes.filter((quote) => !isQuoteExpired(quote));
-  const filteredExpiredQuotes = sortedQuotes.filter((quote) => isQuoteExpired(quote));
+  const filteredActiveQuotes = sortedQuotes.filter((quote) => !isQuoteHistory(quote));
+  const filteredHistoryQuotes = sortedQuotes.filter((quote) => isQuoteHistory(quote));
 
   // Pagination Logic
   const activeTotalPages = Math.ceil(filteredActiveQuotes.length / rowsPerPage);
@@ -536,11 +520,11 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     activeStartIndex + rowsPerPage,
   );
 
-  const expiredTotalPages = Math.ceil(filteredExpiredQuotes.length / rowsPerPage);
-  const expiredStartIndex = (expiredPage - 1) * rowsPerPage;
-  const paginatedExpiredQuotes = filteredExpiredQuotes.slice(
-    expiredStartIndex,
-    expiredStartIndex + rowsPerPage,
+  const historyTotalPages = Math.ceil(filteredHistoryQuotes.length / rowsPerPage);
+  const historyStartIndex = (historyPage - 1) * rowsPerPage;
+  const paginatedHistoryQuotes = filteredHistoryQuotes.slice(
+    historyStartIndex,
+    historyStartIndex + rowsPerPage,
   );
 
   const renderQuoteRow = (quote: Quote) => {
@@ -1165,7 +1149,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
       </div>
 
       {/* Search and Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="md:col-span-2 relative">
           <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <input
@@ -1176,16 +1160,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-praetor outline-none shadow-sm placeholder:font-normal"
           />
         </div>
-        <div>
-          <CustomSelect
-            options={quoteIdOptions}
-            value={filterQuoteId}
-            onChange={(val) => setFilterQuoteId(val as string)}
-            placeholder={t('crm:quotes.filterByQuoteId')}
-            searchable={true}
-            buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
-          />
-        </div>
+
         <div>
           <CustomSelect
             options={[
@@ -1352,8 +1327,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({
       </StandardTable>
 
       <StandardTable
-        title={t('crm:quotes.expiredQuotes')}
-        totalCount={filteredExpiredQuotes.length}
+        title={t('crm:quotes.historyQuotes', { defaultValue: t('crm:quotes.expiredQuotes') })}
+        totalCount={filteredHistoryQuotes.length}
         totalLabel={t('crm:quotes.totalLabel')}
         containerClassName="border-dashed bg-slate-50"
         footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
@@ -1378,28 +1353,28 @@ const QuotesView: React.FC<QuotesViewProps> = ({
               />
               <span className="text-xs font-bold text-slate-400 ml-2">
                 {t('common:pagination.showing', {
-                  start: paginatedExpiredQuotes.length > 0 ? expiredStartIndex + 1 : 0,
-                  end: Math.min(expiredStartIndex + rowsPerPage, filteredExpiredQuotes.length),
-                  total: filteredExpiredQuotes.length,
+                  start: paginatedHistoryQuotes.length > 0 ? historyStartIndex + 1 : 0,
+                  end: Math.min(historyStartIndex + rowsPerPage, filteredHistoryQuotes.length),
+                  total: filteredHistoryQuotes.length,
                 })}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setExpiredPage((prev) => Math.max(1, prev - 1))}
-                disabled={expiredPage === 1}
+                onClick={() => setHistoryPage((prev) => Math.max(1, prev - 1))}
+                disabled={historyPage === 1}
                 className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
               >
                 <i className="fa-solid fa-chevron-left text-xs"></i>
               </button>
               <div className="flex items-center gap-1">
-                {Array.from({ length: expiredTotalPages }, (_, i) => i + 1).map((page) => (
+                {Array.from({ length: historyTotalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
-                    onClick={() => setExpiredPage(page)}
+                    onClick={() => setHistoryPage(page)}
                     className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
-                      expiredPage === page
+                      historyPage === page
                         ? 'bg-praetor text-white shadow-md shadow-slate-200'
                         : 'text-slate-500 hover:bg-slate-100'
                     }`}
@@ -1409,8 +1384,8 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                 ))}
               </div>
               <button
-                onClick={() => setExpiredPage((prev) => Math.min(expiredTotalPages, prev + 1))}
-                disabled={expiredPage === expiredTotalPages || expiredTotalPages === 0}
+                onClick={() => setHistoryPage((prev) => Math.min(historyTotalPages, prev + 1))}
+                disabled={historyPage === historyTotalPages || historyTotalPages === 0}
                 className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
               >
                 <i className="fa-solid fa-chevron-right text-xs"></i>
@@ -1453,14 +1428,16 @@ const QuotesView: React.FC<QuotesViewProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {paginatedExpiredQuotes.map(renderQuoteRow)}
-            {filteredExpiredQuotes.length === 0 && (
+            {paginatedHistoryQuotes.map(renderQuoteRow)}
+            {filteredHistoryQuotes.length === 0 && (
               <tr>
                 <td colSpan={6} className="p-12 text-center">
                   <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                     <i className="fa-solid fa-file-invoice text-2xl"></i>
                   </div>
-                  <p className="text-slate-400 text-sm font-bold">{t('crm:quotes.noQuotes')}</p>
+                  <p className="text-slate-400 text-sm font-bold">
+                    {t('crm:quotes.noHistoryQuotes', { defaultValue: t('crm:quotes.noQuotes') })}
+                  </p>
                 </td>
               </tr>
             )}
