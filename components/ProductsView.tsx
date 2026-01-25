@@ -648,7 +648,6 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                     </label>
                     <input
                       type="text"
-                      required
                       value={formData.name}
                       onChange={(e) => {
                         setFormData({ ...formData, name: e.target.value });
@@ -668,7 +667,6 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                     </label>
                     <input
                       type="text"
-                      required
                       value={formData.productCode}
                       onChange={(e) => {
                         setFormData({ ...formData, productCode: e.target.value });
