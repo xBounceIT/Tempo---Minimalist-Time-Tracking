@@ -177,6 +177,8 @@
     "deleteConfirmMessage": "Are you sure you want to delete the bid for {{clientName}}?",
     "dedicatedClient": "Dedicated Client",
     "productItem": "Product (Item)",
+    "labelOriginal": "Original",
+    "labelNew": "New",
     "originalPriceToSpecialPrice": "Original Price → Special Price ({{currency}})",
     "originalMolToNewMol": "MOL % → New MOL %",
     "selectClient": "Select a client...",

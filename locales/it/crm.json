@@ -171,6 +171,8 @@
     "deleteConfirmMessage": "Sei sicuro di voler eliminare l'offerta speciale per {{clientName}}?",
     "dedicatedClient": "Cliente Dedicato",
     "productItem": "Prodotto (Articolo)",
+    "labelOriginal": "Originale",
+    "labelNew": "Nuovo",
     "originalPriceToSpecialPrice": "Prezzo Originale → Prezzo Speciale ({{currency}})",
     "originalMolToNewMol": "MOL % → Nuovo MOL %",
     "selectClient": "Seleziona un cliente...",

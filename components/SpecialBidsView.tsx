@@ -430,62 +430,74 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                     )}
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1">
-                      {t('specialBids.originalPriceToSpecialPrice', { currency })}
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 text-sm px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold">
-                        {originalPriceDisplay}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 ml-1">
+                          {t('specialBids.labelOriginal')} {t('specialBids.unitPrice')} ({currency})
+                        </label>
+                        <div className="w-full text-sm px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold">
+                          {originalPriceDisplay}
+                        </div>
                       </div>
-                      <i className="fa-solid fa-arrow-right text-slate-400"></i>
-                      <ValidatedNumberInput
-                        step="0.01"
-                        min="0.01"
-                        required
-                        value={formData.unitPrice ?? ''}
-                        onValueChange={(value) => {
-                          const parsed = parseNumberInputValue(value);
-                          setFormData({ ...formData, unitPrice: parsed });
-                          if (errors.unitPrice) {
-                            setErrors((prev) => {
-                              const next = { ...prev };
-                              delete next.unitPrice;
-                              return next;
-                            });
-                          }
-                        }}
-                        className={`flex-1 text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all ${errors.unitPrice ? 'border-red-300' : 'border-slate-200'}`}
-                      />
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 ml-1">
+                          {t('specialBids.labelNew')} {t('specialBids.unitPrice')} ({currency})
+                        </label>
+                        <ValidatedNumberInput
+                          step="0.01"
+                          min="0.01"
+                          required
+                          value={formData.unitPrice ?? ''}
+                          onValueChange={(value) => {
+                            const parsed = parseNumberInputValue(value);
+                            setFormData({ ...formData, unitPrice: parsed });
+                            if (errors.unitPrice) {
+                              setErrors((prev) => {
+                                const next = { ...prev };
+                                delete next.unitPrice;
+                                return next;
+                              });
+                            }
+                          }}
+                          className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all ${errors.unitPrice ? 'border-red-300' : 'border-slate-200'}`}
+                        />
+                      </div>
                     </div>
                     {errors.unitPrice && (
                       <p className="text-red-500 text-[10px] font-bold ml-1">{errors.unitPrice}</p>
                     )}
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1">
-                      {t('specialBids.originalMolToNewMol')}
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 text-sm px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold">
-                        {originalMolDisplay}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 ml-1">
+                          {t('specialBids.labelOriginal')} {t('crm:products.mol')}
+                        </label>
+                        <div className="w-full text-sm px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold">
+                          {originalMolDisplay}
+                        </div>
                       </div>
-                      <i className="fa-solid fa-arrow-right text-slate-400"></i>
-                      <ValidatedNumberInput
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={formData.molPercentage ?? ''}
-                        onValueChange={(value) => {
-                          const parsed = parseNumberInputValue(value);
-                          setFormData({ ...formData, molPercentage: parsed });
-                        }}
-                        className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
-                        placeholder="--"
-                      />
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 ml-1">
+                          {t('specialBids.labelNew')} {t('crm:products.mol')}
+                        </label>
+                        <ValidatedNumberInput
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          value={formData.molPercentage ?? ''}
+                          onValueChange={(value) => {
+                            const parsed = parseNumberInputValue(value);
+                            setFormData({ ...formData, molPercentage: parsed });
+                          }}
+                          className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all"
+                          placeholder="--"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 md:col-span-2">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 ml-1">
                       {t('crm:products.salePriceCalculated')}
                     </label>
@@ -496,7 +508,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 md:col-span-2">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 ml-1">
                       {t('crm:products.marginCalculated')}
                     </label>
