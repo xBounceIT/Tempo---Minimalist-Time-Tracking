@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, useId } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useId, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -84,40 +84,47 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       document.removeEventListener('custom-select-open', handleOtherOpen as EventListener);
   }, [onClose, dropdownId]);
 
+  const calculatePosition = useCallback(() => {
+    const buttonRect = buttonRef.current?.getBoundingClientRect();
+    const dropdownRect = dropdownRef.current?.getBoundingClientRect();
+    if (!buttonRect) return null;
+
+    const dropdownHeight = dropdownRect?.height ?? 0;
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    const shouldOpenUp =
+      dropdownPosition === 'top' ||
+      (dropdownPosition === 'bottom' &&
+        dropdownHeight > 0 &&
+        spaceBelow < dropdownHeight &&
+        buttonRect.top > dropdownHeight);
+
+    const top = shouldOpenUp
+      ? Math.max(8, buttonRect.top - dropdownHeight - 4)
+      : buttonRect.bottom + 4;
+
+    const minWidth = buttonRect.width;
+    const left = Math.min(Math.max(8, buttonRect.left), window.innerWidth - minWidth - 8);
+
+    return {
+      position: 'fixed' as const,
+      top,
+      left,
+      minWidth,
+      zIndex: 1000,
+    };
+  }, [dropdownPosition]);
+
   useLayoutEffect(() => {
     if (!isOpen) return;
 
     const updatePosition = () => {
-      const buttonRect = buttonRef.current?.getBoundingClientRect();
-      const dropdownRect = dropdownRef.current?.getBoundingClientRect();
-      if (!buttonRect) return;
-
-      const dropdownHeight = dropdownRect?.height ?? 0;
-      const spaceBelow = window.innerHeight - buttonRect.bottom;
-      const shouldOpenUp =
-        dropdownPosition === 'top' ||
-        (dropdownPosition === 'bottom' &&
-          dropdownHeight > 0 &&
-          spaceBelow < dropdownHeight &&
-          buttonRect.top > dropdownHeight);
-
-      const top = shouldOpenUp
-        ? Math.max(8, buttonRect.top - dropdownHeight - 4)
-        : buttonRect.bottom + 4;
-
-      const minWidth = buttonRect.width;
-      const left = Math.min(Math.max(8, buttonRect.left), window.innerWidth - minWidth - 8);
-
-      setDropdownStyles({
-        position: 'fixed',
-        top,
-        left,
-        minWidth,
-        zIndex: 1000,
-      });
+      const newStyles = calculatePosition();
+      if (newStyles) {
+        setDropdownStyles(newStyles);
+      }
     };
 
-    updatePosition();
+    // Only add listeners for subsequent updates, initial position is set in onClick
     window.addEventListener('resize', updatePosition);
     window.addEventListener('scroll', updatePosition, true);
 
@@ -125,7 +132,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       window.removeEventListener('resize', updatePosition);
       window.removeEventListener('scroll', updatePosition, true);
     };
-  }, [isOpen, dropdownPosition]);
+  }, [isOpen, calculatePosition]);
 
   const filteredOptions = searchable
     ? options.filter((o) => o.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -178,13 +185,20 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         disabled={disabled}
         onClick={() => {
           const nextState = !isOpen;
-          setIsOpen(nextState);
           if (nextState) {
+            // Calculate position BEFORE opening to prevent animation glitch
+            const initialPosition = calculatePosition();
+            if (initialPosition) {
+              setDropdownStyles(initialPosition);
+            }
+            setIsOpen(true);
             document.dispatchEvent(
               new CustomEvent('custom-select-open', { detail: { id: dropdownId } }),
             );
             onOpen?.();
           } else {
+            setIsOpen(false);
+            setDropdownStyles({});
             onClose?.();
           }
         }}
