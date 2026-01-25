@@ -679,16 +679,16 @@ const TasksView: React.FC<TasksViewProps> = ({
         <table className="w-full text-left">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[160px]">
-                {t('tasks.project')}
-              </th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[140px]">
+              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
                 {t('common:labels.client')}
               </th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[200px]">
-                {t('tasks.name')}
+              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                {t('tasks.project')}
               </th>
               <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                {t('tasks.name')}
+              </th>
+              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[200px]">
                 {t('tasks.description')}
               </th>
               <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[120px]">
@@ -740,9 +740,22 @@ const TasksView: React.FC<TasksViewProps> = ({
                     } ${isInheritedDisabled ? 'opacity-60 grayscale bg-slate-50/50' : ''}`}
                   >
                     <td className="px-6 py-4">
+                      {client ? (
+                        <span
+                          className={`text-sm font-bold ${
+                            isClientDisabled ? 'text-amber-500' : 'text-slate-700'
+                          }`}
+                        >
+                          {client.name} {isClientDisabled && t('projects.disabledLabel')}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div
-                          className="w-2.5 h-2.5 rounded-full"
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                           style={{ backgroundColor: project?.color || '#ccc' }}
                         ></div>
                         <span
@@ -757,23 +770,10 @@ const TasksView: React.FC<TasksViewProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {client ? (
-                        <span
-                          className={`text-xs font-bold ${
-                            isClientDisabled ? 'text-amber-500' : 'text-slate-600'
-                          }`}
-                        >
-                          {client.name} {isClientDisabled && t('projects.disabledLabel')}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-400 italic">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
                       <span className="text-sm font-bold text-slate-800">{task.name}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-xs text-slate-500 max-w-md line-clamp-1">
+                      <p className="text-xs text-slate-500 truncate max-w-[200px]">
                         {task.description || (
                           <span className="italic text-slate-400">
                             {t('projects.noDescriptionProvided')}
@@ -922,16 +922,16 @@ const TasksView: React.FC<TasksViewProps> = ({
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[160px]">
-                  {t('tasks.project')}
-                </th>
-                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[140px]">
+                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
                   {t('common:labels.client')}
                 </th>
-                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[200px]">
-                  {t('tasks.name')}
+                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                  {t('tasks.project')}
                 </th>
                 <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                  {t('tasks.name')}
+                </th>
+                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[200px]">
                   {t('tasks.description')}
                 </th>
                 <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[120px]">
@@ -960,9 +960,16 @@ const TasksView: React.FC<TasksViewProps> = ({
                     }`}
                   >
                     <td className="px-6 py-4">
+                      {client ? (
+                        <span className="text-sm font-bold text-slate-500">{client.name}</span>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div
-                          className="w-2.5 h-2.5 rounded-full"
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                           style={{ backgroundColor: project?.color || '#ccc' }}
                         ></div>
                         <span
@@ -977,19 +984,12 @@ const TasksView: React.FC<TasksViewProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {client ? (
-                        <span className="text-xs font-bold text-slate-400">{client.name}</span>
-                      ) : (
-                        <span className="text-xs text-slate-400 italic">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
                       <span className="text-sm font-bold text-slate-600 line-through decoration-slate-300">
                         {task.name}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-xs text-slate-400 max-w-md italic line-clamp-1">
+                      <p className="text-xs text-slate-400 truncate max-w-[200px] italic">
                         {task.description || (
                           <span className="italic text-slate-400">
                             {t('projects.noDescriptionProvided')}
