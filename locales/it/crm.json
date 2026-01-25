@@ -136,6 +136,7 @@
     "description": "Descrizione",
     "subcategory": "Sottocategoria",
     "productDescriptionPlaceholder": "Descrizione prodotto",
+    "productNamePlaceholder": "es. Laptop Professionale",
     "addSubcategoryModalTitle": "Aggiungi Sottocategoria",
     "subcategoryName": "Nome Sottocategoria",
     "subcategoryNamePlaceholder": "es. Software SaaS",

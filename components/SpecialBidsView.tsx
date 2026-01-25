@@ -6,6 +6,7 @@ import StandardTable from './StandardTable';
 import ValidatedNumberInput from './ValidatedNumberInput';
 import { parseNumberInputValue } from '../utils/numbers';
 import Calendar from './Calendar';
+import StatusBadge from './StatusBadge';
 
 interface SpecialBidsViewProps {
   bids: SpecialBid[];
@@ -292,17 +293,11 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
         <td className="px-8 py-5 text-sm font-bold text-slate-700">{bid.productName}</td>
         <td className="px-8 py-5">
           {expired ? (
-            <span className="text-[10px] font-black text-amber-500 uppercase">
-              {t('specialBids.expired')}
-            </span>
+            <StatusBadge type="expired" label={t('specialBids.expired')} />
           ) : notStarted ? (
-            <span className="text-[10px] font-black text-amber-500 uppercase">
-              {t('specialBids.notStarted')}
-            </span>
+            <StatusBadge type="pending" label={t('specialBids.notStarted')} />
           ) : (
-            <span className="text-[10px] font-black text-praetor uppercase">
-              {t('specialBids.active')}
-            </span>
+            <StatusBadge type="active" label={t('specialBids.active')} />
           )}
         </td>
         <td className="px-8 py-5 text-sm font-bold text-slate-700">
@@ -808,9 +803,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                   {bid.productName}
                 </td>
                 <td className="px-8 py-5">
-                  <span className="text-[10px] font-black text-amber-500 uppercase">
-                    {t('specialBids.expired')}
-                  </span>
+                  <StatusBadge type="expired" label={t('specialBids.expired')} />
                 </td>
                 <td className="px-8 py-5 text-sm font-bold text-slate-500">
                   {Number(bid.unitPrice).toFixed(2)} {currency}

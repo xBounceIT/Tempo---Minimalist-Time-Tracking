@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type StatusType = 'active' | 'disabled' | 'inherited';
+export type StatusType = 'active' | 'disabled' | 'inherited' | 'expired' | 'pending';
 
 interface StatusBadgeProps {
   type: StatusType;
@@ -21,6 +21,14 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ type, label, className = '' }
     inherited: {
       container: 'bg-slate-50 text-slate-500 border-slate-100',
       icon: 'fa-triangle-exclamation',
+    },
+    expired: {
+      container: 'bg-amber-50 text-amber-600 border-amber-100',
+      icon: 'fa-clock',
+    },
+    pending: {
+      container: 'bg-amber-50 text-amber-500 border-amber-100',
+      icon: 'fa-hourglass-half',
     },
   };
 

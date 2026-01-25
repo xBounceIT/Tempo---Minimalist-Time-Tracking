@@ -419,6 +419,21 @@ const ProductsView: React.FC<ProductsViewProps> = ({
     }
   };
 
+  const getTypeBadgeColor = (type: string) => {
+    switch (type) {
+      case 'service':
+        return 'bg-blue-100 text-blue-600';
+      case 'supply':
+        return 'bg-emerald-100 text-emerald-600';
+      case 'consulting':
+        return 'bg-purple-100 text-purple-600';
+      case 'item':
+        return 'bg-amber-100 text-amber-600';
+      default:
+        return 'bg-slate-100 text-slate-600';
+    }
+  };
+
   // Include all actually used types in filter
   const allUsedTypes = Array.from(new Set(products.map((p) => p.type))).sort();
   const filterTypeOptions: Option[] = [{ id: 'all', name: t('common:filters.allTypes') }];
@@ -636,7 +651,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                         setFormData({ ...formData, name: e.target.value });
                         if (errors.name) setErrors({ ...errors, name: '' });
                       }}
-                      placeholder={t('crm:products.categoryNamePlaceholder')}
+                      placeholder={t('crm:products.productNamePlaceholder')}
                       className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
                     />
                     {errors.name && (
@@ -656,7 +671,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                         setFormData({ ...formData, productCode: e.target.value });
                         if (errors.productCode) setErrors({ ...errors, productCode: '' });
                       }}
-                      placeholder="e.g., LAPTOP-001"
+                      placeholder={t('common:form.placeholderCode')}
                       className={`w-full text-sm px-4 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 outline-none transition-all ${errors.productCode ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-slate-200 focus:ring-praetor'}`}
                     />
                     {errors.productCode && (
@@ -1139,11 +1154,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                 </td>
                 <td className="px-4 py-5">
                   <span
-                    className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${p.type === 'service' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}
+                    className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${getTypeBadgeColor(p.type)}`}
                   >
-                    {p.type === 'service'
-                      ? t('crm:products.typeService')
-                      : t('crm:products.typeItem')}
+                    {getLocalizedTypeName(p.type)}
                   </span>
                 </td>
                 <td className="px-6 py-5 text-sm font-semibold text-slate-500">
