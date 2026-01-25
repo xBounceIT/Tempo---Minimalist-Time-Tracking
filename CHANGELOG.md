@@ -13,8 +13,6 @@
 - Aggiornato il componente ProductsView per gestire i nuovi campi e modificata la gestione dei tipi per includere “fornitura” e “consulenza”.
 - Implementata la gestione degli errori per le operazioni asincrone sui prodotti e aggiunta la gestione dello stato degli errori del server.
 - Introdotto un modale per l'aggiunta di sottocategorie, migliorando la gestione delle categorie.
-- Aggiunti controlli pre commit di linting con husky
-- Aggiunto ESLint per analisi codice statica
 - Aggiunta generazione progetto automatica per ciascuna voce quando una vendita viene accettata. La nomenclatura del progetto sarà "$IDCLIENTE_$IDPRODOTTO_$ANNO"
 - Aggiunta auto assegnazione dei manager a tutti i clienti, progetti e task
 - Aggiornata vista assegnazione clienti, progetti e task
@@ -23,3 +21,5 @@
 ## 20260125 - Sicurezza
 
 - Risolto il problema che consentiva ai manager di leggere, aggiornare ed eliminare le voci dei fogli presenze degli utenti che non gestivano.
+- Aggiunti controlli pre commit di linting con husky
+- Aggiunto ESLint per analisi codice statica
