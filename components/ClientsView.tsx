@@ -183,7 +183,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({
         message.toLowerCase().includes('client id') ||
         message.toLowerCase().includes('client code')
       ) {
-        setErrors({ ...newErrors, clientCode: message });
+        setErrors({ ...newErrors, clientCode: t('common:validation.clientCodeUnique') });
       } else {
         setErrors({ ...newErrors, general: message });
       }

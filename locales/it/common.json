@@ -114,6 +114,7 @@
     "taxRateRange": "L'aliquota fiscale deve essere tra 0 e 100",
     "typeRequired": "Il tipo è obbligatorio",
     "clientCodeInvalid": "Sono consentiti solo lettere, numeri, trattini (-) e underscore (_)",
+    "clientCodeUnique": "Questo codice cliente esiste già",
     "productCodeRequired": "Il codice prodotto è obbligatorio",
     "productCodeInvalid": "Sono consentiti solo lettere, numeri, trattini (-) e underscore (_)",
     "productCodeUnique": "Questo codice prodotto esiste già",
