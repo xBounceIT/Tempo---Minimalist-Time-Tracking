@@ -5,10 +5,9 @@ import pkg from './package.json';
 
 // Generate build date in yyyymmdd format
 const getBuildDate = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  const year = '2026';
+  const month = '01';
+  const day = '26';
   return `${year}${month}${day}`;
 };
 
