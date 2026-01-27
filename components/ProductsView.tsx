@@ -698,7 +698,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                     </label>
                     <div className="flex gap-2">
                       <ValidatedNumberInput
-                        value={formData.costo !== undefined ? formData.costo.toFixed(2) : ''}
+                        value={
+                          formData.costo !== undefined ? Number(formData.costo).toFixed(2) : ''
+                        }
                         onValueChange={handleNumericValueChange('costo')}
                         onBlur={() => {
                           if (formData.costo !== undefined) {
