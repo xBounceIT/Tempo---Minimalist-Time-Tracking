@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Product, Supplier } from '../types';
 import CustomSelect, { Option } from './CustomSelect';
 import StandardTable from './StandardTable';
-import StatusBadge from './StatusBadge';
+import StatusBadge, { StatusType } from './StatusBadge';
 import ValidatedNumberInput from './ValidatedNumberInput';
 import { parseNumberInputValue } from '../utils/numbers';
 
@@ -309,21 +309,6 @@ const ProductsView: React.FC<ProductsViewProps> = ({
         return t('crm:products.typeItem');
       default:
         return type.charAt(0).toUpperCase() + type.slice(1);
-    }
-  };
-
-  const getTypeBadgeColor = (type: string) => {
-    switch (type) {
-      case 'service':
-        return 'bg-blue-100 text-blue-600';
-      case 'supply':
-        return 'bg-emerald-100 text-emerald-600';
-      case 'consulting':
-        return 'bg-purple-100 text-purple-600';
-      case 'item':
-        return 'bg-amber-100 text-amber-600';
-      default:
-        return 'bg-slate-100 text-slate-600';
     }
   };
 
@@ -888,11 +873,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
             header: t('crm:products.type'),
             accessorKey: 'type',
             cell: ({ row: p }) => (
-              <span
-                className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${getTypeBadgeColor(p.type)}`}
-              >
-                {getLocalizedTypeName(p.type)}
-              </span>
+              <StatusBadge type={p.type as StatusType} label={getLocalizedTypeName(p.type)} />
             ),
             accessorFn: (row) => getLocalizedTypeName(row.type),
           },

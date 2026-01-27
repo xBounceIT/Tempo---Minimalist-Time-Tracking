@@ -99,7 +99,7 @@ const TableFilter: React.FC<TableFilterProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('table.search')}
-            className="w-full pl-6 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] outline-none focus:ring-1 focus:ring-praetor transition-shadow"
+            className="w-full pl-6 pr-2 py-1.5 bg-slate-50 border border-slate-200 focus:border-praetor rounded-lg text-[11px] outline-none transition-none"
             autoFocus
           />
         </div>

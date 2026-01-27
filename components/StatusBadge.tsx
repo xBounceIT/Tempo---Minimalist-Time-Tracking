@@ -13,7 +13,11 @@ export type StatusType =
   | 'confirmed'
   | 'paid'
   | 'overdue'
-  | 'cancelled';
+  | 'cancelled'
+  | 'supply'
+  | 'service'
+  | 'consulting'
+  | 'item';
 
 interface StatusBadgeProps {
   type: StatusType;
@@ -74,6 +78,22 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ type, label, className = '' }
     cancelled: {
       container: 'bg-slate-50 text-slate-500 border-slate-100',
       icon: 'fa-ban',
+    },
+    supply: {
+      container: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+      icon: 'fa-box-archive',
+    },
+    service: {
+      container: 'bg-blue-50 text-blue-600 border-blue-100',
+      icon: 'fa-gears',
+    },
+    consulting: {
+      container: 'bg-purple-50 text-purple-600 border-purple-100',
+      icon: 'fa-user-tie',
+    },
+    item: {
+      container: 'bg-amber-50 text-amber-600 border-amber-100',
+      icon: 'fa-cube',
     },
   };
 
