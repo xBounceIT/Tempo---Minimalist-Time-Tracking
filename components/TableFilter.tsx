@@ -53,60 +53,62 @@ const TableFilter: React.FC<TableFilterProps> = ({
     !isAllSelected && filteredOptions.some((opt) => selectedValues.includes(opt));
 
   return (
-    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 z-50 flex flex-col text-left font-normal animate-in fade-in zoom-in-95 duration-200">
+    <div className="absolute top-0 left-full ml-1 w-48 bg-white rounded-lg shadow-xl border border-slate-200 z-50 flex flex-col text-left font-normal animate-in fade-in zoom-in-95 duration-200">
       {/* Header with Sort Controls */}
-      <div className="p-3 border-b border-slate-100 space-y-3">
+      <div className="p-2 border-b border-slate-100 space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             {title}
           </span>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xs">
             <i className="fa-solid fa-xmark"></i>
           </button>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <button
             onClick={() => onSortChange('asc')}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-colors flex items-center justify-center gap-2 ${
+            title={t('table.sortAsc')}
+            className={`flex-1 p-1.5 text-xs font-bold rounded border transition-colors flex items-center justify-center ${
               sortDirection === 'asc'
                 ? 'bg-praetor text-white border-praetor'
                 : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
             }`}
           >
-            <i className="fa-solid fa-arrow-down-a-z"></i> {t('table.sortAsc')}
+            <i className="fa-solid fa-arrow-down-a-z"></i>
           </button>
           <button
             onClick={() => onSortChange('desc')}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-colors flex items-center justify-center gap-2 ${
+            title={t('table.sortDesc')}
+            className={`flex-1 p-1.5 text-xs font-bold rounded border transition-colors flex items-center justify-center ${
               sortDirection === 'desc'
                 ? 'bg-praetor text-white border-praetor'
                 : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
             }`}
           >
-            <i className="fa-solid fa-arrow-up-a-z"></i> {t('table.sortDesc')}
+            <i className="fa-solid fa-arrow-up-a-z"></i>
           </button>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="p-3 border-b border-slate-100">
+      <div className="p-2 border-b border-slate-100">
         <div className="relative">
-          <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <i className="fa-solid fa-magnifying-glass absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('table.search')}
-            className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-praetor transition-all"
+            className="w-full pl-6 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-[11px] outline-none focus:ring-1 focus:ring-praetor transition-all"
             autoFocus
           />
         </div>
       </div>
 
       {/* Options List */}
-      <div className="max-h-48 overflow-y-auto p-2 space-y-1">
-        <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-50 rounded-lg cursor-pointer">
+      <div className="max-h-40 overflow-y-auto p-1.5 space-y-0.5">
+        <label className="flex items-center gap-1.5 px-1.5 py-1 hover:bg-slate-50 rounded cursor-pointer">
           <input
             type="checkbox"
             checked={isAllSelected}
@@ -114,40 +116,40 @@ const TableFilter: React.FC<TableFilterProps> = ({
               if (input) input.indeterminate = isIndeterminate;
             }}
             onChange={handleSelectAll}
-            className="w-4 h-4 rounded text-praetor focus:ring-praetor border-gray-300"
+            className="w-3.5 h-3.5 rounded text-praetor focus:ring-praetor border-gray-300"
           />
-          <span className="text-xs text-slate-600 select-none">({t('table.selectAll')})</span>
+          <span className="text-[11px] text-slate-600 select-none">({t('table.selectAll')})</span>
         </label>
         {filteredOptions.length > 0 ? (
           filteredOptions.map((opt) => (
             <label
               key={opt}
-              className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-50 rounded-lg cursor-pointer"
+              className="flex items-center gap-1.5 px-1.5 py-1 hover:bg-slate-50 rounded cursor-pointer"
             >
               <input
                 type="checkbox"
                 checked={selectedValues.includes(opt)}
                 onChange={() => handleCheckboxChange(opt)}
-                className="w-4 h-4 rounded text-praetor focus:ring-praetor border-gray-300"
+                className="w-3.5 h-3.5 rounded text-praetor focus:ring-praetor border-gray-300"
               />
-              <span className="text-xs text-slate-600 truncate select-none" title={opt}>
+              <span className="text-[11px] text-slate-600 truncate select-none" title={opt}>
                 {opt}
               </span>
             </label>
           ))
         ) : (
-          <div className="text-center py-4 text-xs text-slate-400">{t('table.noResults')}</div>
+          <div className="text-center py-3 text-[11px] text-slate-400">{t('table.noResults')}</div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-slate-100 bg-slate-50 rounded-b-xl flex justify-between items-center">
+      <div className="p-2 border-t border-slate-100 bg-slate-50 rounded-b-lg">
         <button
           onClick={() => {
             onFilterChange([]);
             // onSortChange(null); // Optional: clear sort too? usually separate.
           }}
-          className="text-xs font-bold text-slate-500 hover:text-red-500 transition-colors"
+          className="text-[11px] font-bold text-slate-500 hover:text-red-500 transition-colors"
         >
           {t('table.clearFilter')}
         </button>
