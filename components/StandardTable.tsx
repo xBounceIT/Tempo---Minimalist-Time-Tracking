@@ -1,4 +1,4 @@
-import { ReactNode, useState, useMemo, useCallback } from 'react';
+import { ReactNode, useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import TableFilter from './TableFilter';
 import CustomSelect from './CustomSelect';
@@ -55,6 +55,7 @@ const StandardTable = <T extends Record<string, any>>({
   onRowClick,
 }: StandardTableProps<T>) => {
   const { t } = useTranslation('common');
+  const filterRef = useRef<HTMLDivElement>(null);
 
   // Internal State for Data Mode
   const [sortState, setSortState] = useState<{ colId: string; px: 'asc' | 'desc' } | null>(null);
@@ -62,6 +63,23 @@ const StandardTable = <T extends Record<string, any>>({
   const [activeFilterCol, setActiveFilterCol] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(defaultRowsPerPage);
+
+  // Close filter popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setActiveFilterCol(null);
+      }
+    };
+
+    if (activeFilterCol) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activeFilterCol]);
 
   // Helper to resolve value
   const getValue = useCallback((row: T, col: Column<T>) => {
@@ -285,15 +303,17 @@ const StandardTable = <T extends Record<string, any>>({
                         )}
 
                         {activeFilterCol === colId && (
-                          <TableFilter
-                            title={col.header}
-                            options={getFilterOptions(colId)}
-                            selectedValues={filterState[colId] || []}
-                            onFilterChange={(selected) => handleFilter(colId, selected)}
-                            sortDirection={sortState?.colId === colId ? sortState.px : null}
-                            onSortChange={(dir) => handleSort(colId, dir)}
-                            onClose={() => setActiveFilterCol(null)}
-                          />
+                          <div ref={filterRef}>
+                            <TableFilter
+                              title={col.header}
+                              options={getFilterOptions(colId)}
+                              selectedValues={filterState[colId] || []}
+                              onFilterChange={(selected) => handleFilter(colId, selected)}
+                              sortDirection={sortState?.colId === colId ? sortState.px : null}
+                              onSortChange={(dir) => handleSort(colId, dir)}
+                              onClose={() => setActiveFilterCol(null)}
+                            />
+                          </div>
                         )}
                       </div>
                     </th>
