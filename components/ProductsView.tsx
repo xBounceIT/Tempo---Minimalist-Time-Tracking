@@ -921,11 +921,10 @@ const ProductsView: React.FC<ProductsViewProps> = ({
           <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {t('common:labels.name')} / {t('crm:products.category')} /{' '}
-                {t('crm:products.supplier')}
+                {t('common:labels.name')}
               </th>
               <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {t('common:status')}
+                {t('common:labels.status')}
               </th>
               <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 {t('crm:products.type')}
@@ -963,9 +962,6 @@ const ProductsView: React.FC<ProductsViewProps> = ({
               >
                 <td className="px-8 py-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 flex-shrink-0 bg-slate-100 text-praetor rounded-xl flex items-center justify-center text-sm">
-                      <i className="fa-solid fa-box"></i>
-                    </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <div className="font-bold text-slate-800 truncate">{p.name}</div>
@@ -977,6 +973,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                       </div>
                       <div className="text-[10px] font-black text-slate-400 uppercase truncate">
                         {p.category || t('crm:products.noCategory')}
+                        {p.category && p.subcategory && ` - ${p.subcategory}`}
                       </div>
                       <div className="text-[10px] font-semibold text-slate-500 truncate">
                         {p.supplierName || t('crm:products.noSupplier')}

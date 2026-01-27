@@ -112,6 +112,7 @@
     "unusualTaxRate": "Aliquota insolita (superiore al 30%).",
     "editProductTooltip": "Modifica Prodotto",
     "disableProduct": "Disabilita Prodotto",
+    "enableProduct": "Abilita Prodotto",
     "deleteProductTooltip": "Elimina Prodotto",
     "defaultCategories": {
       "electronics": "Elettronica",

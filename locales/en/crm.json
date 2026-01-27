@@ -118,6 +118,7 @@
     "unusualTaxRate": "Unusual tax rate (over 30%).",
     "editProductTooltip": "Edit Product",
     "disableProduct": "Disable Product",
+    "enableProduct": "Enable Product",
     "deleteProductTooltip": "Delete Product",
     "defaultCategories": {
       "electronics": "Electronics",
