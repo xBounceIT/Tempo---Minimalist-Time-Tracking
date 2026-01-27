@@ -38,24 +38,12 @@ const ProductsView: React.FC<ProductsViewProps> = ({
     const saved = localStorage.getItem('praetor_products_rowsPerPage');
     return saved ? parseInt(saved, 10) : 5;
   });
-  const [disabledCurrentPage, setDisabledCurrentPage] = useState(1);
-  const [disabledRowsPerPage, setDisabledRowsPerPage] = useState(() => {
-    const saved = localStorage.getItem('praetor_products_disabled_rowsPerPage');
-    return saved ? parseInt(saved, 10) : 5;
-  });
 
   const handleRowsPerPageChange = (val: string) => {
     const value = parseInt(val, 10);
     setRowsPerPage(value);
     localStorage.setItem('praetor_products_rowsPerPage', value.toString());
     setCurrentPage(1); // Reset to first page
-  };
-
-  const handleDisabledRowsPerPageChange = (val: string) => {
-    const value = parseInt(val, 10);
-    setDisabledRowsPerPage(value);
-    localStorage.setItem('praetor_products_disabled_rowsPerPage', value.toString());
-    setDisabledCurrentPage(1);
   };
 
   // Category Management State
@@ -277,26 +265,10 @@ const ProductsView: React.FC<ProductsViewProps> = ({
     }
   };
 
-  const filteredActiveProductsTotal = React.useMemo(() => {
-    return products.filter((p) => !p.isDisabled);
-  }, [products]);
-
-  const filteredDisabledProductsTotal = React.useMemo(() => {
-    return products.filter((p) => p.isDisabled);
-  }, [products]);
-
-  const hasAnyDisabledProducts = products.some((p) => p.isDisabled);
-
   // Pagination Logic
-  const totalPages = Math.ceil(filteredActiveProductsTotal.length / rowsPerPage);
+  const totalPages = Math.ceil(products.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const activeProducts = filteredActiveProductsTotal.slice(startIndex, startIndex + rowsPerPage);
-  const disabledTotalPages = Math.ceil(filteredDisabledProductsTotal.length / disabledRowsPerPage);
-  const disabledStartIndex = (disabledCurrentPage - 1) * disabledRowsPerPage;
-  const disabledProductsPage = filteredDisabledProductsTotal.slice(
-    disabledStartIndex,
-    disabledStartIndex + disabledRowsPerPage,
-  );
+  const paginatedProducts = products.slice(startIndex, startIndex + rowsPerPage);
 
   // Get unique categories from existing products + defaults
   const availableCategories = React.useMemo(() => {
@@ -874,8 +846,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({
       </div>
 
       <StandardTable
-        title={t('crm:products.activeProducts')}
-        totalCount={filteredActiveProductsTotal.length}
+        title={t('crm:products.title')}
+        totalCount={products.length}
         headerAction={
           <button
             onClick={openAddModal}
@@ -905,9 +877,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                 searchable={false}
               />
               <span className="text-xs font-bold text-slate-400 ml-2">
-                {t('crm:products.showing')} {activeProducts.length > 0 ? startIndex + 1 : 0}-
-                {Math.min(startIndex + rowsPerPage, filteredActiveProductsTotal.length)}{' '}
-                {t('crm:products.of')} {filteredActiveProductsTotal.length}
+                {t('crm:products.showing')} {paginatedProducts.length > 0 ? startIndex + 1 : 0}-
+                {Math.min(startIndex + rowsPerPage, products.length)} {t('crm:products.of')}{' '}
+                {products.length}
               </span>
             </div>
 
@@ -953,6 +925,9 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                 {t('crm:products.supplier')}
               </th>
               <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                {t('common:status')}
+              </th>
+              <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 {t('crm:products.type')}
               </th>
               <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -976,11 +951,15 @@ const ProductsView: React.FC<ProductsViewProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {activeProducts.map((p) => (
+            {paginatedProducts.map((p) => (
               <tr
                 key={p.id}
                 onClick={() => openEditModal(p)}
-                className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                className={`transition-colors group cursor-pointer ${
+                  p.isDisabled
+                    ? 'bg-slate-50/50 grayscale opacity-75 hover:bg-slate-100 hover:opacity-100 hover:grayscale-0'
+                    : 'hover:bg-slate-50/50'
+                }`}
               >
                 <td className="px-8 py-5">
                   <div className="flex items-center gap-3">
@@ -1004,6 +983,12 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                       </div>
                     </div>
                   </div>
+                </td>
+                <td className="px-4 py-5">
+                  <StatusBadge
+                    type={p.isDisabled ? 'disabled' : 'active'}
+                    label={p.isDisabled ? t('crm:products.disabled') : t('crm:products.active')}
+                  />
                 </td>
                 <td className="px-4 py-5">
                   <span
@@ -1032,22 +1017,24 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        openEditModal(p);
+                        if (p.isDisabled) {
+                          onUpdateProduct(p.id, { isDisabled: false });
+                        } else {
+                          onUpdateProduct(p.id, { isDisabled: true });
+                        }
                       }}
-                      className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
-                      title={t('crm:products.editProductTooltip')}
+                      className={`p-2 rounded-lg transition-all ${
+                        p.isDisabled
+                          ? 'text-praetor hover:bg-slate-100'
+                          : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'
+                      }`}
+                      title={
+                        p.isDisabled
+                          ? t('crm:products.enableProduct')
+                          : t('crm:products.disableProduct')
+                      }
                     >
-                      <i className="fa-solid fa-pen-to-square"></i>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUpdateProduct(p.id, { isDisabled: true });
-                      }}
-                      className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
-                      title={t('crm:products.disableProduct')}
-                    >
-                      <i className="fa-solid fa-ban"></i>
+                      <i className={`fa-solid ${p.isDisabled ? 'fa-rotate-left' : 'fa-ban'}`}></i>
                     </button>
                     <button
                       onClick={(e) => {
@@ -1063,15 +1050,13 @@ const ProductsView: React.FC<ProductsViewProps> = ({
                 </td>
               </tr>
             ))}
-            {activeProducts.length === 0 && (
+            {paginatedProducts.length === 0 && (
               <tr>
-                <td colSpan={8} className="p-12 text-center">
+                <td colSpan={9} className="p-12 text-center">
                   <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                     <i className="fa-solid fa-boxes-stacked text-2xl"></i>
                   </div>
-                  <p className="text-slate-400 text-sm font-bold">
-                    {t('crm:products.noActiveProducts')}
-                  </p>
+                  <p className="text-slate-400 text-sm font-bold">{t('crm:products.noProducts')}</p>
                   <button
                     onClick={openAddModal}
                     className="mt-4 text-praetor text-sm font-black hover:underline"
@@ -1084,131 +1069,6 @@ const ProductsView: React.FC<ProductsViewProps> = ({
           </tbody>
         </table>
       </StandardTable>
-
-      {hasAnyDisabledProducts && (
-        <StandardTable
-          title={t('crm:products.disabledProducts')}
-          totalCount={filteredDisabledProductsTotal.length}
-          totalLabel={t('crm:products.disabled')}
-          containerClassName="border-dashed bg-slate-50"
-          footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
-          footer={
-            <>
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-500">
-                  {t('common:labels.rowsPerPage')}
-                </span>
-                <CustomSelect
-                  options={[
-                    { id: '5', name: '5' },
-                    { id: '10', name: '10' },
-                    { id: '20', name: '20' },
-                    { id: '50', name: '50' },
-                  ]}
-                  value={disabledRowsPerPage.toString()}
-                  onChange={(val) => handleDisabledRowsPerPageChange(val as string)}
-                  className="w-20"
-                  buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
-                  searchable={false}
-                />
-                <span className="text-xs font-bold text-slate-400 ml-2">
-                  {t('crm:products.showing')}{' '}
-                  {disabledProductsPage.length > 0 ? disabledStartIndex + 1 : 0}-
-                  {Math.min(
-                    disabledStartIndex + disabledRowsPerPage,
-                    filteredDisabledProductsTotal.length,
-                  )}{' '}
-                  {t('crm:products.of')} {filteredDisabledProductsTotal.length}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setDisabledCurrentPage((prev) => Math.max(1, prev - 1))}
-                  disabled={disabledCurrentPage === 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-                >
-                  <i className="fa-solid fa-chevron-left text-xs"></i>
-                </button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: disabledTotalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setDisabledCurrentPage(page)}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
-                        disabledCurrentPage === page
-                          ? 'bg-praetor text-white shadow-md shadow-slate-200'
-                          : 'text-slate-500 hover:bg-slate-100'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() =>
-                    setDisabledCurrentPage((prev) => Math.min(disabledTotalPages, prev + 1))
-                  }
-                  disabled={disabledCurrentPage === disabledTotalPages || disabledTotalPages === 0}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-                >
-                  <i className="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-              </div>
-            </>
-          }
-        >
-          <div className="divide-y divide-slate-100">
-            {disabledProductsPage.map((p) => (
-              <div
-                key={p.id}
-                onClick={() => openEditModal(p)}
-                className="p-6 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all flex items-center justify-between gap-4 cursor-pointer"
-              >
-                <div className="flex gap-4 items-center">
-                  <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center">
-                    <i className="fa-solid fa-box"></i>
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-slate-500 line-through">{p.name}</h5>
-                    <StatusBadge type="disabled" label={t('crm:products.disabled')} />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onUpdateProduct(p.id, { isDisabled: false });
-                    }}
-                    className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
-                  >
-                    <i className="fa-solid fa-rotate-left"></i>
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      confirmDelete(p);
-                    }}
-                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <i className="fa-solid fa-trash-can"></i>
-                  </button>
-                </div>
-              </div>
-            ))}
-            {disabledProductsPage.length === 0 && (
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
-                  <i className="fa-solid fa-ban text-2xl"></i>
-                </div>
-                <p className="text-slate-400 text-sm font-bold">
-                  {t('crm:products.noDisabledProducts')}
-                </p>
-              </div>
-            )}
-          </div>
-        </StandardTable>
-      )}
     </div>
   );
 };
