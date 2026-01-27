@@ -887,7 +887,8 @@ const ProductsView: React.FC<ProductsViewProps> = ({
           },
           {
             header: t('crm:products.cost'),
-            accessorFn: (row) => row.costo, // Numeric for sorting
+            accessorFn: (row) => Number(row.costo), // Numeric for sorting
+            filterFormat: (val) => Number(val).toFixed(2),
             cell: ({ row: p }) => (
               <span className="text-sm font-semibold text-slate-500">
                 {Number(p.costo).toFixed(2)} {currency} /{' '}
@@ -898,6 +899,7 @@ const ProductsView: React.FC<ProductsViewProps> = ({
           {
             header: t('crm:products.mol'),
             accessorKey: 'molPercentage',
+            filterFormat: (val) => Number(val).toFixed(2),
             cell: ({ row: p }) => (
               <span className="text-sm font-semibold text-slate-500">
                 {Number(p.molPercentage).toFixed(2)}%

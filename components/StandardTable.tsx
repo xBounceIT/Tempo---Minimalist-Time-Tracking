@@ -14,6 +14,7 @@ export type Column<T> = {
   headerClassName?: string;
   disableSorting?: boolean;
   disableFiltering?: boolean;
+  filterFormat?: (value: unknown) => string;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -105,7 +106,8 @@ const StandardTable = <T extends Record<string, any>>({
         const col = columns.find((c) => getColId(c) === filterColId);
         if (col) {
           result = result.filter((row) => {
-            const val = String(getValue(row, col));
+            const rawVal = getValue(row, col);
+            const val = col.filterFormat ? col.filterFormat(rawVal) : String(rawVal);
             return selectedValues.includes(val);
           });
         }
@@ -152,7 +154,7 @@ const StandardTable = <T extends Record<string, any>>({
     const values = new Set<string>();
     data.forEach((row) => {
       const val = getValue(row, col);
-      values.add(String(val));
+      values.add(col.filterFormat ? col.filterFormat(val) : String(val));
     });
     return Array.from(values).sort();
   };
