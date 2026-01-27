@@ -53,7 +53,7 @@ const TableFilter: React.FC<TableFilterProps> = ({
     !isAllSelected && filteredOptions.some((opt) => selectedValues.includes(opt));
 
   return (
-    <div className="absolute top-0 left-full ml-1 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-50 flex flex-col text-left font-normal animate-in fade-in zoom-in-95 duration-200">
+    <div className="absolute top-0 left-full ml-1 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 flex flex-col text-left font-normal animate-in fade-in zoom-in-95 duration-200">
       {/* Header */}
       <div className="p-2 border-b border-slate-100 flex items-center justify-between">
         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
@@ -99,7 +99,7 @@ const TableFilter: React.FC<TableFilterProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('table.search')}
-            className="w-full pl-6 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-[11px] outline-none focus:ring-1 focus:ring-praetor transition-all"
+            className="w-full pl-6 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] outline-none focus:ring-1 focus:ring-praetor transition-shadow"
             autoFocus
           />
         </div>
@@ -143,13 +143,12 @@ const TableFilter: React.FC<TableFilterProps> = ({
         )}
       </div>
 
-      {/* Footer with Clear Filter */}
       <div className="p-2 border-t border-slate-100">
         <button
           onClick={() => {
             onFilterChange([]);
           }}
-          className="w-full px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:text-white bg-slate-50 hover:bg-red-500 rounded transition-all flex items-center justify-center gap-1.5"
+          className="w-full px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:text-white bg-slate-50 hover:bg-red-500 rounded-lg transition-all flex items-center justify-center gap-1.5"
         >
           <i className="fa-solid fa-filter-circle-xmark"></i>
           <span>{t('table.clearFilter')}</span>
