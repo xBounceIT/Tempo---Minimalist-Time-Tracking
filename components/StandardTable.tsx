@@ -276,8 +276,8 @@ const StandardTable = <T extends Record<string, any>>({
                             }}
                             className={`p-1 rounded hover:bg-slate-200 transition-colors ${
                               isFiltered || isSorted || activeFilterCol === colId
-                                ? 'text-praetor opacity-100'
-                                : 'text-slate-300 opacity-0 group-hover:opacity-100'
+                                ? 'text-praetor'
+                                : 'text-slate-400'
                             }`}
                           >
                             <i className="fa-solid fa-filter"></i>

@@ -53,42 +53,41 @@ const TableFilter: React.FC<TableFilterProps> = ({
     !isAllSelected && filteredOptions.some((opt) => selectedValues.includes(opt));
 
   return (
-    <div className="absolute top-0 left-full ml-1 w-48 bg-white rounded-lg shadow-xl border border-slate-200 z-50 flex flex-col text-left font-normal animate-in fade-in zoom-in-95 duration-200">
-      {/* Header with Sort Controls */}
-      <div className="p-2 border-b border-slate-100 space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-            {title}
-          </span>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xs">
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-        </div>
+    <div className="absolute top-0 left-full ml-1 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-50 flex flex-col text-left font-normal animate-in fade-in zoom-in-95 duration-200">
+      {/* Header */}
+      <div className="p-2 border-b border-slate-100 flex items-center justify-between">
+        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+          {title}
+        </span>
+        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xs">
+          <i className="fa-solid fa-xmark"></i>
+        </button>
+      </div>
 
-        <div className="flex gap-1">
-          <button
-            onClick={() => onSortChange('asc')}
-            title={t('table.sortAsc')}
-            className={`flex-1 p-1.5 text-xs font-bold rounded border transition-colors flex items-center justify-center ${
-              sortDirection === 'asc'
-                ? 'bg-praetor text-white border-praetor'
-                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-            }`}
-          >
-            <i className="fa-solid fa-arrow-down-a-z"></i>
-          </button>
-          <button
-            onClick={() => onSortChange('desc')}
-            title={t('table.sortDesc')}
-            className={`flex-1 p-1.5 text-xs font-bold rounded border transition-colors flex items-center justify-center ${
-              sortDirection === 'desc'
-                ? 'bg-praetor text-white border-praetor'
-                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-            }`}
-          >
-            <i className="fa-solid fa-arrow-up-a-z"></i>
-          </button>
-        </div>
+      {/* Sort Options - Excel Style */}
+      <div className="border-b border-slate-100">
+        <button
+          onClick={() => onSortChange('asc')}
+          className={`w-full px-3 py-2 text-left text-[11px] font-semibold transition-colors flex items-center gap-2 ${
+            sortDirection === 'asc'
+              ? 'bg-slate-100 text-praetor'
+              : 'text-slate-700 hover:bg-slate-50'
+          }`}
+        >
+          <i className="fa-solid fa-arrow-down-a-z w-4"></i>
+          <span>{t('table.sortAsc')}</span>
+        </button>
+        <button
+          onClick={() => onSortChange('desc')}
+          className={`w-full px-3 py-2 text-left text-[11px] font-semibold transition-colors flex items-center gap-2 border-t border-slate-100 ${
+            sortDirection === 'desc'
+              ? 'bg-slate-100 text-praetor'
+              : 'text-slate-700 hover:bg-slate-50'
+          }`}
+        >
+          <i className="fa-solid fa-arrow-up-a-z w-4"></i>
+          <span>{t('table.sortDesc')}</span>
+        </button>
       </div>
 
       {/* Search Bar */}
@@ -118,7 +117,9 @@ const TableFilter: React.FC<TableFilterProps> = ({
             onChange={handleSelectAll}
             className="w-3.5 h-3.5 rounded text-praetor focus:ring-praetor border-gray-300"
           />
-          <span className="text-[11px] text-slate-600 select-none">({t('table.selectAll')})</span>
+          <span className="text-[11px] text-slate-600 select-none font-semibold">
+            ({t('table.selectAll')})
+          </span>
         </label>
         {filteredOptions.length > 0 ? (
           filteredOptions.map((opt) => (
@@ -142,16 +143,16 @@ const TableFilter: React.FC<TableFilterProps> = ({
         )}
       </div>
 
-      {/* Footer */}
-      <div className="p-2 border-t border-slate-100 bg-slate-50 rounded-b-lg">
+      {/* Footer with Clear Filter */}
+      <div className="p-2 border-t border-slate-100">
         <button
           onClick={() => {
             onFilterChange([]);
-            // onSortChange(null); // Optional: clear sort too? usually separate.
           }}
-          className="text-[11px] font-bold text-slate-500 hover:text-red-500 transition-colors"
+          className="w-full px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:text-white bg-slate-50 hover:bg-red-500 rounded transition-all flex items-center justify-center gap-1.5"
         >
-          {t('table.clearFilter')}
+          <i className="fa-solid fa-filter-circle-xmark"></i>
+          <span>{t('table.clearFilter')}</span>
         </button>
       </div>
     </div>
