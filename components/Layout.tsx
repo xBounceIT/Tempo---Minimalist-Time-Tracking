@@ -486,13 +486,13 @@ const Layout: React.FC<LayoutProps> = ({
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                   ${
                     activeModule.id === module.id
-                      ? 'bg-praetor text-white shadow-lg shadow-black/10'
+                      ? 'bg-white text-praetor shadow-lg shadow-black/10'
                       : 'text-white/60 hover:bg-white/10 hover:text-white'
                   }
                   ${isCollapsed ? 'justify-center' : ''}`}
               >
                 <div
-                  className={`flex items-center justify-center transition-colors ${activeModule.id === module.id ? 'text-white' : ''}`}
+                  className={`flex items-center justify-center transition-colors ${activeModule.id === module.id ? 'text-praetor' : ''}`}
                 >
                   <i className={`fa-solid ${module.icon} text-lg w-6 text-center`}></i>
                 </div>
