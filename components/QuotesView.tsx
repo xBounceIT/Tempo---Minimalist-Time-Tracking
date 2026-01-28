@@ -893,50 +893,52 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                   <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
                   {t('crm:quotes.clientInformation')}
                 </h4>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 ml-1">
-                    {t('crm:quotes.quoteCode', { defaultValue: 'Quote Code' })}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.quoteCode || ''}
-                    onChange={(e) => {
-                      setFormData({ ...formData, quoteCode: e.target.value });
-                      if (errors.quoteCode) {
-                        setErrors((prev) => {
-                          const next = { ...prev };
-                          delete next.quoteCode;
-                          return next;
-                        });
-                      }
-                    }}
-                    placeholder="Q0000"
-                    disabled={isReadOnly}
-                    className={`w-full text-sm px-4 py-2.5 bg-slate-50 border ${
-                      errors.quoteCode ? 'border-red-300' : 'border-slate-200'
-                    } rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
-                  />
-                  {errors.quoteCode && (
-                    <p className="text-red-500 text-[10px] font-bold ml-1">{errors.quoteCode}</p>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 ml-1">
-                    {t('crm:quotes.client')}
-                  </label>
-                  <CustomSelect
-                    options={activeClients.map((c) => ({ id: c.id, name: c.name }))}
-                    value={formData.clientId || ''}
-                    onChange={(val) => handleClientChange(val as string)}
-                    placeholder={t('crm:quotes.selectAClient')}
-                    searchable={true}
-                    disabled={isReadOnly}
-                    className={errors.clientId ? 'border-red-300' : ''}
-                  />
-                  {errors.clientId && (
-                    <p className="text-red-500 text-[10px] font-bold ml-1">{errors.clientId}</p>
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 ml-1">
+                      {t('crm:quotes.client')}
+                    </label>
+                    <CustomSelect
+                      options={activeClients.map((c) => ({ id: c.id, name: c.name }))}
+                      value={formData.clientId || ''}
+                      onChange={(val) => handleClientChange(val as string)}
+                      placeholder={t('crm:quotes.selectAClient')}
+                      searchable={true}
+                      disabled={isReadOnly}
+                      className={errors.clientId ? 'border-red-300' : ''}
+                    />
+                    {errors.clientId && (
+                      <p className="text-red-500 text-[10px] font-bold ml-1">{errors.clientId}</p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 ml-1">
+                      {t('crm:quotes.quoteCode', { defaultValue: 'Quote Code' })}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.quoteCode || ''}
+                      onChange={(e) => {
+                        setFormData({ ...formData, quoteCode: e.target.value });
+                        if (errors.quoteCode) {
+                          setErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.quoteCode;
+                            return next;
+                          });
+                        }
+                      }}
+                      placeholder="Q0000"
+                      disabled={isReadOnly}
+                      className={`w-full text-sm px-4 py-2.5 bg-slate-50 border ${
+                        errors.quoteCode ? 'border-red-300' : 'border-slate-200'
+                      } rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                    />
+                    {errors.quoteCode && (
+                      <p className="text-red-500 text-[10px] font-bold ml-1">{errors.quoteCode}</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1359,18 +1361,25 @@ const QuotesView: React.FC<QuotesViewProps> = ({
         columns={columns}
         defaultRowsPerPage={5}
         onRowClick={(row) => {
-          if (!isHistoryRow(row)) {
+          // Allow viewing/editing for all quotes except those in history (expired/denied with special handling)
+          // Accepted and denied quotes open in read-only mode via isReadOnly flag
+          const canOpenModal =
+            !isHistoryRow(row) || row.status === 'accepted' || row.status === 'denied';
+          if (canOpenModal) {
             openEditModal(row);
           }
         }}
         rowClassName={(row) => {
           const expired = isQuoteExpired(row);
           const history = isHistoryRow(row);
+          const canOpenModal =
+            !isHistoryRow(row) || row.status === 'accepted' || row.status === 'denied';
+          const cursorClass = canOpenModal ? 'cursor-pointer' : 'cursor-not-allowed';
           return history
-            ? 'bg-slate-50 text-slate-400'
+            ? `bg-slate-50 text-slate-400 hover:bg-slate-100 ${cursorClass}`
             : expired
-              ? 'hover:bg-slate-50/50 cursor-pointer bg-red-50/30'
-              : 'hover:bg-slate-50/50 cursor-pointer';
+              ? `hover:bg-slate-50/50 ${cursorClass} bg-red-50/30`
+              : `hover:bg-slate-50/50 ${cursorClass}`;
         }}
         headerAction={
           <button
