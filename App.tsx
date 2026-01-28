@@ -98,6 +98,7 @@ const TrackerView: React.FC<{
   onUpdateEntry: (id: string, updates: Partial<TimeEntry>) => void;
   startOfWeek: 'Monday' | 'Sunday';
   treatSaturdayAsHoliday: boolean;
+  allowWeekendSelection: boolean;
   onMakeRecurring: (
     taskId: string,
     pattern: 'daily' | 'weekly' | 'monthly',
@@ -126,6 +127,7 @@ const TrackerView: React.FC<{
   onUpdateEntry,
   startOfWeek,
   treatSaturdayAsHoliday,
+  allowWeekendSelection,
   onMakeRecurring,
   userRole,
   viewingUserId,
@@ -231,7 +233,7 @@ const TrackerView: React.FC<{
           onAddBulkEntries={onAddBulkEntries}
           startOfWeek={startOfWeek}
           treatSaturdayAsHoliday={treatSaturdayAsHoliday}
-          allowWeekendSelection={generalSettings.allowWeekendSelection}
+          allowWeekendSelection={allowWeekendSelection}
         />
       ) : (
         <div className="flex flex-col lg:flex-row gap-8">
@@ -421,7 +423,7 @@ const TrackerView: React.FC<{
               startOfWeek={startOfWeek}
               treatSaturdayAsHoliday={treatSaturdayAsHoliday}
               dailyGoal={dailyGoal}
-              allowWeekendSelection={generalSettings.allowWeekendSelection}
+              allowWeekendSelection={allowWeekendSelection}
             />
 
             {enableAiInsights && (
@@ -2040,6 +2042,7 @@ const App: React.FC = () => {
                 onRefreshInsights={generateInsights}
                 startOfWeek={generalSettings.startOfWeek}
                 treatSaturdayAsHoliday={generalSettings.treatSaturdayAsHoliday}
+                allowWeekendSelection={generalSettings.allowWeekendSelection}
                 onMakeRecurring={handleMakeRecurring}
                 userRole={currentUser.role}
                 viewingUserId={viewingUserId}
