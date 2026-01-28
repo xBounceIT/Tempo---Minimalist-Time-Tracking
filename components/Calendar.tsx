@@ -154,10 +154,8 @@ const Calendar: React.FC<CalendarProps> = ({
     const holidayName = isItalianHoliday(dateObj);
     const isSunday = dayOfWeek === 0;
     const isSaturday = dayOfWeek === 6;
-    const isForbidden =
-      !allowWeekendSelection &&
-      selectionMode === 'single' &&
-      (isSunday || (treatSaturdayAsHoliday && isSaturday) || !!holidayName); // Typically specific to work-logging, maybe relax for reporting
+    const isWeekendOrHoliday = isSunday || (treatSaturdayAsHoliday && isSaturday) || !!holidayName;
+    const isForbidden = !allowWeekendSelection && selectionMode === 'single' && isWeekendOrHoliday;
 
     days.push(
       <button
@@ -177,8 +175,8 @@ const Calendar: React.FC<CalendarProps> = ({
               ? 'bg-praetor text-white border-praetor shadow-md scale-105 z-10'
               : isInRange
                 ? 'bg-stone-200 text-slate-800 border-stone-200' // Changed to a more neutral/stone color
-                : isForbidden
-                  ? 'bg-red-50 text-red-500 border-red-100 cursor-not-allowed'
+                : isWeekendOrHoliday
+                  ? 'bg-red-50 text-red-500 border-red-100'
                   : dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0
                     ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                     : isToday
@@ -190,7 +188,7 @@ const Calendar: React.FC<CalendarProps> = ({
           className={`text-sm font-bold ${
             isSelected || isInRange
               ? ''
-              : isForbidden
+              : isWeekendOrHoliday
                 ? 'text-red-600'
                 : dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0
                   ? 'text-emerald-700'
@@ -202,7 +200,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
         {hasActivity && selectionMode === 'single' && (
           <span
-            className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : isForbidden ? 'bg-red-300' : dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0 ? 'bg-emerald-400' : 'bg-praetor'}`}
+            className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : isWeekendOrHoliday ? 'bg-red-300' : dailyTotals[dateStr] >= dailyGoal - 0.01 && dailyGoal > 0 ? 'bg-emerald-400' : 'bg-praetor'}`}
           ></span>
         )}
         {holidayName && selectionMode === 'single' && (

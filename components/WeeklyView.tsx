@@ -62,9 +62,9 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
       const holidayName = isItalianHoliday(new Date(dateStr + 'T00:00:00'));
       const isSunday = d.getDay() === 0;
       const isSaturday = d.getDay() === 6;
-      const isForbidden =
-        !allowWeekendSelection &&
-        (isSunday || (treatSaturdayAsHoliday && isSaturday) || !!holidayName);
+      const isWeekendOrHoliday =
+        isSunday || (treatSaturdayAsHoliday && isSaturday) || !!holidayName;
+      const isForbidden = !allowWeekendSelection && isWeekendOrHoliday;
       const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][d.getDay()];
 
       return {
@@ -73,6 +73,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
         dayNum: d.getDate(),
         isToday: dateStr === toLocalISOString(new Date()),
         isForbidden,
+        isWeekendOrHoliday,
         holidayName,
       };
     });
@@ -371,15 +372,15 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                 {weekDays.map((day) => (
                   <th
                     key={day.dateStr}
-                    className={`px-2 py-4 text-center w-24 relative ${day.isToday ? 'bg-slate-100' : ''} ${day.isForbidden ? 'bg-red-50/50' : ''}`}
+                    className={`px-2 py-4 text-center w-24 relative ${day.isToday ? 'bg-slate-100' : ''} ${day.isWeekendOrHoliday ? 'bg-red-50/50' : ''}`}
                   >
                     <p
-                      className={`text-[10px] font-black uppercase ${day.isToday ? 'text-praetor' : day.isForbidden ? 'text-red-500' : 'text-slate-400'}`}
+                      className={`text-[10px] font-black uppercase ${day.isToday ? 'text-praetor' : day.isWeekendOrHoliday ? 'text-red-500' : 'text-slate-400'}`}
                     >
                       {day.dayName}
                     </p>
                     <p
-                      className={`text-lg font-black leading-none ${day.isToday ? 'text-praetor' : day.isForbidden ? 'text-red-600' : 'text-slate-700'}`}
+                      className={`text-lg font-black leading-none ${day.isToday ? 'text-praetor' : day.isWeekendOrHoliday ? 'text-red-600' : 'text-slate-700'}`}
                     >
                       {day.dayNum}
                     </p>
@@ -462,7 +463,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                   {weekDays.map((day) => (
                     <td
                       key={day.dateStr}
-                      className={`px-2 py-4 transition-all duration-700 ${day.isToday ? 'bg-slate-50' : ''} ${day.isForbidden ? 'bg-red-50/30' : ''} ${showSuccess && row.days[day.dateStr]?.duration > 0 ? 'bg-emerald-50' : ''}`}
+                      className={`px-2 py-4 transition-all duration-700 ${day.isToday ? 'bg-slate-50' : ''} ${day.isWeekendOrHoliday ? 'bg-red-50/30' : ''} ${showSuccess && row.days[day.dateStr]?.duration > 0 ? 'bg-emerald-50' : ''}`}
                     >
                       <div className="flex flex-col gap-2 items-center relative">
                         {showSuccess && row.days[day.dateStr]?.duration > 0 && (
@@ -475,7 +476,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                           onValueChange={(value) =>
                             handleValueChange(rowIndex, day.dateStr, 'duration', value)
                           }
-                          className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && row.days[day.dateStr]?.duration > 0 ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} ${day.isForbidden ? 'opacity-50 cursor-not-allowed bg-red-50/50 border-red-100' : 'border-slate-200'} border rounded-lg py-2.5 focus:ring-2 focus:ring-praetor outline-none`}
+                          className={`w-16 text-center text-sm font-black transition-all duration-300 ${showSuccess && row.days[day.dateStr]?.duration > 0 ? 'text-emerald-700 border-emerald-200 bg-white scale-105 shadow-sm' : 'text-slate-700 bg-slate-50 border-slate-200'} ${day.isForbidden ? 'opacity-50 cursor-not-allowed' : ''} ${day.isWeekendOrHoliday ? 'bg-red-50/50 border-red-100' : 'border-slate-200'} border rounded-lg py-2.5 focus:ring-2 focus:ring-praetor outline-none`}
                         />
                         <input
                           type="text"
@@ -485,7 +486,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                           onChange={(e) =>
                             handleValueChange(rowIndex, day.dateStr, 'note', e.target.value)
                           }
-                          className={`w-16 text-xs bg-slate-50 border border-slate-100 focus:border-praetor focus:ring-1 focus:ring-praetor rounded px-2 py-1.5 transition-colors h-7 ${showSuccess && row.days[day.dateStr]?.duration > 0 ? 'text-emerald-600' : 'text-slate-500 focus:text-slate-700'} ${day.isForbidden ? 'opacity-30 cursor-not-allowed' : ''}`}
+                          className={`w-16 text-xs border focus:border-praetor focus:ring-1 focus:ring-praetor rounded px-2 py-1.5 transition-colors h-7 ${showSuccess && row.days[day.dateStr]?.duration > 0 ? 'text-emerald-600 bg-slate-50' : 'text-slate-500 focus:text-slate-700'} ${day.isForbidden ? 'opacity-30 cursor-not-allowed' : ''} ${day.isWeekendOrHoliday ? 'bg-red-50/30 border-red-100' : 'bg-slate-50 border-slate-100'}`}
                         />
                       </div>
                     </td>
@@ -522,7 +523,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                 {weekDays.map((day) => (
                   <td
                     key={day.dateStr}
-                    className={`px-2 py-4 text-center ${day.isToday ? 'bg-slate-100' : ''} ${day.isForbidden ? 'bg-red-50/50' : ''}`}
+                    className={`px-2 py-4 text-center ${day.isToday ? 'bg-slate-100' : ''} ${day.isWeekendOrHoliday ? 'bg-red-50/50' : ''}`}
                   >
                     <p
                       className={`text-xs font-black ${(dayTotals[day.dateStr] as number) > 8 ? 'text-red-600' : 'text-praetor'}`}
