@@ -1,4 +1,4 @@
-import { query } from './index';
+import { query } from './index.ts';
 
 /**
  * Migration: Add quote_code column to quotes table
