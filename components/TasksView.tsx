@@ -133,7 +133,7 @@ const TasksView: React.FC<TasksViewProps> = ({
     ...projects.map((p) => ({ id: p.id, name: p.name })),
   ];
 
-  const isManagement = role === 'manager';
+  const isManagement = role === 'admin' || role === 'manager';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

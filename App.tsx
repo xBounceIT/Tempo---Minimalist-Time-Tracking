@@ -36,8 +36,6 @@ import RecurringManager from './components/RecurringManager';
 import ClientsView from './components/ClientsView';
 import ProjectsView from './components/ProjectsView';
 import TasksView from './components/TasksView';
-import TasksReadOnly from './components/TasksReadOnly';
-import ProjectsReadOnly from './components/ProjectsReadOnly';
 import AdminAuthentication from './components/AdminAuthentication';
 import GeneralSettings from './components/GeneralSettings';
 import CustomSelect from './components/CustomSelect';
@@ -576,8 +574,6 @@ const App: React.FC = () => {
       'timesheets/tracker',
       'timesheets/reports',
       'timesheets/recurring',
-      'timesheets/tasks',
-      'timesheets/projects',
       'hr/workforce',
       'hr/work-units',
       'configuration/authentication',
@@ -609,8 +605,6 @@ const App: React.FC = () => {
       'timesheets/tracker',
       'timesheets/reports',
       'timesheets/recurring',
-      'timesheets/tasks',
-      'timesheets/projects',
       'hr/workforce',
       'hr/work-units',
       'configuration/authentication',
@@ -667,8 +661,6 @@ const App: React.FC = () => {
       'timesheets/tracker': ['manager', 'user'],
       'timesheets/reports': ['manager', 'user'],
       'timesheets/recurring': ['manager', 'user'],
-      'timesheets/tasks': ['manager', 'user'],
-      'timesheets/projects': ['manager', 'user'],
       // HR module - admin/manager
       'hr/workforce': ['admin', 'manager'],
       'hr/work-units': ['admin', 'manager'],
@@ -687,9 +679,9 @@ const App: React.FC = () => {
       'finances/payments': ['manager'],
       'finances/expenses': ['manager'],
       'finances/reports': ['manager'],
-      // Projects module - manager
-      'projects/manage': ['manager'],
-      'projects/tasks': ['manager'],
+      // Projects module - manager and user (read-only for user)
+      'projects/manage': ['manager', 'user'],
+      'projects/tasks': ['manager', 'user'],
       // Suppliers module - manager
       'suppliers/manage': ['manager'],
       'suppliers/quotes': ['manager'],
@@ -913,7 +905,7 @@ const App: React.FC = () => {
             break;
           }
           case 'projects': {
-            if (currentUser.role !== 'manager') return;
+            if (currentUser.role !== 'manager' && currentUser.role !== 'user') return;
             const [projectsData, tasksData, clientsData, usersData, workUnitsData] =
               await Promise.all([
                 api.projects.list(),
@@ -2184,14 +2176,6 @@ const App: React.FC = () => {
                   currency={generalSettings.currency}
                 />
               )}
-
-            {activeView === 'timesheets/projects' && (
-              <ProjectsReadOnly projects={projects} clients={clients} />
-            )}
-
-            {activeView === 'timesheets/tasks' && (
-              <TasksReadOnly tasks={projectTasks} projects={projects} clients={clients} />
-            )}
 
             {activeView === 'projects/manage' && (
               <ProjectsView

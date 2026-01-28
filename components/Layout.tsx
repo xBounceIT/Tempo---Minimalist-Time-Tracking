@@ -99,14 +99,13 @@ const Layout: React.FC<LayoutProps> = ({
     if (m.id === 'timesheets') return currentUser.role === 'manager' || currentUser.role === 'user';
 
     // Manager only access (Admin and users excluded as requested)
-    if (
-      m.id === 'crm' ||
-      m.id === 'catalog' ||
-      m.id === 'projects' ||
-      m.id === 'finances' ||
-      m.id === 'suppliers'
-    ) {
+    if (m.id === 'crm' || m.id === 'catalog' || m.id === 'finances' || m.id === 'suppliers') {
       return currentUser.role === 'manager';
+    }
+
+    // Projects module: accessible to manager and user (read-only for user)
+    if (m.id === 'projects') {
+      return currentUser.role === 'manager' || currentUser.role === 'user';
     }
 
     return true;
@@ -188,28 +187,6 @@ const Layout: React.FC<LayoutProps> = ({
               isCollapsed={isCollapsed}
               onClick={() => {
                 onViewChange('timesheets/recurring');
-                setIsMobileMenuOpen(false);
-              }}
-            />
-
-            <NavItem
-              icon="fa-folder-tree"
-              label={t('routes.projects')}
-              active={activeView === 'timesheets/projects'}
-              isCollapsed={isCollapsed}
-              onClick={() => {
-                onViewChange('timesheets/projects');
-                setIsMobileMenuOpen(false);
-              }}
-            />
-
-            <NavItem
-              icon="fa-tasks"
-              label={t('routes.tasks')}
-              active={activeView === 'timesheets/tasks'}
-              isCollapsed={isCollapsed}
-              onClick={() => {
-                onViewChange('timesheets/tasks');
                 setIsMobileMenuOpen(false);
               }}
             />

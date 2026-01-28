@@ -239,8 +239,6 @@ export type View =
   | 'timesheets/tracker'
   | 'timesheets/reports'
   | 'timesheets/recurring'
-  | 'timesheets/tasks'
-  | 'timesheets/projects'
   // Configuration module (admin)
   | 'configuration/authentication'
   | 'configuration/general'
