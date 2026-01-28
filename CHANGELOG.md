@@ -1,9 +1,9 @@
 
 ## 20260128 - Operativo
 - Ridisegnata la sidebar per avere tutti i moduli disponibili nel menu esposti e le loro pagine come voci del dropdown
-- Rimossi filtri dalle pagine
+- Rimossi filtri e barra di ricerca dalle pagine
 - Rimosse tabelle storico / scadute / disattive e unificato tutto nella tabella principale, aggiungendo ove mancante la colonna stato
-- Aggiunta possibilità di filtrare sulle colonne stile excel
+- Aggiunta filtri sulle colonne stile excel
 - Rimosse le pagine Progetti e Attività dal modulo Presenze
 - Aggiunto all'utente base il modulo Progetti in sola lettura
 

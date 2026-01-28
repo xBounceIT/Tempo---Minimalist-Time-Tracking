@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Project, Client, UserRole } from '../types';
 import { COLORS } from '../constants';
 import CustomSelect from './CustomSelect';
-import StandardTable from './StandardTable';
+import StandardTable, { Column } from './StandardTable';
 import StatusBadge from './StatusBadge';
 
 interface ProjectsViewProps {
@@ -38,58 +38,6 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
   const [color, setColor] = useState(COLORS[0]);
   const [tempIsDisabled, setTempIsDisabled] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(() => {
-    const saved = localStorage.getItem('praetor_projects_rowsPerPage');
-    return saved ? parseInt(saved, 10) : 5;
-  });
-  const [disabledCurrentPage, setDisabledCurrentPage] = useState(1);
-  const [disabledRowsPerPage, setDisabledRowsPerPage] = useState(() => {
-    const saved = localStorage.getItem('praetor_projects_disabled_rowsPerPage');
-    return saved ? parseInt(saved, 10) : 5;
-  });
-
-  const handleRowsPerPageChange = (val: string) => {
-    const value = parseInt(val, 10);
-    setRowsPerPage(value);
-    localStorage.setItem('praetor_projects_rowsPerPage', value.toString());
-    setCurrentPage(1);
-  };
-
-  const handleDisabledRowsPerPageChange = (val: string) => {
-    const value = parseInt(val, 10);
-    setDisabledRowsPerPage(value);
-    localStorage.setItem('praetor_projects_disabled_rowsPerPage', value.toString());
-    setDisabledCurrentPage(1);
-  };
-
-  // Filters State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterClientId, setFilterClientId] = useState('all');
-
-  const normalizedSearch = searchTerm.trim().toLowerCase();
-  const hasActiveFilters = normalizedSearch !== '' || filterClientId !== 'all';
-
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setFilterClientId('all');
-    setCurrentPage(1);
-    setDisabledCurrentPage(1);
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
-    setDisabledCurrentPage(1);
-  };
-
-  const handleFilterClientChange = (val: string) => {
-    setFilterClientId(val);
-    setCurrentPage(1);
-    setDisabledCurrentPage(1);
-  };
 
   const isManagement = role === 'admin' || role === 'manager';
 
@@ -163,52 +111,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
     }
   };
 
-  // Filter Logic
-  const matchesFilters = useCallback(
-    (project: Project) => {
-      const client = clients.find((c) => c.id === project.clientId);
-      const clientName = client?.name.toLowerCase() || '';
-
-      const matchesSearch =
-        normalizedSearch === '' ||
-        project.name.toLowerCase().includes(normalizedSearch) ||
-        clientName.includes(normalizedSearch) ||
-        (project.description || '').toLowerCase().includes(normalizedSearch);
-
-      const matchesClient = filterClientId === 'all' || project.clientId === filterClientId;
-
-      return matchesSearch && matchesClient;
-    },
-    [clients, normalizedSearch, filterClientId],
-  );
-
-  const filteredActiveProjectsTotal = useMemo(() => {
-    return projects.filter((p) => !p.isDisabled).filter(matchesFilters);
-  }, [projects, matchesFilters]);
-
-  const filteredDisabledProjectsTotal = useMemo(() => {
-    return projects.filter((p) => p.isDisabled).filter(matchesFilters);
-  }, [projects, matchesFilters]);
-
-  const hasAnyDisabledProjects = projects.some((p) => p.isDisabled);
-
-  // Pagination Logic
-  const totalPages = Math.ceil(filteredActiveProjectsTotal.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const activeProjects = filteredActiveProjectsTotal.slice(startIndex, startIndex + rowsPerPage);
-
-  const disabledTotalPages = Math.ceil(filteredDisabledProjectsTotal.length / disabledRowsPerPage);
-  const disabledStartIndex = (disabledCurrentPage - 1) * disabledRowsPerPage;
-  const disabledProjectsPage = filteredDisabledProjectsTotal.slice(
-    disabledStartIndex,
-    disabledStartIndex + disabledRowsPerPage,
-  );
-
   const clientOptions = clients.map((c) => ({ id: c.id, name: c.name }));
-  const filterClientOptions = [
-    { id: 'all', name: t('common:filters.allClients') },
-    ...clientOptions,
-  ];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -418,44 +321,10 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
         </div>
       </div>
 
-      {/* Search and Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="md:col-span-2 relative">
-          <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input
-            type="text"
-            placeholder={t('common:form.searchPlaceholder')}
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-praetor outline-none shadow-sm placeholder:font-normal"
-          />
-        </div>
-        <div>
-          <CustomSelect
-            options={filterClientOptions}
-            value={filterClientId}
-            onChange={(val) => handleFilterClientChange(val as string)}
-            placeholder={t('projects:projects.selectClient')}
-            searchable={true}
-            buttonClassName="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm"
-          />
-        </div>
-        <div className="flex items-center justify-end">
-          <button
-            type="button"
-            onClick={handleClearFilters}
-            disabled={!hasActiveFilters}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <i className="fa-solid fa-rotate-left"></i>
-            {t('common:form.clearFilters')}
-          </button>
-        </div>
-      </div>
-
-      <StandardTable
+      <StandardTable<Project>
         title={t('projects:projects.projectsDirectory')}
-        totalCount={filteredActiveProjectsTotal.length}
+        defaultRowsPerPage={5}
+        data={projects}
         headerAction={
           isManagement ? (
             <button
@@ -466,378 +335,158 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
             </button>
           ) : undefined
         }
-        footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
-        footer={
-          <>
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-500">
-                {t('common:labels.rowsPerPage')}
-              </span>
-              <CustomSelect
-                options={[
-                  { id: '5', name: '5' },
-                  { id: '10', name: '10' },
-                  { id: '20', name: '20' },
-                  { id: '50', name: '50' },
-                ]}
-                value={rowsPerPage.toString()}
-                onChange={(val) => handleRowsPerPageChange(val as string)}
-                className="w-20"
-                buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
-                searchable={false}
-              />
-              <span className="text-xs font-bold text-slate-400 ml-2">
-                {t('common:pagination.showing', {
-                  start: activeProjects.length > 0 ? startIndex + 1 : 0,
-                  end: Math.min(startIndex + rowsPerPage, filteredActiveProjectsTotal.length),
-                  total: filteredActiveProjectsTotal.length,
-                })}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-              >
-                <i className="fa-solid fa-chevron-left text-xs"></i>
-              </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
-                      currentPage === page
-                        ? 'bg-praetor text-white shadow-md shadow-slate-200'
-                        : 'text-slate-500 hover:bg-slate-100'
+        onRowClick={isManagement ? openEditModal : undefined}
+        rowClassName={(row) => (row.isDisabled ? 'opacity-70 grayscale hover:grayscale-0' : '')}
+        columns={
+          [
+            {
+              header: t('projects:projects.tableHeaders.client'),
+              id: 'client',
+              accessorFn: (row) =>
+                clients.find((c) => c.id === row.clientId)?.name || t('projects:projects.unknown'),
+              cell: ({ row }) => {
+                const client = clients.find((c) => c.id === row.clientId);
+                const isClientDisabled = client?.isDisabled || false;
+                return (
+                  <span
+                    className={`text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${
+                      isClientDisabled
+                        ? 'text-amber-600 bg-amber-50 border-amber-100'
+                        : row.isDisabled
+                          ? 'text-slate-400'
+                          : 'text-praetor'
                     }`}
                   >
-                    {page}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages || totalPages === 0}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-              >
-                <i className="fa-solid fa-chevron-right text-xs"></i>
-              </button>
-            </div>
-          </>
-        }
-      >
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[160px]">
-                {t('projects:projects.tableHeaders.client')}
-              </th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[200px]">
-                {t('projects:projects.tableHeaders.projectName')}
-              </th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                {t('projects:projects.tableHeaders.description')}
-              </th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[120px]">
-                {t('projects:projects.tableHeaders.status')}
-              </th>
-              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right w-[140px]">
-                {t('projects:projects.tableHeaders.actions')}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredActiveProjectsTotal.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-12 text-center">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
-                    <i className="fa-solid fa-briefcase text-2xl"></i>
-                  </div>
-                  <p className="text-slate-400 text-sm font-bold">
-                    {t('projects:projects.noProjects')}
-                  </p>
-                  {isManagement && (
-                    <button
-                      onClick={openAddModal}
-                      className="mt-4 text-praetor text-sm font-black hover:underline"
-                    >
-                      {t('projects:projects.createNewProject')}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ) : (
-              activeProjects.map((project) => {
-                const client = clients.find((c) => c.id === project.clientId);
-                const isClientDisabled = client?.isDisabled || false;
-
-                return (
-                  <tr
-                    key={project.id}
-                    onClick={() => isManagement && openEditModal(project)}
-                    className={`group hover:bg-slate-50 transition-colors ${isManagement ? 'cursor-pointer' : 'cursor-default'}`}
-                  >
-                    <td className="px-6 py-4">
-                      <span
-                        className={`text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${isClientDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-praetor'}`}
-                      >
-                        {client?.name || t('projects:projects.unknown')}
-                        {isClientDisabled && (
-                          <span className="ml-1 text-[8px]">
-                            {t('projects:projects.disabledLabel')}
-                          </span>
-                        )}
+                    {client?.name || t('projects:projects.unknown')}
+                    {isClientDisabled && (
+                      <span className="ml-1 text-[8px]">
+                        {t('projects:projects.disabledLabel')}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{ backgroundColor: project.color }}
-                        ></div>
-                        <span className="text-sm font-bold text-slate-800">{project.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-xs text-slate-500 max-w-md italic line-clamp-1">
-                        {project.description || t('projects:projects.noDescriptionProvided')}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      {isClientDisabled ? (
-                        <StatusBadge
-                          type="inherited"
-                          label={t('projects:projects.statusInheritedDisable')}
-                        />
-                      ) : (
-                        <StatusBadge type="active" label={t('projects:projects.statusActive')} />
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {isManagement && (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openEditModal(project);
-                            }}
-                            className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
-                            title={t('projects:projects.editProject')}
-                          >
-                            <i className="fa-solid fa-pen-to-square"></i>
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onUpdateProject(project.id, { isDisabled: true });
-                            }}
-                            className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
-                            title={t('projects:projects.disableProject')}
-                          >
-                            <i className="fa-solid fa-ban"></i>
-                          </button>
-                          {/* Admin only maybe? keeping it for management now */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              promptDelete(project);
-                            }}
-                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                            title={t('common:buttons.delete')}
-                          >
-                            <i className="fa-solid fa-trash-can"></i>
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
+                    )}
+                  </span>
                 );
-              })
-            )}
-          </tbody>
-        </table>
-      </StandardTable>
-
-      {hasAnyDisabledProjects && (
-        <StandardTable
-          title={t('projects:projects.disabledProjects')}
-          totalCount={filteredDisabledProjectsTotal.length}
-          totalLabel={t('common:table.total')}
-          containerClassName="border-dashed bg-slate-50"
-          footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
-          footer={
-            <>
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-500">
-                  {t('common:labels.rowsPerPage')}
-                </span>
-                <CustomSelect
-                  options={[
-                    { id: '5', name: '5' },
-                    { id: '10', name: '10' },
-                    { id: '20', name: '20' },
-                    { id: '50', name: '50' },
-                  ]}
-                  value={disabledRowsPerPage.toString()}
-                  onChange={(val) => handleDisabledRowsPerPageChange(val as string)}
-                  className="w-20"
-                  buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
-                  searchable={false}
-                />
-                <span className="text-xs font-bold text-slate-400 ml-2">
-                  {t('common:pagination.showing', {
-                    start: disabledProjectsPage.length > 0 ? disabledStartIndex + 1 : 0,
-                    end: Math.min(
-                      disabledStartIndex + disabledRowsPerPage,
-                      filteredDisabledProjectsTotal.length,
-                    ),
-                    total: filteredDisabledProjectsTotal.length,
-                  })}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setDisabledCurrentPage((prev) => Math.max(1, prev - 1))}
-                  disabled={disabledCurrentPage === 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-                >
-                  <i className="fa-solid fa-chevron-left text-xs"></i>
-                </button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: disabledTotalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setDisabledCurrentPage(page)}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
-                        disabledCurrentPage === page
-                          ? 'bg-praetor text-white shadow-md shadow-slate-200'
-                          : 'text-slate-500 hover:bg-slate-100'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
+              },
+            },
+            {
+              header: t('projects:projects.tableHeaders.projectName'),
+              accessorKey: 'name',
+              cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: row.color }}
+                  />
+                  <span
+                    className={`text-sm font-bold ${
+                      row.isDisabled
+                        ? 'text-slate-600 line-through decoration-slate-300'
+                        : 'text-slate-800'
+                    }`}
+                  >
+                    {row.name}
+                  </span>
                 </div>
-                <button
-                  onClick={() =>
-                    setDisabledCurrentPage((prev) => Math.min(disabledTotalPages, prev + 1))
-                  }
-                  disabled={disabledCurrentPage === disabledTotalPages || disabledTotalPages === 0}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+              ),
+            },
+            {
+              header: t('projects:projects.tableHeaders.description'),
+              accessorKey: 'description',
+              cell: ({ row }) => (
+                <p
+                  className={`text-xs max-w-md italic line-clamp-1 ${
+                    row.isDisabled ? 'text-slate-400' : 'text-slate-500'
+                  }`}
                 >
-                  <i className="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-              </div>
-            </>
-          }
-        >
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[160px]">
-                  {t('projects:projects.tableHeaders.client')}
-                </th>
-                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[200px]">
-                  {t('projects:projects.tableHeaders.projectName')}
-                </th>
-                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                  {t('projects:projects.tableHeaders.description')}
-                </th>
-                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest w-[120px]">
-                  {t('projects:projects.tableHeaders.status')}
-                </th>
-                <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right w-[140px]">
-                  {t('projects:projects.tableHeaders.actions')}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {disabledProjectsPage.map((project) => {
-                const client = clients.find((c) => c.id === project.clientId);
+                  {row.description || t('projects:projects.noDescriptionProvided')}
+                </p>
+              ),
+            },
+            {
+              header: t('projects:projects.tableHeaders.status'),
+              id: 'status',
+              accessorFn: (row) => {
+                const client = clients.find((c) => c.id === row.clientId);
+                if (row.isDisabled) return t('projects:projects.statusDisabled');
+                if (client?.isDisabled) return t('projects:projects.statusInheritedDisable');
+                return t('projects:projects.statusActive');
+              },
+              cell: ({ row }) => {
+                const client = clients.find((c) => c.id === row.clientId);
                 const isClientDisabled = client?.isDisabled || false;
-
-                return (
-                  <tr
-                    key={project.id}
-                    onClick={() => isManagement && openEditModal(project)}
-                    className={`group hover:bg-slate-100 transition-colors opacity-70 grayscale hover:grayscale-0 ${isManagement ? 'cursor-pointer' : 'cursor-default'}`}
-                  >
-                    <td className="px-6 py-4">
-                      <span
-                        className={`text-[10px] font-black uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${isClientDisabled ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-slate-400'}`}
+                if (row.isDisabled) {
+                  return (
+                    <StatusBadge type="disabled" label={t('projects:projects.statusDisabled')} />
+                  );
+                }
+                if (isClientDisabled) {
+                  return (
+                    <StatusBadge
+                      type="inherited"
+                      label={t('projects:projects.statusInheritedDisable')}
+                    />
+                  );
+                }
+                return <StatusBadge type="active" label={t('projects:projects.statusActive')} />;
+              },
+            },
+            {
+              header: t('projects:projects.tableHeaders.actions'),
+              id: 'actions',
+              align: 'right',
+              disableSorting: true,
+              disableFiltering: true,
+              cell: ({ row }) =>
+                isManagement ? (
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditModal(row);
+                      }}
+                      className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
+                      title={t('projects:projects.editProject')}
+                    >
+                      <i className="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    {row.isDisabled ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUpdateProject(row.id, { isDisabled: false });
+                        }}
+                        className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
+                        title={t('projects:projects.enableProject')}
                       >
-                        {client?.name || t('projects:projects.unknown')}
-                        {isClientDisabled && (
-                          <span className="ml-1 text-[8px]">
-                            {t('projects:projects.disabledLabel')}
-                          </span>
-                        )}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{ backgroundColor: project.color }}
-                        ></div>
-                        <span className="text-sm font-bold text-slate-600 line-through decoration-slate-300">
-                          {project.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-xs text-slate-400 max-w-md italic line-clamp-1">
-                        {project.description || t('projects:projects.noDescriptionProvided')}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <StatusBadge type="disabled" label={t('projects:projects.statusDisabled')} />
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {isManagement && (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openEditModal(project);
-                            }}
-                            className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
-                            title={t('projects:projects.editProject')}
-                          >
-                            <i className="fa-solid fa-pen-to-square"></i>
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onUpdateProject(project.id, { isDisabled: false });
-                            }}
-                            className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
-                          >
-                            <i className="fa-solid fa-rotate-left"></i>
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              promptDelete(project);
-                            }}
-                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                            title={t('common:buttons.delete')}
-                          >
-                            <i className="fa-solid fa-trash-can"></i>
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </StandardTable>
-      )}
+                        <i className="fa-solid fa-rotate-left"></i>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUpdateProject(row.id, { isDisabled: true });
+                        }}
+                        className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                        title={t('projects:projects.disableProject')}
+                      >
+                        <i className="fa-solid fa-ban"></i>
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        promptDelete(row);
+                      }}
+                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                      title={t('common:buttons.delete')}
+                    >
+                      <i className="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
+                ) : null,
+            },
+          ] as Column<Project>[]
+        }
+      />
     </div>
   );
 };
