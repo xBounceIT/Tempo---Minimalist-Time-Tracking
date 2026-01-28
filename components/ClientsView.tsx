@@ -195,7 +195,9 @@ const ClientsView: React.FC<ClientsViewProps> = ({
       {
         header: t('crm:clients.tableHeaders.phone'),
         accessorKey: 'phone',
-        cell: ({ row }) => <span className="text-xs text-slate-500">{row.phone || '-'}</span>,
+        cell: ({ row }) => (
+          <span className="text-xs text-slate-500 whitespace-nowrap">{row.phone || '-'}</span>
+        ),
       },
       {
         header: t('crm:clients.tableHeaders.vat'),
@@ -205,7 +207,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({
       {
         header: t('crm:clients.tableHeaders.taxCode'),
         accessorKey: 'taxCode',
-        className: 'font-mono text-xs text-slate-400',
+        className: 'font-mono text-xs text-slate-400 pr-8',
       },
       {
         header: t('crm:clients.tableHeaders.billingCode'),
