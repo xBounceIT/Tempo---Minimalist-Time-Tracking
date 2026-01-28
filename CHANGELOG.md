@@ -6,6 +6,7 @@
 - Aggiunta filtri sulle colonne stile excel
 - Rimosse le pagine Progetti e Attività dal modulo Presenze
 - Aggiunto all'utente base il modulo Progetti in sola lettura
+- Aggiunto campo Sede in Time Tracker (Default: Remoto)
 
 ## 20260125 - Operativo
 
