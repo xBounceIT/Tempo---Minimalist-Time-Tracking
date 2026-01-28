@@ -115,9 +115,9 @@
     "typeRequired": "Il tipo è obbligatorio",
     "clientCodeInvalid": "Sono consentiti solo lettere, numeri, trattini (-) e underscore (_)",
     "clientCodeUnique": "Questo codice cliente esiste già",
-    "productCodeRequired": "Il codice prodotto è obbligatorio",
+    "productCodeRequired": "Il codice è obbligatorio",
     "productCodeInvalid": "Sono consentiti solo lettere, numeri, trattini (-) e underscore (_)",
-    "productCodeUnique": "Questo codice prodotto esiste già",
+    "productCodeUnique": "Questo codice esiste già",
     "productNameUnique": "Questo nome prodotto esiste già"
   },
   "states": {

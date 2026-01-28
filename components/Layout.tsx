@@ -88,9 +88,8 @@ const Layout: React.FC<LayoutProps> = ({
 
   // Filter modules based on user role
   const accessibleModules = modules.filter((m) => {
-    // Admin and Manager access to Configuration (Administration)
-    if (m.id === 'configuration')
-      return currentUser.role === 'admin' || currentUser.role === 'manager';
+    // Admin only access to Configuration (Administration)
+    if (m.id === 'configuration') return currentUser.role === 'admin';
 
     // Timesheets access for managers and users
     if (m.id === 'timesheets') return currentUser.role === 'manager' || currentUser.role === 'user';

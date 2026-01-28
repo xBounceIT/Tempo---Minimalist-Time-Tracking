@@ -1,11 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Quote, QuoteItem, Client, Product, SpecialBid, Sale } from '../types';
 import CustomSelect from './CustomSelect';
-import StandardTable from './StandardTable';
+import StandardTable, { Column } from './StandardTable';
 import ValidatedNumberInput from './ValidatedNumberInput';
 import StatusBadge, { StatusType } from './StatusBadge';
-import TableFilter from './TableFilter';
 import { parseNumberInputValue, roundToTwoDecimals } from '../utils/numbers';
 
 interface QuotesViewProps {
@@ -76,86 +75,103 @@ const QuotesView: React.FC<QuotesViewProps> = ({
   const [quoteToDelete, setQuoteToDelete] = useState<Quote | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const getStatusLabel = (status: string) => {
-    const option = STATUS_OPTIONS.find((o) => o.id === status);
-    return option ? option.name : status;
-  };
+  const getStatusLabel = useCallback(
+    (status: string) => {
+      const option = STATUS_OPTIONS.find((o) => o.id === status);
+      return option ? option.name : status;
+    },
+    [STATUS_OPTIONS],
+  );
 
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(() => {
-    const saved = localStorage.getItem('praetor_quotes_rowsPerPage');
-    return saved ? parseInt(saved, 10) : 5;
-  });
+  // Helper: Check if quote is expired
+  const isExpired = useCallback((expirationDate: string) => {
+    const normalizedDate = expirationDate.includes('T')
+      ? expirationDate
+      : `${expirationDate}T00:00:00`;
+    const expiry = new Date(normalizedDate);
+    expiry.setDate(expiry.getDate() + 1);
+    return new Date() >= expiry;
+  }, []);
 
-  const handleRowsPerPageChange = (val: string) => {
-    const value = parseInt(val, 10);
-    setRowsPerPage(value);
-    localStorage.setItem('praetor_quotes_rowsPerPage', value.toString());
-    setCurrentPage(1); // Reset to first page
-  };
-  // Filter State
-  const [clientFilter, setClientFilter] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [quoteCodeFilter, setQuoteCodeFilter] = useState<string[]>([]);
-  const [sortColumn, setSortColumn] = useState<keyof Quote | null>('createdAt');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const isQuoteExpired = useCallback(
+    (quote: Quote) => {
+      return (
+        quote.status !== 'accepted' &&
+        quote.status !== 'denied' &&
+        quote.isExpired !== false &&
+        (quote.isExpired === true || isExpired(quote.expirationDate))
+      );
+    },
+    [isExpired],
+  );
 
-  const filteredQuotes = useMemo(() => {
-    let result = [...quotes];
+  const hasSaleForQuote = useCallback(
+    (quote: Quote) => Boolean(quoteIdsWithSales?.has(quote.id)),
+    [quoteIdsWithSales],
+  );
 
-    // Apply filters
-    if (clientFilter.length > 0) {
-      result = result.filter((q) => clientFilter.includes(q.clientName));
-    }
-    if (statusFilter.length > 0) {
-      result = result.filter((q) => statusFilter.includes(q.status));
-    }
-    if (quoteCodeFilter.length > 0) {
-      result = result.filter((q) => quoteCodeFilter.includes(q.quoteCode));
-    }
+  const getSaleStatusForQuote = useCallback(
+    (quote: Quote) => quoteSaleStatuses?.[quote.id],
+    [quoteSaleStatuses],
+  );
 
-    // Sort
-    if (sortColumn) {
-      result.sort((a, b) => {
-        const aValue = a[sortColumn];
-        const bValue = b[sortColumn];
-        if (aValue === bValue) return 0;
-        if (aValue === undefined) return 1;
-        if (bValue === undefined) return -1;
+  const isHistoryRow = useCallback(
+    (quote: Quote) => {
+      const expired = isQuoteExpired(quote);
+      const hasSale = hasSaleForQuote(quote);
+      return quote.status === 'denied' || expired || hasSale;
+    },
+    [isQuoteExpired, hasSaleForQuote],
+  );
 
-        const comparison = aValue > bValue ? 1 : -1;
-        return sortDirection === 'asc' ? comparison : -comparison;
+  // Calculate totals for a quote
+  const calculateQuoteTotals = useCallback(
+    (items: QuoteItem[], globalDiscount: number) => {
+      let subtotal = 0;
+      let totalCost = 0;
+      const taxGroups: Record<number, number> = {};
+
+      items.forEach((item) => {
+        const product = products.find((p) => p.id === item.productId);
+        const lineSubtotal = item.quantity * item.unitPrice;
+        const lineDiscount = item.discount ? (lineSubtotal * item.discount) / 100 : 0;
+        const lineNet = lineSubtotal - lineDiscount;
+
+        subtotal += lineNet;
+
+        if (product) {
+          const taxRate = product.taxRate;
+          const lineNetAfterGlobal = lineNet * (1 - globalDiscount / 100);
+          const taxAmount = lineNetAfterGlobal * (taxRate / 100);
+          taxGroups[taxRate] = (taxGroups[taxRate] || 0) + taxAmount;
+
+          const cost = item.specialBidId
+            ? Number(item.specialBidUnitPrice ?? 0)
+            : Number(item.productCost ?? product.costo);
+          totalCost += item.quantity * cost;
+        }
       });
-    }
 
-    return result;
-  }, [quotes, clientFilter, statusFilter, quoteCodeFilter, sortColumn, sortDirection]);
+      const discountAmount = subtotal * (globalDiscount / 100);
+      const taxableAmount = subtotal - discountAmount;
+      const totalTax = Object.values(taxGroups).reduce((sum, val) => sum + val, 0);
+      const total = taxableAmount + totalTax;
+      const margin = taxableAmount - totalCost;
+      const marginPercentage = taxableAmount > 0 ? (margin / taxableAmount) * 100 : 0;
 
-  // Unique values for filters
-  const uniqueClients = useMemo(
-    () => Array.from(new Set(quotes.map((q) => q.clientName))).sort(),
-    [quotes],
+      return {
+        subtotal,
+        taxableAmount,
+        discountAmount,
+        totalTax,
+        total,
+        margin,
+        marginPercentage,
+        taxGroups,
+      };
+    },
+    [products],
   );
-
-  const uniqueStatuses = useMemo(
-    () => Array.from(new Set(quotes.map((q) => q.status))).sort(),
-    [quotes],
-  );
-
-  const uniqueQuoteCodes = useMemo(
-    () => Array.from(new Set(quotes.map((q) => q.quoteCode))).sort(),
-    [quotes],
-  );
-
-  const handleSort = (column: keyof Quote) => {
-    if (sortColumn === column) {
-      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-  };
 
   // Form State
   const [formData, setFormData] = useState<Partial<Quote>>({
@@ -193,7 +209,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     setIsModalOpen(true);
   };
 
-  const openEditModal = (quote: Quote) => {
+  const openEditModal = useCallback((quote: Quote) => {
     setEditingQuote(quote);
     // Ensure expirationDate is in YYYY-MM-DD format for the date input
     const formattedDate = quote.expirationDate
@@ -212,7 +228,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     });
     setErrors({});
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -311,10 +327,10 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     setIsModalOpen(false);
   };
 
-  const confirmDelete = (quote: Quote) => {
+  const confirmDelete = useCallback((quote: Quote) => {
     setQuoteToDelete(quote);
     setIsDeleteConfirmOpen(true);
-  };
+  }, []);
 
   const handleDelete = () => {
     if (quoteToDelete) {
@@ -486,54 +502,57 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     setFormData({ ...formData, items: newItems });
   };
 
-  // Calculate totals
-  const calculateTotals = (items: QuoteItem[], globalDiscount: number) => {
-    let subtotal = 0;
-    let totalCost = 0;
-    const taxGroups: Record<number, number> = {};
+  // Calculate totals (used in form)
+  const calculateTotals = useCallback(
+    (items: QuoteItem[], globalDiscount: number) => {
+      let subtotal = 0;
+      let totalCost = 0;
+      const taxGroups: Record<number, number> = {};
 
-    items.forEach((item) => {
-      const product = products.find((p) => p.id === item.productId);
-      const lineSubtotal = item.quantity * item.unitPrice;
-      const lineDiscount = item.discount ? (lineSubtotal * item.discount) / 100 : 0;
-      const lineNet = lineSubtotal - lineDiscount;
+      items.forEach((item) => {
+        const product = products.find((p) => p.id === item.productId);
+        const lineSubtotal = item.quantity * item.unitPrice;
+        const lineDiscount = item.discount ? (lineSubtotal * item.discount) / 100 : 0;
+        const lineNet = lineSubtotal - lineDiscount;
 
-      subtotal += lineNet;
+        subtotal += lineNet;
 
-      if (product) {
-        const taxRate = product.taxRate;
-        // Applying global discount proportionally to the tax base
-        const lineNetAfterGlobal = lineNet * (1 - globalDiscount / 100);
-        const taxAmount = lineNetAfterGlobal * (taxRate / 100);
-        taxGroups[taxRate] = (taxGroups[taxRate] || 0) + taxAmount;
+        if (product) {
+          const taxRate = product.taxRate;
+          // Applying global discount proportionally to the tax base
+          const lineNetAfterGlobal = lineNet * (1 - globalDiscount / 100);
+          const taxAmount = lineNetAfterGlobal * (taxRate / 100);
+          taxGroups[taxRate] = (taxGroups[taxRate] || 0) + taxAmount;
 
-        // Determine cost: use stored snapshot values to avoid retroactive changes
-        const cost = item.specialBidId
-          ? Number(item.specialBidUnitPrice ?? 0)
-          : Number(item.productCost ?? product.costo);
+          // Determine cost: use stored snapshot values to avoid retroactive changes
+          const cost = item.specialBidId
+            ? Number(item.specialBidUnitPrice ?? 0)
+            : Number(item.productCost ?? product.costo);
 
-        totalCost += item.quantity * cost;
-      }
-    });
+          totalCost += item.quantity * cost;
+        }
+      });
 
-    const discountAmount = subtotal * (globalDiscount / 100);
-    const taxableAmount = subtotal - discountAmount;
-    const totalTax = Object.values(taxGroups).reduce((sum, val) => sum + val, 0);
-    const total = taxableAmount + totalTax;
-    const margin = taxableAmount - totalCost;
-    const marginPercentage = taxableAmount > 0 ? (margin / taxableAmount) * 100 : 0;
+      const discountAmount = subtotal * (globalDiscount / 100);
+      const taxableAmount = subtotal - discountAmount;
+      const totalTax = Object.values(taxGroups).reduce((sum, val) => sum + val, 0);
+      const total = taxableAmount + totalTax;
+      const margin = taxableAmount - totalCost;
+      const marginPercentage = taxableAmount > 0 ? (margin / taxableAmount) * 100 : 0;
 
-    return {
-      subtotal,
-      taxableAmount,
-      discountAmount,
-      totalTax,
-      total,
-      margin,
-      marginPercentage,
-      taxGroups,
-    };
-  };
+      return {
+        subtotal,
+        taxableAmount,
+        discountAmount,
+        totalTax,
+        total,
+        margin,
+        marginPercentage,
+        taxGroups,
+      };
+    },
+    [products],
+  );
 
   const activeClients = clients.filter((c) => !c.isDisabled);
   const activeProducts = products.filter((p) => !p.isDisabled);
@@ -555,256 +574,289 @@ const QuotesView: React.FC<QuotesViewProps> = ({
     return bid ? `${bid.clientName} · ${bid.productName}` : t('crm:quotes.noSpecialBid');
   };
 
-  // Check if quote is expired
-  const isExpired = (expirationDate: string) => {
-    const normalizedDate = expirationDate.includes('T')
-      ? expirationDate
-      : `${expirationDate}T00:00:00`;
-    const expiry = new Date(normalizedDate);
-    expiry.setDate(expiry.getDate() + 1);
-    return new Date() >= expiry;
-  };
+  // Helper functions are now defined above with useCallback
 
-  const isQuoteExpired = (quote: Quote) =>
-    quote.status !== 'accepted' &&
-    quote.status !== 'denied' &&
-    quote.isExpired !== false &&
-    (quote.isExpired === true || isExpired(quote.expirationDate));
-  const hasSaleForQuote = (quote: Quote) => Boolean(quoteIdsWithSales?.has(quote.id));
-  const getSaleStatusForQuote = (quote: Quote) => quoteSaleStatuses?.[quote.id];
-
-  // Pagination Logic
-  const totalPages = Math.ceil(filteredQuotes.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedQuotes = filteredQuotes.slice(startIndex, startIndex + rowsPerPage);
-
-  const renderQuoteRow = (quote: Quote) => {
-    const { total } = calculateTotals(quote.items, quote.discount);
-    const expired = isQuoteExpired(quote);
-    const hasSale = hasSaleForQuote(quote);
-    const saleStatus = getSaleStatusForQuote(quote);
-    // Determine history status dynamically
-    const isHistoryRow = quote.status === 'denied' || expired || hasSale;
-
-    const isDeleteDisabled = expired || quote.status !== 'draft' || isHistoryRow;
-    const deleteTitle = isHistoryRow
-      ? t('crm:quotes.historyActionsDisabled', {
-          defaultValue: 'History entries cannot be modified.',
-        })
-      : expired
-        ? t('crm:quotes.errors.expiredCannotDelete')
-        : t('crm:quotes.deleteQuote');
-
-    const isCreateSaleDisabled = isHistoryRow || hasSale;
-    const createSaleTitle = hasSale
-      ? t('crm:quotes.saleAlreadyExists', {
-          defaultValue: 'A sale order for this quote already exists.',
-        })
-      : isHistoryRow
-        ? t('crm:quotes.historyActionsDisabled', {
-            defaultValue: 'History entries cannot be modified.',
-          })
-        : t('crm:quotes.convertToSale');
-
-    const canRestore = !hasSale || saleStatus === 'draft';
-    const restoreTitle = !canRestore
-      ? t('crm:quotes.restoreDisabledSaleStatus', {
-          defaultValue: 'Restore is only possible when the linked sale order is in draft status.',
-        })
-      : t('crm:quotes.restoreQuote', { defaultValue: 'Restore quote' });
-    return (
-      <tr
-        key={quote.id}
-        onClick={isHistoryRow ? undefined : () => openEditModal(quote)}
-        className={`transition-colors group ${isHistoryRow ? 'bg-slate-50 text-slate-400' : 'hover:bg-slate-50/50 cursor-pointer'} ${!isHistoryRow && expired ? 'bg-red-50/30' : ''}`}
-      >
-        <td className="px-8 py-5">
-          <div className="font-mono text-sm font-bold text-slate-500">{quote.quoteCode}</div>
-        </td>
-        <td className="px-8 py-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-100 text-praetor rounded-xl flex items-center justify-center text-sm">
-              <i className="fa-solid fa-file-invoice"></i>
-            </div>
-            <div>
-              <div
-                className={isHistoryRow ? 'font-bold text-slate-400' : 'font-bold text-slate-800'}
-              >
-                {quote.clientName}
+  // Column definitions for StandardTable
+  const columns = useMemo<Column<Quote>[]>(
+    () => [
+      {
+        header: t('crm:quotes.quoteCode', { defaultValue: 'CODE' }),
+        accessorKey: 'quoteCode',
+        cell: ({ row }) => (
+          <div className="font-mono text-sm font-bold text-slate-500">{row.quoteCode}</div>
+        ),
+      },
+      {
+        header: t('crm:quotes.clientColumn'),
+        accessorKey: 'clientName',
+        cell: ({ row }) => {
+          const history = isHistoryRow(row);
+          return (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-slate-100 text-praetor rounded-xl flex items-center justify-center text-sm">
+                <i className="fa-solid fa-file-invoice"></i>
               </div>
-              <div className="text-[10px] font-black text-slate-400 uppercase">
-                {t('crm:quotes.itemsCount', { count: quote.items.length })}
+              <div>
+                <div className={history ? 'font-bold text-slate-400' : 'font-bold text-slate-800'}>
+                  {row.clientName}
+                </div>
+                <div className="text-[10px] font-black text-slate-400 uppercase">
+                  {t('crm:quotes.itemsCount', { count: row.items.length })}
+                </div>
               </div>
             </div>
-          </div>
-        </td>
-        <td
-          className={`px-8 py-5 text-sm font-bold ${
-            isHistoryRow ? 'text-slate-400' : 'text-slate-700'
-          }`}
-        >
-          {total.toFixed(2)} {currency}
-        </td>
-        <td
-          className={`px-8 py-5 text-sm font-semibold ${
-            isHistoryRow ? 'text-slate-400' : 'text-slate-600'
-          }`}
-        >
-          {quote.paymentTerms === 'immediate'
-            ? t('crm:quotes.immediatePayment')
-            : quote.paymentTerms}
-        </td>
-        <td className="px-8 py-5">
-          <div
-            className={`text-sm ${
-              isHistoryRow
-                ? 'text-slate-400'
-                : expired
-                  ? 'text-red-600 font-bold'
-                  : 'text-slate-600'
-            }`}
-          >
-            {new Date(quote.expirationDate).toLocaleDateString()}
-            {expired && !isHistoryRow && (
-              <span className="ml-2 text-[10px] font-black">{t('crm:quotes.expiredLabel')}</span>
-            )}
-          </div>
-        </td>
-        <td className="px-8 py-5">
-          <div className={isHistoryRow ? 'opacity-60' : ''}>
-            <StatusBadge
-              type={expired ? 'expired' : (quote.status as StatusType)}
-              label={getStatusLabel(quote.status)}
-            />
-          </div>
-        </td>
-        <td className="px-8 py-5">
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (isHistoryRow) return;
-                openEditModal(quote);
-              }}
-              disabled={isHistoryRow}
-              className={`p-2 rounded-lg transition-all ${isHistoryRow ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-praetor hover:bg-slate-100'}`}
-              title={
-                isHistoryRow
-                  ? t('crm:quotes.historyActionsDisabled', {
-                      defaultValue: 'History entries cannot be modified.',
-                    })
-                  : t('crm:quotes.editQuote')
-              }
+          );
+        },
+      },
+      {
+        header: t('crm:quotes.totalColumn'),
+        id: 'total',
+        accessorFn: (row) => calculateQuoteTotals(row.items, row.discount).total,
+        disableFiltering: true,
+        cell: ({ row }) => {
+          const { total } = calculateQuoteTotals(row.items, row.discount);
+          const history = isHistoryRow(row);
+          return (
+            <span className={`text-sm font-bold ${history ? 'text-slate-400' : 'text-slate-700'}`}>
+              {total.toFixed(2)} {currency}
+            </span>
+          );
+        },
+      },
+      {
+        header: t('crm:quotes.paymentTermsColumn'),
+        accessorKey: 'paymentTerms',
+        cell: ({ row }) => {
+          const history = isHistoryRow(row);
+          return (
+            <span
+              className={`text-sm font-semibold ${history ? 'text-slate-400' : 'text-slate-600'}`}
             >
-              <i className="fa-solid fa-pen-to-square"></i>
-            </button>
-            {quote.status === 'accepted' && onCreateSale && (
+              {row.paymentTerms === 'immediate'
+                ? t('crm:quotes.immediatePayment')
+                : row.paymentTerms}
+            </span>
+          );
+        },
+      },
+      {
+        header: t('crm:quotes.expirationColumn'),
+        accessorKey: 'expirationDate',
+        cell: ({ row }) => {
+          const expired = isQuoteExpired(row);
+          const history = isHistoryRow(row);
+          return (
+            <div
+              className={`text-sm ${
+                history ? 'text-slate-400' : expired ? 'text-red-600 font-bold' : 'text-slate-600'
+              }`}
+            >
+              {new Date(row.expirationDate).toLocaleDateString()}
+              {expired && !history && (
+                <span className="ml-2 text-[10px] font-black">{t('crm:quotes.expiredLabel')}</span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        header: t('crm:quotes.statusColumn'),
+        accessorKey: 'status',
+        cell: ({ row }) => {
+          const expired = isQuoteExpired(row);
+          const history = isHistoryRow(row);
+          return (
+            <div className={history ? 'opacity-60' : ''}>
+              <StatusBadge
+                type={expired ? 'expired' : (row.status as StatusType)}
+                label={getStatusLabel(row.status)}
+              />
+            </div>
+          );
+        },
+      },
+      {
+        header: t('crm:quotes.actionsColumn'),
+        id: 'actions',
+        align: 'right',
+        disableSorting: true,
+        disableFiltering: true,
+        cell: ({ row }) => {
+          const expired = isQuoteExpired(row);
+          const hasSale = hasSaleForQuote(row);
+          const saleStatus = getSaleStatusForQuote(row);
+          const history = isHistoryRow(row);
+
+          const isDeleteDisabled = expired || row.status !== 'draft' || history;
+          const deleteTitle = history
+            ? t('crm:quotes.historyActionsDisabled', {
+                defaultValue: 'History entries cannot be modified.',
+              })
+            : expired
+              ? t('crm:quotes.errors.expiredCannotDelete')
+              : t('crm:quotes.deleteQuote');
+
+          const isCreateSaleDisabled = history || hasSale;
+          const createSaleTitle = hasSale
+            ? t('crm:quotes.saleAlreadyExists', {
+                defaultValue: 'A sale order for this quote already exists.',
+              })
+            : history
+              ? t('crm:quotes.historyActionsDisabled', {
+                  defaultValue: 'History entries cannot be modified.',
+                })
+              : t('crm:quotes.convertToSale');
+
+          const canRestore = !hasSale || saleStatus === 'draft';
+          const restoreTitle = !canRestore
+            ? t('crm:quotes.restoreDisabledSaleStatus', {
+                defaultValue:
+                  'Restore is only possible when the linked sale order is in draft status.',
+              })
+            : t('crm:quotes.restoreQuote', { defaultValue: 'Restore quote' });
+
+          return (
+            <div className="flex justify-end gap-2">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (isCreateSaleDisabled) return;
-                  onCreateSale(quote);
+                  if (history) return;
+                  openEditModal(row);
                 }}
-                disabled={isCreateSaleDisabled}
-                className={`p-2 rounded-lg transition-all ${isCreateSaleDisabled ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-praetor hover:bg-slate-100'}`}
-                title={createSaleTitle}
-              >
-                <i className="fa-solid fa-cart-plus"></i>
-              </button>
-            )}
-            {quote.status === 'draft' && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isHistoryRow) return;
-                  onUpdateQuote(quote.id, { status: 'sent' });
-                }}
-                disabled={isHistoryRow}
-                className={`p-2 rounded-lg transition-all ${isHistoryRow ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'}`}
+                disabled={history}
+                className={`p-2 rounded-lg transition-all ${history ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-praetor hover:bg-slate-100'}`}
                 title={
-                  isHistoryRow
+                  history
                     ? t('crm:quotes.historyActionsDisabled', {
                         defaultValue: 'History entries cannot be modified.',
                       })
-                    : t('crm:quotes.markAsSent')
+                    : t('crm:quotes.editQuote')
                 }
               >
-                <i className="fa-solid fa-paper-plane"></i>
+                <i className="fa-solid fa-pen-to-square"></i>
               </button>
-            )}
-            {quote.status === 'sent' && (
-              <>
+              {row.status === 'accepted' && onCreateSale && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (isHistoryRow) return;
-                    onUpdateQuote(quote.id, { status: 'accepted' });
+                    if (isCreateSaleDisabled) return;
+                    onCreateSale(row);
                   }}
-                  disabled={isHistoryRow}
-                  className={`p-2 rounded-lg transition-all ${isHistoryRow ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'}`}
-                  title={
-                    isHistoryRow
-                      ? t('crm:quotes.historyActionsDisabled', {
-                          defaultValue: 'History entries cannot be modified.',
-                        })
-                      : t('crm:quotes.markAsConfirmed')
-                  }
+                  disabled={isCreateSaleDisabled}
+                  className={`p-2 rounded-lg transition-all ${isCreateSaleDisabled ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-praetor hover:bg-slate-100'}`}
+                  title={createSaleTitle}
                 >
-                  <i className="fa-solid fa-check"></i>
+                  <i className="fa-solid fa-cart-plus"></i>
                 </button>
+              )}
+              {row.status === 'draft' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (isHistoryRow) return;
-                    onUpdateQuote(quote.id, { status: 'denied' });
+                    if (history) return;
+                    onUpdateQuote(row.id, { status: 'sent' });
                   }}
-                  disabled={isHistoryRow}
-                  className={`p-2 rounded-lg transition-all ${isHistoryRow ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-red-600 hover:bg-red-50'}`}
+                  disabled={history}
+                  className={`p-2 rounded-lg transition-all ${history ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'}`}
                   title={
-                    isHistoryRow
+                    history
                       ? t('crm:quotes.historyActionsDisabled', {
                           defaultValue: 'History entries cannot be modified.',
                         })
-                      : t('crm:quotes.markAsDenied')
+                      : t('crm:quotes.markAsSent')
                   }
                 >
-                  <i className="fa-solid fa-xmark"></i>
+                  <i className="fa-solid fa-paper-plane"></i>
                 </button>
-              </>
-            )}
-            {quote.status === 'draft' && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isDeleteDisabled) return;
-                  confirmDelete(quote);
-                }}
-                disabled={isDeleteDisabled}
-                className={`p-2 text-slate-400 rounded-lg transition-all ${isDeleteDisabled ? 'cursor-not-allowed opacity-50' : 'hover:text-red-600 hover:bg-red-50'}`}
-                title={deleteTitle}
-              >
-                <i className="fa-solid fa-trash-can"></i>
-              </button>
-            )}
-            {isHistoryRow && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!canRestore) return;
-                  onUpdateQuote(quote.id, { status: 'draft', isExpired: false });
-                }}
-                disabled={!canRestore}
-                className={`p-2 rounded-lg transition-all ${canRestore ? 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50' : 'cursor-not-allowed opacity-50 text-slate-400'}`}
-                title={restoreTitle}
-              >
-                <i className="fa-solid fa-rotate-left"></i>
-              </button>
-            )}
-          </div>
-        </td>
-      </tr>
-    );
-  };
+              )}
+              {row.status === 'sent' && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (history) return;
+                      onUpdateQuote(row.id, { status: 'accepted' });
+                    }}
+                    disabled={history}
+                    className={`p-2 rounded-lg transition-all ${history ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'}`}
+                    title={
+                      history
+                        ? t('crm:quotes.historyActionsDisabled', {
+                            defaultValue: 'History entries cannot be modified.',
+                          })
+                        : t('crm:quotes.markAsConfirmed')
+                    }
+                  >
+                    <i className="fa-solid fa-check"></i>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (history) return;
+                      onUpdateQuote(row.id, { status: 'denied' });
+                    }}
+                    disabled={history}
+                    className={`p-2 rounded-lg transition-all ${history ? 'cursor-not-allowed opacity-50 text-slate-400' : 'text-slate-400 hover:text-red-600 hover:bg-red-50'}`}
+                    title={
+                      history
+                        ? t('crm:quotes.historyActionsDisabled', {
+                            defaultValue: 'History entries cannot be modified.',
+                          })
+                        : t('crm:quotes.markAsDenied')
+                    }
+                  >
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+                </>
+              )}
+              {row.status === 'draft' && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isDeleteDisabled) return;
+                    confirmDelete(row);
+                  }}
+                  disabled={isDeleteDisabled}
+                  className={`p-2 text-slate-400 rounded-lg transition-all ${isDeleteDisabled ? 'cursor-not-allowed opacity-50' : 'hover:text-red-600 hover:bg-red-50'}`}
+                  title={deleteTitle}
+                >
+                  <i className="fa-solid fa-trash-can"></i>
+                </button>
+              )}
+              {history && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!canRestore) return;
+                    onUpdateQuote(row.id, { status: 'draft', isExpired: false });
+                  }}
+                  disabled={!canRestore}
+                  className={`p-2 rounded-lg transition-all ${canRestore ? 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50' : 'cursor-not-allowed opacity-50 text-slate-400'}`}
+                  title={restoreTitle}
+                >
+                  <i className="fa-solid fa-rotate-left"></i>
+                </button>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [
+      t,
+      currency,
+      isHistoryRow,
+      isQuoteExpired,
+      hasSaleForQuote,
+      getSaleStatusForQuote,
+      calculateQuoteTotals,
+      getStatusLabel,
+      onCreateSale,
+      onUpdateQuote,
+      confirmDelete,
+      openEditModal,
+    ],
+  );
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -1311,9 +1363,25 @@ const QuotesView: React.FC<QuotesViewProps> = ({
 
       {/* Search and Filters */}
 
-      <StandardTable
+      <StandardTable<Quote>
         title={t('crm:quotes.activeQuotes')}
-        totalCount={filteredQuotes.length}
+        data={quotes}
+        columns={columns}
+        defaultRowsPerPage={5}
+        onRowClick={(row) => {
+          if (!isHistoryRow(row)) {
+            openEditModal(row);
+          }
+        }}
+        rowClassName={(row) => {
+          const expired = isQuoteExpired(row);
+          const history = isHistoryRow(row);
+          return history
+            ? 'bg-slate-50 text-slate-400'
+            : expired
+              ? 'hover:bg-slate-50/50 cursor-pointer bg-red-50/30'
+              : 'hover:bg-slate-50/50 cursor-pointer';
+        }}
         headerAction={
           <button
             onClick={openAddModal}
@@ -1322,140 +1390,7 @@ const QuotesView: React.FC<QuotesViewProps> = ({
             <i className="fa-solid fa-plus"></i> {t('crm:quotes.createNewQuote')}
           </button>
         }
-        footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
-        footer={
-          <>
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-500">
-                {t('crm:quotes.rowsPerPage')}
-              </span>
-              <CustomSelect
-                options={[
-                  { id: '5', name: '5' },
-                  { id: '10', name: '10' },
-                  { id: '20', name: '20' },
-                  { id: '50', name: '50' },
-                ]}
-                value={rowsPerPage.toString()}
-                onChange={(val) => handleRowsPerPageChange(val as string)}
-                className="w-20"
-                buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
-                searchable={false}
-              />
-              <span className="text-xs font-bold text-slate-400 ml-2">
-                {t('common:pagination.showing', {
-                  start: paginatedQuotes.length > 0 ? startIndex + 1 : 0,
-                  end: Math.min(startIndex + rowsPerPage, filteredQuotes.length),
-                  total: filteredQuotes.length,
-                })}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-              >
-                <i className="fa-solid fa-chevron-left text-xs"></i>
-              </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
-                      currentPage === page
-                        ? 'bg-praetor text-white shadow-md shadow-slate-200'
-                        : 'text-slate-500 hover:bg-slate-100'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages || totalPages === 0}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-              >
-                <i className="fa-solid fa-chevron-right text-xs"></i>
-              </button>
-            </div>
-          </>
-        }
-      >
-        <table className="w-full text-left border-collapse">
-          <thead className="bg-slate-50 border-b border-slate-100">
-            <tr>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <TableFilter
-                  title={t('crm:quotes.quoteCode', { defaultValue: 'CODE' })}
-                  options={uniqueQuoteCodes}
-                  selectedValues={quoteCodeFilter}
-                  onFilterChange={setQuoteCodeFilter}
-                  sortDirection={sortColumn === 'quoteCode' ? sortDirection : null}
-                  onSortChange={() => handleSort('quoteCode')}
-                  onClose={() => {}}
-                />
-              </th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <TableFilter
-                  title={t('crm:quotes.clientColumn')}
-                  options={uniqueClients}
-                  selectedValues={clientFilter}
-                  onFilterChange={setClientFilter}
-                  sortDirection={sortColumn === 'clientName' ? sortDirection : null}
-                  onSortChange={() => handleSort('clientName')}
-                  onClose={() => {}}
-                />
-              </th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {t('crm:quotes.totalColumn')}
-              </th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {t('crm:quotes.paymentTermsColumn')}
-              </th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {t('crm:quotes.expirationColumn')}
-              </th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <TableFilter
-                  title={t('crm:quotes.statusColumn')}
-                  options={uniqueStatuses}
-                  selectedValues={statusFilter}
-                  onFilterChange={setStatusFilter}
-                  sortDirection={sortColumn === 'status' ? sortDirection : null}
-                  onSortChange={() => handleSort('status')}
-                  onClose={() => {}}
-                />
-              </th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
-                {t('crm:quotes.actionsColumn')}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {paginatedQuotes.map((quote) => renderQuoteRow(quote))}
-            {filteredQuotes.length === 0 && (
-              <tr>
-                <td colSpan={7} className="p-12 text-center">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
-                    <i className="fa-solid fa-file-invoice text-2xl"></i>
-                  </div>
-                  <p className="text-slate-400 text-sm font-bold">{t('crm:quotes.noQuotes')}</p>
-                  <button
-                    onClick={openAddModal}
-                    className="mt-4 text-praetor text-sm font-black hover:underline"
-                  >
-                    {t('crm:quotes.createYourFirstQuote')}
-                  </button>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </StandardTable>
+      />
     </div>
   );
 };

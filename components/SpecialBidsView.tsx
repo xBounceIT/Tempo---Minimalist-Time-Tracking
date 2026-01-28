@@ -277,30 +277,16 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
         className={`hover:bg-slate-50/50 transition-colors group cursor-pointer ${expired ? 'bg-red-50/30' : notStarted ? 'bg-amber-50/30' : ''}`}
       >
         <td className="px-8 py-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-100 text-praetor rounded-xl flex items-center justify-center text-sm">
-              <i className="fa-solid fa-handshake"></i>
-            </div>
-            <div>
-              <div className="font-bold text-slate-800">{bid.clientName}</div>
-              <div className="text-[10px] font-black text-slate-400 uppercase">
-                {t('specialBids.dedicated')}
-              </div>
-            </div>
-          </div>
+          <div className="font-bold text-slate-800">{bid.clientName}</div>
         </td>
         <td className="px-8 py-5 text-sm font-bold text-slate-700">{bid.productName}</td>
-        <td className="px-8 py-5">
-          {expired ? (
-            <StatusBadge type="expired" label={t('specialBids.expired')} />
-          ) : notStarted ? (
-            <StatusBadge type="pending" label={t('specialBids.notStarted')} />
-          ) : (
-            <StatusBadge type="active" label={t('specialBids.active')} />
-          )}
-        </td>
         <td className="px-8 py-5 text-sm font-bold text-slate-700">
           {Number(bid.unitPrice).toFixed(2)} {currency}
+        </td>
+        <td className="px-8 py-5 text-sm font-bold text-slate-700">
+          {bid.molPercentage !== undefined && bid.molPercentage !== null
+            ? `${Number(bid.molPercentage).toFixed(2)} %`
+            : '--'}
         </td>
         <td className="px-8 py-5">
           <div
@@ -311,17 +297,16 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
           </div>
         </td>
         <td className="px-8 py-5">
+          {expired ? (
+            <StatusBadge type="expired" label={t('specialBids.expired')} />
+          ) : notStarted ? (
+            <StatusBadge type="pending" label={t('specialBids.notStarted')} />
+          ) : (
+            <StatusBadge type="active" label={t('specialBids.active')} />
+          )}
+        </td>
+        <td className="px-8 py-5">
           <div className="flex justify-end gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openEditModal(bid);
-              }}
-              className="p-2 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-lg transition-all"
-              title={t('specialBids.editSpecialBidTooltip')}
-            >
-              <i className="fa-solid fa-pen-to-square"></i>
-            </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -680,13 +665,16 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
                 {t('specialBids.product')}
               </th>
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {t('common:labels.status')}
-              </th>
-              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 {t('specialBids.unitPrice')}
               </th>
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                {t('specialBids.mol')}
+              </th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 {t('specialBids.validityPeriod')}
+              </th>
+              <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                {t('common:labels.status')}
               </th>
               <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
                 {t('common:labels.actions')}
@@ -697,7 +685,7 @@ const SpecialBidsView: React.FC<SpecialBidsViewProps> = ({
             {paginatedBids.map(renderBidRow)}
             {filteredBids.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-12 text-center">
+                <td colSpan={7} className="p-12 text-center">
                   <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                     <i className="fa-solid fa-tags text-2xl"></i>
                   </div>

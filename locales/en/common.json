@@ -115,9 +115,9 @@
     "taskNameRequired": "Task name is required",
     "clientCodeInvalid": "Only letters, numbers, dashes (-), and underscores (_) are allowed",
     "clientCodeUnique": "This client code already exists",
-    "productCodeRequired": "Product code is required",
+    "productCodeRequired": "Code is required",
     "productCodeInvalid": "Only letters, numbers, dashes (-), and underscores (_) are allowed",
-    "productCodeUnique": "This product code already exists",
+    "productCodeUnique": "This code already exists",
     "productNameUnique": "This product name already exists"
   },
   "states": {
