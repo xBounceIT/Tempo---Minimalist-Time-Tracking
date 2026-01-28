@@ -940,6 +940,75 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                     )}
                   </div>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 ml-1">
+                      {t('crm:quotes.paymentTerms')}
+                    </label>
+                    <CustomSelect
+                      options={PAYMENT_TERMS_OPTIONS}
+                      value={formData.paymentTerms || 'immediate'}
+                      onChange={(val) =>
+                        setFormData({ ...formData, paymentTerms: val as Quote['paymentTerms'] })
+                      }
+                      searchable={false}
+                      disabled={isReadOnly}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 ml-1">
+                      {t('crm:quotes.globalDiscount')}
+                    </label>
+                    <ValidatedNumberInput
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={formData.discount}
+                      onValueChange={(value) => {
+                        const parsed = parseNumberInputValue(value);
+                        setFormData({ ...formData, discount: parsed });
+                        if (errors.total) {
+                          setErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.total;
+                            return next;
+                          });
+                        }
+                      }}
+                      disabled={isReadOnly}
+                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 ml-1">
+                      {t('crm:quotes.expirationDateLabel')}
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={formData.expirationDate}
+                      onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
+                      disabled={isReadOnly}
+                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div className="col-span-full space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 ml-1">
+                      {t('crm:quotes.notesLabel')}
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      placeholder={t('crm:quotes.additionalNotesPlaceholder')}
+                      disabled={isReadOnly}
+                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Products */}
@@ -1206,83 +1275,6 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                   })()}
                 </div>
               )}
-
-              {/* Quote Details */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-black text-praetor uppercase tracking-widest flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-praetor"></span>
-                  {t('crm:quotes.quoteDetails')}
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">
-                      {t('crm:quotes.paymentTerms')}
-                    </label>
-                    <CustomSelect
-                      options={PAYMENT_TERMS_OPTIONS}
-                      value={formData.paymentTerms || 'immediate'}
-                      onChange={(val) =>
-                        setFormData({ ...formData, paymentTerms: val as Quote['paymentTerms'] })
-                      }
-                      searchable={false}
-                      disabled={isReadOnly}
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">
-                      {t('crm:quotes.globalDiscount')}
-                    </label>
-                    <ValidatedNumberInput
-                      step="0.01"
-                      min="0"
-                      max="100"
-                      value={formData.discount}
-                      onValueChange={(value) => {
-                        const parsed = parseNumberInputValue(value);
-                        setFormData({ ...formData, discount: parsed });
-                        if (errors.total) {
-                          setErrors((prev) => {
-                            const next = { ...prev };
-                            delete next.total;
-                            return next;
-                          });
-                        }
-                      }}
-                      disabled={isReadOnly}
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">
-                      {t('crm:quotes.expirationDateLabel')}
-                    </label>
-                    <input
-                      type="date"
-                      required
-                      value={formData.expirationDate}
-                      onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
-                      disabled={isReadOnly}
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div className="col-span-full space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 ml-1">
-                      {t('crm:quotes.notesLabel')}
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder={t('crm:quotes.additionalNotesPlaceholder')}
-                      disabled={isReadOnly}
-                      className="w-full text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-praetor outline-none transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
-                  </div>
-                </div>
-              </div>
 
               <div className="flex justify-between items-center pt-8 border-t border-slate-100">
                 <button
