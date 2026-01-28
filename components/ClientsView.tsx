@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Client } from '../types';
 import CustomSelect from './CustomSelect';
 import StandardTable from './StandardTable';
 import StatusBadge from './StatusBadge';
+import TableFilter from './TableFilter';
 
 interface ClientsViewProps {
   clients: Client[];
@@ -31,27 +32,36 @@ const ClientsView: React.FC<ClientsViewProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(() => {
     const saved = localStorage.getItem('praetor_clients_rowsPerPage');
-    return saved ? parseInt(saved, 10) : 5;
+    return saved ? parseInt(saved, 10) : 10;
   });
-  const [disabledCurrentPage, setDisabledCurrentPage] = useState(1);
-  const [disabledRowsPerPage, setDisabledRowsPerPage] = useState(() => {
-    const saved = localStorage.getItem('praetor_clients_disabled_rowsPerPage');
-    return saved ? parseInt(saved, 10) : 5;
+
+  // Filter & Sort State
+  const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' | null }>({
+    key: '',
+    direction: null,
   });
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   const handleRowsPerPageChange = (val: string) => {
     const value = parseInt(val, 10);
     setRowsPerPage(value);
     localStorage.setItem('praetor_clients_rowsPerPage', value.toString());
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
 
-  const handleDisabledRowsPerPageChange = (val: string) => {
-    const value = parseInt(val, 10);
-    setDisabledRowsPerPage(value);
-    localStorage.setItem('praetor_clients_disabled_rowsPerPage', value.toString());
-    setDisabledCurrentPage(1);
-  };
+  const handleFilterChange = useCallback((columnKey: string, selectedValues: string[]) => {
+    setFilters((prev) => ({ ...prev, [columnKey]: selectedValues }));
+    setCurrentPage(1);
+  }, []);
+
+  const handleSortChange = useCallback((columnKey: string, direction: 'asc' | 'desc' | null) => {
+    setSortConfig({ key: columnKey, direction });
+  }, []);
+
+  const toggleFilter = useCallback((columnKey: string) => {
+    setActiveFilter((prev) => (prev === columnKey ? null : columnKey));
+  }, []);
 
   // Form State
   const [formData, setFormData] = useState<Partial<Client>>({
@@ -184,26 +194,91 @@ const ClientsView: React.FC<ClientsViewProps> = ({
     }
   };
 
-  const filteredActiveClientsTotal = React.useMemo(() => {
-    return clients.filter((c) => !c.isDisabled);
-  }, [clients]);
+  // Column definitions
+  const columns = useMemo(
+    () => [
+      { key: 'name', label: t('crm:clients.companyName') },
+      { key: 'clientCode', label: t('crm:clients.uniqueId') },
+      { key: 'type', label: t('crm:clients.subjectType') },
+      { key: 'email', label: t('crm:clients.primaryEmail') },
+      { key: 'phone', label: t('crm:clients.phoneLabel') },
+      { key: 'vatNumber', label: t('crm:clients.vatNumber') },
+      { key: 'taxCode', label: t('crm:clients.taxCode') },
+      { key: 'billingCode', label: t('crm:clients.billingCode') },
+      { key: 'status', label: t('common:labels.status') },
+    ],
+    [t],
+  );
 
-  const filteredDisabledClientsTotal = React.useMemo(() => {
-    return clients.filter((c) => c.isDisabled);
-  }, [clients]);
+  // Get unique options for a column (for TableFilter)
+  const getUniqueOptions = useCallback(
+    (columnKey: string) => {
+      if (columnKey === 'status') {
+        return [t('common:labels.active'), t('common:labels.disabled')];
+      }
+      if (columnKey === 'type') {
+        return [t('crm:clients.typeCompany'), t('crm:clients.typeIndividual')];
+      }
+      const values = clients.map((c) => {
+        const val = c[columnKey as keyof Client];
+        return val ? String(val) : '';
+      });
+      return [...new Set(values)].filter(Boolean).sort();
+    },
+    [clients, t],
+  );
 
-  const hasAnyDisabledClients = clients.some((c) => c.isDisabled);
+  // Get display value for a cell
+  const getCellValue = useCallback(
+    (client: Client, columnKey: string): string => {
+      if (columnKey === 'status') {
+        return client.isDisabled ? t('common:labels.disabled') : t('common:labels.active');
+      }
+      if (columnKey === 'type') {
+        return client.type === 'company'
+          ? t('crm:clients.typeCompany')
+          : t('crm:clients.typeIndividual');
+      }
+      const val = client[columnKey as keyof Client];
+      return val ? String(val) : '';
+    },
+    [t],
+  );
+
+  // Filtered and sorted clients
+  const filteredAndSortedClients = useMemo(() => {
+    let result = [...clients];
+
+    // Apply filters
+    Object.entries(filters).forEach(([columnKey, selectedValues]) => {
+      if (selectedValues.length > 0) {
+        result = result.filter((client) => {
+          const cellValue = getCellValue(client, columnKey);
+          return selectedValues.includes(cellValue);
+        });
+      }
+    });
+
+    // Apply sort
+    if (sortConfig.key && sortConfig.direction) {
+      result.sort((a, b) => {
+        const aVal = getCellValue(a, sortConfig.key);
+        const bVal = getCellValue(b, sortConfig.key);
+        const comparison = aVal.localeCompare(bVal, undefined, {
+          numeric: true,
+          sensitivity: 'base',
+        });
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    }
+
+    return result;
+  }, [clients, filters, sortConfig, getCellValue]);
 
   // Pagination Logic
-  const totalPages = Math.ceil(filteredActiveClientsTotal.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredAndSortedClients.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const activeClients = filteredActiveClientsTotal.slice(startIndex, startIndex + rowsPerPage);
-  const disabledTotalPages = Math.ceil(filteredDisabledClientsTotal.length / disabledRowsPerPage);
-  const disabledStartIndex = (disabledCurrentPage - 1) * disabledRowsPerPage;
-  const disabledClientsPage = filteredDisabledClientsTotal.slice(
-    disabledStartIndex,
-    disabledStartIndex + disabledRowsPerPage,
-  );
+  const paginatedClients = filteredAndSortedClients.slice(startIndex, startIndex + rowsPerPage);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -499,8 +574,8 @@ const ClientsView: React.FC<ClientsViewProps> = ({
       </div>
 
       <StandardTable
-        title={t('crm:clients.activeClients')}
-        totalCount={filteredActiveClientsTotal.length}
+        title={t('crm:clients.title')}
+        totalCount={filteredAndSortedClients.length}
         headerAction={
           <button
             onClick={openAddModal}
@@ -531,9 +606,9 @@ const ClientsView: React.FC<ClientsViewProps> = ({
               />
               <span className="text-xs font-bold text-slate-400 ml-2">
                 {t('common:pagination.showing', {
-                  start: activeClients.length > 0 ? startIndex + 1 : 0,
-                  end: Math.min(startIndex + rowsPerPage, filteredActiveClientsTotal.length),
-                  total: filteredActiveClientsTotal.length,
+                  start: paginatedClients.length > 0 ? startIndex + 1 : 0,
+                  end: Math.min(startIndex + rowsPerPage, filteredAndSortedClients.length),
+                  total: filteredAndSortedClients.length,
                 })}
               </span>
             </div>
@@ -547,19 +622,31 @@ const ClientsView: React.FC<ClientsViewProps> = ({
                 <i className="fa-solid fa-chevron-left text-xs"></i>
               </button>
               <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
-                      currentPage === page
-                        ? 'bg-praetor text-white shadow-md shadow-slate-200'
-                        : 'text-slate-500 hover:bg-slate-100'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  let page: number;
+                  if (totalPages <= 5) {
+                    page = i + 1;
+                  } else if (currentPage <= 3) {
+                    page = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    page = totalPages - 4 + i;
+                  } else {
+                    page = currentPage - 2 + i;
+                  }
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
+                        currentPage === page
+                          ? 'bg-praetor text-white shadow-md shadow-slate-200'
+                          : 'text-slate-500 hover:bg-slate-100'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
               </div>
               <button
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
@@ -572,93 +659,134 @@ const ClientsView: React.FC<ClientsViewProps> = ({
           </>
         }
       >
-        <div className="divide-y divide-slate-100">
-          {activeClients.map((c) => (
-            <div
-              key={c.id}
-              onClick={() => openEditModal(c)}
-              className="p-6 hover:bg-slate-50/50 active:bg-slate-100 active:scale-[0.98] transition-all group cursor-pointer select-none"
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex gap-4 items-start">
-                  <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-sm ${c.type === 'individual' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-praetor'}`}
-                  >
-                    <i
-                      className={`fa-solid ${c.type === 'individual' ? 'fa-user' : 'fa-building'}`}
-                    ></i>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <h4 className="font-bold text-slate-800 leading-tight">{c.name}</h4>
-                      {c.clientCode && (
-                        <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase">
-                          {c.clientCode}
-                        </span>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100">
+                {columns.map((col) => {
+                  const hasActiveFilter = (filters[col.key] || []).length > 0;
+                  const isCurrentSort = sortConfig.key === col.key && sortConfig.direction;
+                  return (
+                    <th key={col.key} className="relative text-left p-3 font-bold text-slate-600">
+                      <button
+                        onClick={() => toggleFilter(col.key)}
+                        className={`flex items-center gap-1.5 hover:text-praetor transition-colors ${
+                          hasActiveFilter || isCurrentSort ? 'text-praetor' : ''
+                        }`}
+                      >
+                        <span className="text-xs uppercase tracking-wider">{col.label}</span>
+                        <i
+                          className={`fa-solid fa-filter text-[10px] ${
+                            hasActiveFilter ? 'text-praetor' : 'text-slate-300'
+                          }`}
+                        ></i>
+                        {isCurrentSort && (
+                          <i
+                            className={`fa-solid ${
+                              sortConfig.direction === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'
+                            } text-[10px] text-praetor`}
+                          ></i>
+                        )}
+                      </button>
+                      {activeFilter === col.key && (
+                        <div className="absolute left-0 top-full z-50 mt-1">
+                          <TableFilter
+                            title={col.label}
+                            options={getUniqueOptions(col.key)}
+                            selectedValues={filters[col.key] || []}
+                            onFilterChange={(vals) => handleFilterChange(col.key, vals)}
+                            sortDirection={sortConfig.key === col.key ? sortConfig.direction : null}
+                            onSortChange={(dir) => handleSortChange(col.key, dir)}
+                            onClose={() => setActiveFilter(null)}
+                          />
+                        </div>
                       )}
-                    </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                      {c.email && (
-                        <span className="text-xs text-slate-500 flex items-center gap-1.5">
-                          <i className="fa-solid fa-envelope text-[10px] text-slate-300"></i>{' '}
-                          {c.email}
-                        </span>
-                      )}
-                      {c.phone && (
-                        <span className="text-xs text-slate-500 flex items-center gap-1.5">
-                          <i className="fa-solid fa-phone text-[10px] text-slate-300"></i> {c.phone}
-                        </span>
-                      )}
-                      {c.vatNumber && (
-                        <span className="text-xs text-slate-400 font-mono tracking-tighter">
-                          VAT: {c.vatNumber}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <StatusBadge type="active" label={t('projects:projects.statusActive')} />
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEditModal(c);
-                      }}
-                      className="p-2.5 text-slate-400 hover:text-praetor hover:bg-slate-100 rounded-xl transition-all"
-                      title={t('crm:clients.editClient')}
+                    </th>
+                  );
+                })}
+                <th className="text-right p-3 font-bold text-slate-600">
+                  <span className="text-xs uppercase tracking-wider">
+                    {t('common:labels.actions')}
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedClients.map((c) => (
+                <tr
+                  key={c.id}
+                  onClick={() => openEditModal(c)}
+                  className={`border-b border-slate-50 cursor-pointer transition-all hover:bg-slate-50 active:bg-slate-100 ${
+                    c.isDisabled ? 'opacity-60' : ''
+                  }`}
+                >
+                  <td className="p-3">
+                    <span
+                      className={`font-semibold ${c.isDisabled ? 'line-through text-slate-400' : 'text-slate-800'}`}
                     >
-                      <i className="fa-solid fa-pen-to-square"></i>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUpdateClient(c.id, { isDisabled: true });
-                      }}
-                      className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
-                      title={t('crm:clients.isDisabled')}
-                    >
-                      <i className="fa-solid fa-ban"></i>
-                    </button>
-                    {userRole === 'admin' && (
+                      {c.name}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    {c.clientCode && (
+                      <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase">
+                        {c.clientCode}
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-3 text-slate-500">
+                    {c.type === 'company'
+                      ? t('crm:clients.typeCompany')
+                      : t('crm:clients.typeIndividual')}
+                  </td>
+                  <td className="p-3 text-slate-500">{c.email || '-'}</td>
+                  <td className="p-3 text-slate-500">{c.phone || '-'}</td>
+                  <td className="p-3 text-slate-400 font-mono text-xs">{c.vatNumber || '-'}</td>
+                  <td className="p-3 text-slate-400 font-mono text-xs">{c.taxCode || '-'}</td>
+                  <td className="p-3 text-slate-400 font-mono text-xs">{c.billingCode || '-'}</td>
+                  <td className="p-3">
+                    <StatusBadge
+                      type={c.isDisabled ? 'disabled' : 'active'}
+                      label={c.isDisabled ? t('common:labels.disabled') : t('common:labels.active')}
+                    />
+                  </td>
+                  <td className="p-3">
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          confirmDelete(c);
+                          onUpdateClient(c.id, { isDisabled: !c.isDisabled });
                         }}
-                        className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                        title={t('common:buttons.delete')}
+                        className={`p-2 rounded-lg transition-all ${
+                          c.isDisabled
+                            ? 'text-praetor hover:bg-slate-100'
+                            : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'
+                        }`}
+                        title={
+                          c.isDisabled ? t('common:buttons.enable') : t('crm:clients.isDisabled')
+                        }
                       >
-                        <i className="fa-solid fa-trash-can"></i>
+                        <i className={`fa-solid ${c.isDisabled ? 'fa-rotate-left' : 'fa-ban'}`}></i>
                       </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-          {filteredActiveClientsTotal.length === 0 && (
+                      {userRole === 'admin' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confirmDelete(c);
+                          }}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                          title={t('common:buttons.delete')}
+                        >
+                          <i className="fa-solid fa-trash-can"></i>
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {filteredAndSortedClients.length === 0 && (
             <div className="p-12 text-center">
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
                 <i className="fa-solid fa-users text-2xl"></i>
@@ -674,136 +802,6 @@ const ClientsView: React.FC<ClientsViewProps> = ({
           )}
         </div>
       </StandardTable>
-
-      {hasAnyDisabledClients && (
-        <StandardTable
-          title={t('crm:clients.disabledClients')}
-          totalCount={filteredDisabledClientsTotal.length}
-          totalLabel="DISABLED"
-          containerClassName="border-dashed bg-slate-50"
-          footerClassName="flex flex-col sm:flex-row justify-between items-center gap-4"
-          footer={
-            <>
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-500">
-                  {t('common:labels.rowsPerPage')}
-                </span>
-                <CustomSelect
-                  options={[
-                    { id: '5', name: '5' },
-                    { id: '10', name: '10' },
-                    { id: '20', name: '20' },
-                    { id: '50', name: '50' },
-                  ]}
-                  value={disabledRowsPerPage.toString()}
-                  onChange={(val) => handleDisabledRowsPerPageChange(val as string)}
-                  className="w-20"
-                  buttonClassName="px-2 py-1 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg"
-                  searchable={false}
-                />
-                <span className="text-xs font-bold text-slate-400 ml-2">
-                  {t('common:pagination.showing', {
-                    start: disabledClientsPage.length > 0 ? disabledStartIndex + 1 : 0,
-                    end: Math.min(
-                      disabledStartIndex + disabledRowsPerPage,
-                      filteredDisabledClientsTotal.length,
-                    ),
-                    total: filteredDisabledClientsTotal.length,
-                  })}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setDisabledCurrentPage((prev) => Math.max(1, prev - 1))}
-                  disabled={disabledCurrentPage === 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-                >
-                  <i className="fa-solid fa-chevron-left text-xs"></i>
-                </button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: disabledTotalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setDisabledCurrentPage(page)}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
-                        disabledCurrentPage === page
-                          ? 'bg-praetor text-white shadow-md shadow-slate-200'
-                          : 'text-slate-500 hover:bg-slate-100'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() =>
-                    setDisabledCurrentPage((prev) => Math.min(disabledTotalPages, prev + 1))
-                  }
-                  disabled={disabledCurrentPage === disabledTotalPages || disabledTotalPages === 0}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
-                >
-                  <i className="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-              </div>
-            </>
-          }
-        >
-          <div className="divide-y divide-slate-100">
-            {disabledClientsPage.map((c) => (
-              <div
-                key={c.id}
-                onClick={() => openEditModal(c)}
-                className="p-6 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 active:bg-slate-100 active:scale-[0.98] transition-all flex items-center justify-between gap-4 cursor-pointer select-none"
-              >
-                <div className="flex gap-4 items-center">
-                  <div className="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center">
-                    <i
-                      className={`fa-solid ${c.type === 'individual' ? 'fa-user' : 'fa-building'}`}
-                    ></i>
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-slate-500 line-through">{c.name}</h5>
-                    <span className="text-[10px] font-black text-amber-500 uppercase">
-                      {t('crm:clients.isDisabled')}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onUpdateClient(c.id, { isDisabled: false });
-                    }}
-                    className="p-2 text-praetor hover:bg-slate-100 rounded-lg transition-colors"
-                  >
-                    <i className="fa-solid fa-rotate-left"></i>
-                  </button>
-                  {userRole === 'admin' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        confirmDelete(c);
-                      }}
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <i className="fa-solid fa-trash-can"></i>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-            {disabledClientsPage.length === 0 && (
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300 mb-4">
-                  <i className="fa-solid fa-user-slash text-2xl"></i>
-                </div>
-                <p className="text-slate-400 text-sm font-bold">{t('crm:clients.noClients')}</p>
-              </div>
-            )}
-          </div>
-        </StandardTable>
-      )}
     </div>
   );
 };
