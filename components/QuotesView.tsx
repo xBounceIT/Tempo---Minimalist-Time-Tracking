@@ -878,13 +878,9 @@ const QuotesView: React.FC<QuotesViewProps> = ({
                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50">
                   <span className="text-amber-700 text-xs font-bold">
                     {t('crm:quotes.readOnlyStatus', {
-                      status: '',
-                    }).replace(': {{status}}', ':')}
+                      status: getStatusLabel(editingQuote?.status || ''),
+                    })}
                   </span>
-                  <StatusBadge
-                    type={editingQuote?.status as StatusType}
-                    label={getStatusLabel(editingQuote?.status || '')}
-                  />
                 </div>
               )}
               {/* Client Selection */}
